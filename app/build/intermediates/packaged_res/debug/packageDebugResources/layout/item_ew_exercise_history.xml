@@ -10,7 +10,6 @@
     android:paddingHorizontal="4dp">
 
     <ImageView
-        android:id="@+id/ivExerciseHistoryIcon"
         android:layout_width="34dp"
         android:layout_height="34dp"
         android:contentDescription="@null"

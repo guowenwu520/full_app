@@ -2,7 +2,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/realmStatusCard"
     android:layout_width="match_parent"
     android:layout_height="156dp"
     android:layout_marginHorizontal="12dp"
@@ -69,7 +68,6 @@
 
         <!-- 境界小标 -->
         <ImageView
-            android:id="@+id/ivRealmStage"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginStart="8dp"
@@ -112,7 +110,6 @@
 
         <!-- 距离下一境界 -->
         <LinearLayout
-            android:id="@+id/groupNextExp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -156,7 +153,6 @@
 
         <!-- 左装饰线 -->
         <View
-            android:id="@+id/linePercentLeft"
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_marginTop="7dp"
@@ -181,7 +177,6 @@
 
         <!-- 右装饰线 -->
         <View
-            android:id="@+id/linePercentRight"
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_marginTop="7dp"
@@ -192,7 +187,6 @@
 
         <!-- 境界描述 -->
         <TextView
-            android:id="@+id/tvRealmDescription"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"

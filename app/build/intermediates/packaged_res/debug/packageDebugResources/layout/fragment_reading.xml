@@ -41,7 +41,6 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tvReadingPageTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="serif"
@@ -52,7 +51,6 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvReadingPageSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -69,7 +67,6 @@
                 android:src="@drawable/ic_reading_calendar_small" />
 
             <ImageView
-                android:id="@+id/ivReadingRealm"
                 android:layout_width="38dp"
                 android:layout_height="38dp"
                 android:layout_marginStart="16dp"
@@ -79,7 +76,6 @@
 
         <!-- 四项阅读统计 -->
         <LinearLayout
-            android:id="@+id/readingSummaryCard"
             android:layout_width="match_parent"
             android:layout_height="96dp"
             android:layout_marginTop="18dp"
@@ -311,7 +307,6 @@
 
         <!-- 我的书架 -->
         <LinearLayout
-            android:id="@+id/bookshelfCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -363,7 +358,6 @@
 
         <!-- 最近笔记 -->
         <LinearLayout
-            android:id="@+id/recentNotesCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"

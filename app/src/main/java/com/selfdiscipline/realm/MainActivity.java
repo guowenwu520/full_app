@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.selfdiscipline.realm.fragments.BadgesRealmFragment;
 import com.selfdiscipline.realm.fragments.DiaryFragment;
 import com.selfdiscipline.realm.fragments.OverviewFragment;
 import com.selfdiscipline.realm.fragments.ReadingFragment;

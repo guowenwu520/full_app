@@ -7,7 +7,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/coreDataOverviewCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="12dp"
@@ -83,7 +82,6 @@
             tools:ignore="HardcodedText,UseAppTint" />
 
         <TextView
-            android:id="@+id/tvDisciplineStreakLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -98,7 +96,6 @@
             tools:ignore="HardcodedText" />
 
         <LinearLayout
-            android:id="@+id/groupDisciplineStreakValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -119,7 +116,6 @@
                 tools:ignore="HardcodedText" />
 
             <TextView
-                android:id="@+id/tvDisciplineStreakUnit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -133,7 +129,6 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/itemWordStreak"
         android:layout_width="0dp"
         android:layout_height="55dp"
         app:layout_constraintEnd_toStartOf="@id/guideColumnTwo"
@@ -152,7 +147,6 @@
             tools:ignore="HardcodedText,UseAppTint" />
 
         <TextView
-            android:id="@+id/tvWordStreakLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -167,7 +161,6 @@
             tools:ignore="HardcodedText" />
 
         <LinearLayout
-            android:id="@+id/groupWordStreakValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -188,7 +181,6 @@
                 tools:ignore="HardcodedText" />
 
             <TextView
-                android:id="@+id/tvWordStreakUnit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -202,7 +194,6 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/itemNoBreakStreak"
         android:layout_width="0dp"
         android:layout_height="55dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -221,7 +212,6 @@
             tools:ignore="HardcodedText,UseAppTint" />
 
         <TextView
-            android:id="@+id/tvNoBreakStreakLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -236,7 +226,6 @@
             tools:ignore="HardcodedText" />
 
         <LinearLayout
-            android:id="@+id/groupNoBreakStreakValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -257,7 +246,6 @@
                 tools:ignore="HardcodedText" />
 
             <TextView
-                android:id="@+id/tvNoBreakStreakUnit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -291,7 +279,6 @@
             tools:ignore="HardcodedText,UseAppTint" />
 
         <TextView
-            android:id="@+id/tvTodayCaloriesLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -306,7 +293,6 @@
             tools:ignore="HardcodedText" />
 
         <LinearLayout
-            android:id="@+id/groupTodayCaloriesValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -327,7 +313,6 @@
                 tools:ignore="HardcodedText" />
 
             <TextView
-                android:id="@+id/tvTodayCaloriesUnit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -341,7 +326,6 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/itemCurrentWeight"
         android:layout_width="0dp"
         android:layout_height="55dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -361,7 +345,6 @@
             tools:ignore="HardcodedText,UseAppTint" />
 
         <TextView
-            android:id="@+id/tvCurrentWeightLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -376,7 +359,6 @@
             tools:ignore="HardcodedText" />
 
         <LinearLayout
-            android:id="@+id/groupCurrentWeightValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -397,7 +379,6 @@
                 tools:ignore="HardcodedText" />
 
             <TextView
-                android:id="@+id/tvCurrentWeightUnit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -411,7 +392,6 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/itemMonthlyReading"
         android:layout_width="0dp"
         android:layout_height="55dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -431,7 +411,6 @@
             tools:ignore="HardcodedText,UseAppTint" />
 
         <TextView
-            android:id="@+id/tvMonthlyReadingLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -446,7 +425,6 @@
             tools:ignore="HardcodedText" />
 
         <LinearLayout
-            android:id="@+id/groupMonthlyReadingValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -467,7 +445,6 @@
                 tools:ignore="HardcodedText" />
 
             <TextView
-                android:id="@+id/tvMonthlyReadingUnit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -493,7 +470,6 @@
         app:layout_constraintTop_toBottomOf="@id/itemDisciplineStreak" />
 
     <View
-        android:id="@+id/dividerTopOne"
         android:layout_width="1dp"
         android:layout_height="38dp"
         android:layout_marginStart="2dp"
@@ -504,7 +480,6 @@
         app:layout_constraintTop_toTopOf="@id/itemDisciplineStreak" />
 
     <View
-        android:id="@+id/dividerTopTwo"
         android:layout_width="1dp"
         android:layout_height="38dp"
         android:layout_marginStart="2dp"
@@ -515,7 +490,6 @@
         app:layout_constraintTop_toTopOf="@id/itemDisciplineStreak" />
 
     <View
-        android:id="@+id/dividerBottomOne"
         android:layout_width="1dp"
         android:layout_height="38dp"
         android:layout_marginStart="2dp"
@@ -526,7 +500,6 @@
         app:layout_constraintTop_toTopOf="@id/itemTodayCalories" />
 
     <View
-        android:id="@+id/dividerBottomTwo"
         android:layout_width="1dp"
         android:layout_height="38dp"
         android:layout_marginStart="2dp"

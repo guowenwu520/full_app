@@ -51,14 +51,12 @@
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/ivExerciseWordCalendar"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_ew_calendar" />
 
             <ImageView
-                android:id="@+id/ivExerciseWordRealm"
                 android:layout_width="38dp"
                 android:layout_height="38dp"
                 android:layout_marginStart="14dp"
@@ -615,7 +613,6 @@
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/tvQuizHelp"
                             android:layout_width="22dp"
                             android:layout_height="22dp"
                             android:layout_gravity="end|center_vertical"
@@ -681,7 +678,6 @@
                     </RadioGroup>
 
                     <TextView
-                        android:id="@+id/tvQuizReward"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="完成抽查可得 +8 经验"

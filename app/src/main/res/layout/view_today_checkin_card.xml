@@ -4,7 +4,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/todayCheckinCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="12dp"
@@ -124,7 +123,6 @@
 
     <!-- 运动 -->
     <LinearLayout
-        android:id="@+id/itemExercise"
         android:layout_width="0dp"
         android:layout_height="104dp"
         android:gravity="center"
@@ -163,7 +161,6 @@
 
     <!-- 作息 -->
     <LinearLayout
-        android:id="@+id/itemSleep"
         android:layout_width="0dp"
         android:layout_height="104dp"
         android:gravity="center"
@@ -202,7 +199,6 @@
 
     <!-- 单词 -->
     <LinearLayout
-        android:id="@+id/itemWord"
         android:layout_width="0dp"
         android:layout_height="104dp"
         android:gravity="center"
@@ -242,7 +238,6 @@
 
     <!-- 日记 -->
     <LinearLayout
-        android:id="@+id/itemDiary"
         android:layout_width="0dp"
         android:layout_height="104dp"
         android:gravity="center"
