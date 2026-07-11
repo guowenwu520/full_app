@@ -1,0 +1,77 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:fillViewport="true"
+    android:clipToPadding="false">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingLeft="20dp" android:paddingRight="20dp" android:paddingTop="34dp" android:paddingBottom="20dp">
+        <TextView android:id="@+id/title_study_sport" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/title_study" android:textColor="@color/color_text_main" android:textSize="34sp" android:textStyle="bold" android:fontFamily="serif" />
+        <TextView android:id="@+id/subtitle_study_sport" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/sport_subtitle_pixel" android:textColor="@color/color_text_sub" android:textSize="16sp" />
+
+        <LinearLayout android:layout_width="260dp" android:layout_height="52dp" android:layout_gravity="center_horizontal" android:layout_marginTop="22dp" android:background="@drawable/bg_segment" android:orientation="horizontal" android:padding="4dp">
+            <TextView android:id="@+id/tab_sport" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:background="@drawable/bg_segment_selected" android:text="@string/title_study" android:textColor="@color/color_text_main" android:textSize="16sp" android:textStyle="bold" />
+            <TextView android:id="@+id/tab_words" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="@string/title_words" android:textColor="@color/color_text_main" android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/panel_sport" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:background="@drawable/bg_card" android:orientation="horizontal">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:drawableTop="@drawable/ic_nav_sport" android:drawablePadding="6dp" android:text="今日消耗\n0 kcal" android:textColor="@color/color_text_main" android:textSize="15sp" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:drawableTop="@drawable/ic_badge_silver" android:drawablePadding="6dp" android:text="连续运动\n0 天" android:textColor="@color/color_text_main" android:textSize="15sp" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:drawableTop="@drawable/ic_xp" android:drawablePadding="6dp" android:text="当前体重\n-- kg" android:textColor="@color/color_text_main" android:textSize="15sp" />
+            </LinearLayout>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/section_today_sport" android:textColor="@color/color_text_main" android:textStyle="bold" android:textSize="22sp" android:fontFamily="serif" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_card" android:orientation="vertical">
+                <EditText android:id="@+id/input_exercise_date" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_input" android:hint="@string/hint_date" android:inputType="text" android:textColor="@color/color_text_main" android:textColorHint="@color/color_text_sub" />
+                <EditText android:id="@+id/input_exercise_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_input" android:hint="@string/hint_exercise_content" android:inputType="text" android:textColor="@color/color_text_main" android:textColorHint="@color/color_text_sub" />
+                <EditText android:id="@+id/input_calories" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_input" android:hint="@string/hint_calories" android:inputType="number" android:textColor="@color/color_text_main" android:textColorHint="@color/color_text_sub" />
+                <TextView android:id="@+id/button_save_exercise" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_button_primary" android:gravity="center" android:text="@string/button_save_exercise" android:textColor="@color/color_text_on_primary" android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/section_weight" android:textColor="@color/color_text_main" android:textStyle="bold" android:textSize="22sp" android:fontFamily="serif" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_card" android:orientation="vertical">
+                <com.selfdiscipline.realm.view.WeightChartView android:id="@+id/weight_chart" android:layout_width="match_parent" android:layout_height="180dp" />
+                <EditText android:id="@+id/input_weight_date" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_input" android:hint="@string/hint_date" android:inputType="text" android:textColor="@color/color_text_main" android:textColorHint="@color/color_text_sub" />
+                <EditText android:id="@+id/input_weight" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_input" android:hint="@string/hint_weight" android:inputType="numberDecimal" android:textColor="@color/color_text_main" android:textColorHint="@color/color_text_sub" />
+                <TextView android:id="@+id/button_save_weight" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_button_soft" android:gravity="center" android:text="@string/button_save_weight" android:textColor="@color/color_primary_dark" android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/section_sleep" android:textColor="@color/color_text_main" android:textStyle="bold" android:textSize="22sp" android:fontFamily="serif" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_card" android:orientation="vertical">
+                <EditText android:id="@+id/input_sleep_date" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_input" android:hint="@string/hint_date" android:inputType="text" android:textColor="@color/color_text_main" android:textColorHint="@color/color_text_sub" />
+                <EditText android:id="@+id/input_sleep_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_input" android:hint="@string/hint_sleep_time" android:inputType="time" android:textColor="@color/color_text_main" android:textColorHint="@color/color_text_sub" />
+                <EditText android:id="@+id/input_wake_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_input" android:hint="@string/hint_wake_time" android:inputType="time" android:textColor="@color/color_text_main" android:textColorHint="@color/color_text_sub" />
+                <TextView android:id="@+id/button_save_sleep" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_button_soft" android:gravity="center" android:text="@string/button_save_sleep" android:textColor="@color/color_primary_dark" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="16dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/section_recent_sport_sleep" android:textColor="@color/color_text_main" android:textStyle="bold" android:textSize="22sp" android:fontFamily="serif" />
+                <TextView android:id="@+id/button_view_all_study" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/bg_button_soft" android:text="@string/button_all" android:textColor="@color/color_text_sub" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/study_history_list" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="vertical" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/panel_words" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:background="@drawable/bg_card" android:orientation="horizontal">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:drawableTop="@drawable/ic_nav_reading" android:drawablePadding="6dp" android:text="单词总量\n--" android:textColor="@color/color_text_main" android:textSize="15sp" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:drawableTop="@drawable/ic_badge_silver" android:drawablePadding="6dp" android:text="连续背词\n-- 天" android:textColor="@color/color_text_main" android:textSize="15sp" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:drawableTop="@drawable/ic_nav_diary" android:drawablePadding="6dp" android:text="今日复习\n--" android:textColor="@color/color_text_main" android:textSize="15sp" />
+            </LinearLayout>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/section_today_words" android:textColor="@color/color_text_main" android:textStyle="bold" android:textSize="22sp" android:fontFamily="serif" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_card" android:orientation="vertical">
+                <EditText android:id="@+id/input_word" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_input" android:hint="@string/hint_word" android:inputType="text" android:textColor="@color/color_text_main" android:textColorHint="@color/color_text_sub" />
+                <EditText android:id="@+id/input_meaning" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_input" android:hint="@string/hint_meaning" android:inputType="text" android:textColor="@color/color_text_main" android:textColorHint="@color/color_text_sub" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="10dp">
+                    <TextView android:id="@+id/button_add_word" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="6dp" android:background="@drawable/bg_button_primary" android:gravity="center" android:text="@string/button_add_word" android:textColor="@color/color_text_on_primary" android:textStyle="bold" />
+                    <TextView android:id="@+id/button_random_test" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="6dp" android:background="@drawable/bg_button_soft" android:gravity="center" android:text="@string/button_start_test" android:textColor="@color/color_primary_dark" android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="16dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/section_recent_words" android:textColor="@color/color_text_main" android:textStyle="bold" android:textSize="22sp" android:fontFamily="serif" />
+                <TextView android:id="@+id/button_view_all_words" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/bg_button_soft" android:text="@string/button_all" android:textColor="@color/color_text_sub" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/word_list" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="vertical" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

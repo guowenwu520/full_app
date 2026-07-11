@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    阅读主页
+    复用已有资源：
+    @drawable/bg_realm_status_card
+    @drawable/bg_button_primary
+    @drawable/bg_button_soft
+    @drawable/ic_exp_reading
+    @drawable/ic_arrow_right_small
+    @color/color_text_main
+    @color/color_text_sub
+    @color/color_primary_dark
+    @color/color_text_on_primary
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:clipToPadding="false"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="34dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="24dp">
+
+        <!-- 页面标题 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvReadingPageTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="serif"
+                    android:includeFontPadding="false"
+                    android:text="@string/reading_page_title"
+                    android:textColor="@color/color_text_main"
+                    android:textSize="25sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvReadingPageSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/reading_page_subtitle"
+                    android:textColor="@color/color_text_sub"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ivReadingCalendar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/reading_calendar"
+                android:src="@drawable/ic_reading_calendar_small" />
+
+            <ImageView
+                android:id="@+id/ivReadingRealm"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_marginStart="16dp"
+                android:contentDescription="@string/current_realm"
+                android:src="@drawable/ic_profile_meditation" />
+        </LinearLayout>
+
+        <!-- 四项阅读统计 -->
+        <LinearLayout
+            android:id="@+id/readingSummaryCard"
+            android:layout_width="match_parent"
+            android:layout_height="96dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_realm_status_card"
+            android:clipToOutline="true"
+            android:elevation="3dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <include
+                android:id="@+id/statMonthlyPages"
+                layout="@layout/item_reading_stat"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="48dp"
+                android:background="#33A7BBC8" />
+
+            <include
+                android:id="@+id/statReadingBooks"
+                layout="@layout/item_reading_stat"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="48dp"
+                android:background="#33A7BBC8" />
+
+            <include
+                android:id="@+id/statFinishedBooks"
+                layout="@layout/item_reading_stat"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="48dp"
+                android:background="#33A7BBC8" />
+
+            <include
+                android:id="@+id/statReadingStreak"
+                layout="@layout/item_reading_stat"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <!-- 最近阅读 -->
+        <LinearLayout
+            android:id="@+id/recentReadingCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_realm_status_card"
+            android:clipToOutline="true"
+            android:elevation="3dp"
+            android:orientation="vertical"
+            android:paddingStart="12dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:fontFamily="serif"
+                    android:includeFontPadding="false"
+                    android:text="@string/recent_reading"
+                    android:textColor="@color/color_text_main"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:alpha="0.8"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_exp_all_complete" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivCurrentBookCover"
+                    android:layout_width="92dp"
+                    android:layout_height="132dp"
+                    android:background="@drawable/bg_book_cover_placeholder"
+                    android:contentDescription="@string/current_book_cover"
+                    android:scaleType="centerCrop" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvCurrentBookTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:includeFontPadding="false"
+                            android:maxLines="1"
+                            android:text="《三体》"
+                            android:textColor="@color/color_text_main"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvCurrentBookAuthor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:maxLines="1"
+                            android:text="刘慈欣"
+                            android:textColor="@color/color_text_sub"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvCurrentReadingProgress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="进度：126 / 302 页"
+                        android:textColor="@color/color_text_sub"
+                        android:textSize="11sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ProgressBar
+                            android:id="@+id/progressCurrentBook"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="0dp"
+                            android:layout_height="8dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="42"
+                            android:progressDrawable="@drawable/progress_realm" />
+
+                        <TextView
+                            android:id="@+id/tvCurrentReadingPercent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="41.7%"
+                            android:textColor="@color/color_text_sub"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/buttonContinueReading"
+                        android:layout_width="170dp"
+                        android:layout_height="42dp"
+                        android:layout_marginTop="14dp"
+                        android:background="@drawable/bg_button_primary"
+                        android:drawableStart="@drawable/ic_note_small"
+                        android:drawablePadding="7dp"
+                        android:gravity="center"
+                        android:text="@string/continue_record_pages"
+                        android:textColor="@color/color_text_on_primary"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/buttonBookReflection"
+                            android:layout_width="0dp"
+                            android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:drawableStart="@drawable/ic_note_small"
+                            android:drawablePadding="6dp"
+                            android:gravity="center"
+                            android:text="@string/book_reflection"
+                            android:textColor="@color/color_text_sub"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/buttonPageNotes"
+                            android:layout_width="0dp"
+                            android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:drawableStart="@drawable/ic_page_note_small"
+                            android:drawablePadding="6dp"
+                            android:gravity="center"
+                            android:text="@string/page_notes"
+                            android:textColor="@color/color_text_sub"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 我的书架 -->
+        <LinearLayout
+            android:id="@+id/bookshelfCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_realm_status_card"
+            android:clipToOutline="true"
+            android:elevation="3dp"
+            android:orientation="vertical"
+            android:paddingStart="12dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="8dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="28dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="start"
+                    android:fontFamily="serif"
+                    android:gravity="center_vertical"
+                    android:text="@string/my_bookshelf"
+                    android:textColor="@color/color_text_main"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/buttonManageBooks"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:drawableEnd="@drawable/ic_arrow_right_small"
+                    android:drawablePadding="4dp"
+                    android:gravity="center"
+                    android:text="@string/manage"
+                    android:textColor="@color/color_text_sub"
+                    android:textSize="10sp" />
+            </FrameLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerBookshelf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:scrollbars="none" />
+        </LinearLayout>
+
+        <!-- 最近笔记 -->
+        <LinearLayout
+            android:id="@+id/recentNotesCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_realm_status_card"
+            android:clipToOutline="true"
+            android:elevation="3dp"
+            android:orientation="vertical"
+            android:paddingStart="12dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="8dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="28dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="start"
+                    android:fontFamily="serif"
+                    android:gravity="center_vertical"
+                    android:text="@string/recent_notes"
+                    android:textColor="@color/color_text_main"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/buttonAllNotes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:drawableEnd="@drawable/ic_arrow_right_small"
+                    android:drawablePadding="4dp"
+                    android:gravity="center"
+                    android:text="@string/view_all"
+                    android:textColor="@color/color_text_sub"
+                    android:textSize="10sp" />
+            </FrameLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerRecentNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:scrollbars="none" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,4 @@
+#Fri Jul 10 21:50:55 CST 2026
+base.0=/home/asher/AndroidStudioProjects/SelfDisciplineRealm_v0.8.1_resource_fix/SelfDisciplineRealm_v0.8_pixel_ui/app/build/intermediates/dex/debugAndroidTest/mergeProjectDexDebugAndroidTest/0/classes.dex
+path.0=0/classes.dex
+renamed.0=classes.dex

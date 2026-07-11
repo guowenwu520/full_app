@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    核心数据速览卡片
+    复用已有：bg_realm_status_card、ic_exp_word、ic_exp_exercise、
+    ic_exp_reading、ic_exp_all_complete 以及之前的颜色资源。
+    字号比前面卡片整体缩小约 4sp。
+-->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coreDataOverviewCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="12dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/bg_realm_status_card"
+    android:clipToOutline="true"
+    android:elevation="3dp"
+    android:paddingStart="12dp"
+    android:paddingTop="9dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="9dp">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideColumnOne"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.3333" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideColumnTwo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.6666" />
+
+    <TextView
+        android:id="@+id/tvCoreOverviewTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="serif"
+        android:includeFontPadding="false"
+        android:text="核心数据速览"
+        android:textColor="@color/checkin_text_primary"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/ivCoreDecoration"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="HardcodedText" />
+
+    <ImageView
+        android:id="@+id/ivCoreDecoration"
+        android:layout_width="27dp"
+        android:layout_height="27dp"
+        android:alpha="0.75"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_exp_all_complete"
+        app:layout_constraintBottom_toBottomOf="@id/tvCoreOverviewTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tvCoreOverviewTitle"
+        tools:ignore="UseAppTint" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/itemDisciplineStreak"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        app:layout_constraintEnd_toStartOf="@id/guideColumnOne"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvCoreOverviewTitle">
+
+        <ImageView
+            android:id="@+id/ivDisciplineStreak"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:contentDescription="连续自律"
+            android:src="@drawable/ic_core_streak"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText,UseAppTint" />
+
+        <TextView
+            android:id="@+id/tvDisciplineStreakLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="连续自律"
+            android:textColor="@color/exp_text_secondary"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivDisciplineStreak"
+            app:layout_constraintTop_toTopOf="@id/ivDisciplineStreak"
+            tools:ignore="HardcodedText" />
+
+        <LinearLayout
+            android:id="@+id/groupDisciplineStreakValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="@id/ivDisciplineStreak"
+            app:layout_constraintStart_toEndOf="@id/ivDisciplineStreak">
+
+            <TextView
+                android:id="@+id/tvDisciplineStreakValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="18"
+                android:textColor="@color/checkin_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/tvDisciplineStreakUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="1dp"
+                android:text="天"
+                android:textColor="@color/exp_text_secondary"
+                android:textSize="10sp"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/itemWordStreak"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        app:layout_constraintEnd_toStartOf="@id/guideColumnTwo"
+        app:layout_constraintStart_toStartOf="@id/guideColumnOne"
+        app:layout_constraintTop_toTopOf="@id/itemDisciplineStreak">
+
+        <ImageView
+            android:id="@+id/ivWordStreak"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:contentDescription="连续背词"
+            android:src="@drawable/ic_exp_word"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText,UseAppTint" />
+
+        <TextView
+            android:id="@+id/tvWordStreakLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="连续背词"
+            android:textColor="@color/exp_text_secondary"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivWordStreak"
+            app:layout_constraintTop_toTopOf="@id/ivWordStreak"
+            tools:ignore="HardcodedText" />
+
+        <LinearLayout
+            android:id="@+id/groupWordStreakValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="@id/ivWordStreak"
+            app:layout_constraintStart_toEndOf="@id/ivWordStreak">
+
+            <TextView
+                android:id="@+id/tvWordStreakValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="12"
+                android:textColor="@color/checkin_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/tvWordStreakUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="1dp"
+                android:text="天"
+                android:textColor="@color/exp_text_secondary"
+                android:textSize="10sp"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/itemNoBreakStreak"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guideColumnTwo"
+        app:layout_constraintTop_toTopOf="@id/itemDisciplineStreak">
+
+        <ImageView
+            android:id="@+id/ivNoBreakStreak"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:contentDescription="连续不破戒"
+            android:src="@drawable/ic_core_no_break"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText,UseAppTint" />
+
+        <TextView
+            android:id="@+id/tvNoBreakStreakLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="连续不破戒"
+            android:textColor="@color/exp_text_secondary"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivNoBreakStreak"
+            app:layout_constraintTop_toTopOf="@id/ivNoBreakStreak"
+            tools:ignore="HardcodedText" />
+
+        <LinearLayout
+            android:id="@+id/groupNoBreakStreakValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="@id/ivNoBreakStreak"
+            app:layout_constraintStart_toEndOf="@id/ivNoBreakStreak">
+
+            <TextView
+                android:id="@+id/tvNoBreakStreakValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="9"
+                android:textColor="@color/checkin_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/tvNoBreakStreakUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="1dp"
+                android:text="天"
+                android:textColor="@color/exp_text_secondary"
+                android:textSize="10sp"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/itemTodayCalories"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideColumnOne"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dividerMiddle">
+
+        <ImageView
+            android:id="@+id/ivTodayCalories"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:contentDescription="今日卡路里"
+            android:src="@drawable/ic_exp_exercise"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText,UseAppTint" />
+
+        <TextView
+            android:id="@+id/tvTodayCaloriesLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="今日卡路里"
+            android:textColor="@color/exp_text_secondary"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivTodayCalories"
+            app:layout_constraintTop_toTopOf="@id/ivTodayCalories"
+            tools:ignore="HardcodedText" />
+
+        <LinearLayout
+            android:id="@+id/groupTodayCaloriesValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="@id/ivTodayCalories"
+            app:layout_constraintStart_toEndOf="@id/ivTodayCalories">
+
+            <TextView
+                android:id="@+id/tvTodayCaloriesValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="420"
+                android:textColor="@color/checkin_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/tvTodayCaloriesUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="1dp"
+                android:text="kcal"
+                android:textColor="@color/exp_text_secondary"
+                android:textSize="10sp"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/itemCurrentWeight"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideColumnTwo"
+        app:layout_constraintStart_toStartOf="@id/guideColumnOne"
+        app:layout_constraintTop_toBottomOf="@id/dividerMiddle">
+
+        <ImageView
+            android:id="@+id/ivCurrentWeight"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:contentDescription="当前体重"
+            android:src="@drawable/ic_core_weight"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText,UseAppTint" />
+
+        <TextView
+            android:id="@+id/tvCurrentWeightLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="当前体重"
+            android:textColor="@color/exp_text_secondary"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivCurrentWeight"
+            app:layout_constraintTop_toTopOf="@id/ivCurrentWeight"
+            tools:ignore="HardcodedText" />
+
+        <LinearLayout
+            android:id="@+id/groupCurrentWeightValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="@id/ivCurrentWeight"
+            app:layout_constraintStart_toEndOf="@id/ivCurrentWeight">
+
+            <TextView
+                android:id="@+id/tvCurrentWeightValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="68.4"
+                android:textColor="@color/checkin_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/tvCurrentWeightUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="1dp"
+                android:text="kg"
+                android:textColor="@color/exp_text_secondary"
+                android:textSize="10sp"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/itemMonthlyReading"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guideColumnTwo"
+        app:layout_constraintTop_toBottomOf="@id/dividerMiddle">
+
+        <ImageView
+            android:id="@+id/ivMonthlyReading"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:contentDescription="本月阅读"
+            android:src="@drawable/ic_exp_reading"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText,UseAppTint" />
+
+        <TextView
+            android:id="@+id/tvMonthlyReadingLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="本月阅读"
+            android:textColor="@color/exp_text_secondary"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivMonthlyReading"
+            app:layout_constraintTop_toTopOf="@id/ivMonthlyReading"
+            tools:ignore="HardcodedText" />
+
+        <LinearLayout
+            android:id="@+id/groupMonthlyReadingValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="@id/ivMonthlyReading"
+            app:layout_constraintStart_toEndOf="@id/ivMonthlyReading">
+
+            <TextView
+                android:id="@+id/tvMonthlyReadingValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="426"
+                android:textColor="@color/checkin_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/tvMonthlyReadingUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="1dp"
+                android:text="页"
+                android:textColor="@color/exp_text_secondary"
+                android:textSize="10sp"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <View
+        android:id="@+id/dividerMiddle"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:background="@color/exp_divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/itemDisciplineStreak" />
+
+    <View
+        android:id="@+id/dividerTopOne"
+        android:layout_width="1dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:background="@color/exp_divider"
+        app:layout_constraintBottom_toBottomOf="@id/itemDisciplineStreak"
+        app:layout_constraintStart_toStartOf="@id/guideColumnOne"
+        app:layout_constraintTop_toTopOf="@id/itemDisciplineStreak" />
+
+    <View
+        android:id="@+id/dividerTopTwo"
+        android:layout_width="1dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:background="@color/exp_divider"
+        app:layout_constraintBottom_toBottomOf="@id/itemDisciplineStreak"
+        app:layout_constraintStart_toStartOf="@id/guideColumnTwo"
+        app:layout_constraintTop_toTopOf="@id/itemDisciplineStreak" />
+
+    <View
+        android:id="@+id/dividerBottomOne"
+        android:layout_width="1dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:background="@color/exp_divider"
+        app:layout_constraintBottom_toBottomOf="@id/itemTodayCalories"
+        app:layout_constraintStart_toStartOf="@id/guideColumnOne"
+        app:layout_constraintTop_toTopOf="@id/itemTodayCalories" />
+
+    <View
+        android:id="@+id/dividerBottomTwo"
+        android:layout_width="1dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:background="@color/exp_divider"
+        app:layout_constraintBottom_toBottomOf="@id/itemTodayCalories"
+        app:layout_constraintStart_toStartOf="@id/guideColumnTwo"
+        app:layout_constraintTop_toTopOf="@id/itemTodayCalories" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
