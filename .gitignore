@@ -1,0 +1,7 @@
+# IDE
+.idea/
+.gradle/
+*.iml
+
+# 编译文件
+build/
