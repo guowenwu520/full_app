@@ -10,7 +10,7 @@ import java.util.Set;
 public class StatsEngine {
     public static int totalXp(AppState s) { int sum=0; for (ExperienceLog l:s.expLogs) sum += l.points; return sum; }
     public static int totalCalories(AppState s) { int sum=0; for (ExerciseRecord r:s.exercises) sum += r.calories; return sum; }
-    public static int totalNotes(AppState s) { int sum=0; for (Book b:s.books) { if (b.fullReview != null && b.fullReview.trim().length()>0) sum++; sum += b.pageNotes.size(); } return sum; }
+    public static int totalNotes(AppState s) { int sum=0; for (Book b:s.books) { if (b.fullReview != null && b.fullReview.trim().length()>0) sum++; } return sum; }
     public static boolean hasExercise(AppState s, String date) { for (ExerciseRecord r:s.exercises) if (date.equals(r.date)) return true; return false; }
     public static boolean hasSleepPassed(AppState s, String date) { for (SleepRecord r:s.sleeps) if (date.equals(r.date) && r.passed) return true; return false; }
     public static boolean hasDiaryNoBreak(AppState s, String date) { for (DiaryRecord r:s.diaries) if (date.equals(r.date) && !r.broken) return true; return false; }

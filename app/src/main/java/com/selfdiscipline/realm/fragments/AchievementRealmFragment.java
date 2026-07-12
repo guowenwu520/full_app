@@ -1,6 +1,5 @@
 package com.selfdiscipline.realm.fragments;
 
-import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -26,6 +25,8 @@ import com.selfdiscipline.realm.model.DiaryRecord;
 import com.selfdiscipline.realm.model.ExperienceLog;
 import com.selfdiscipline.realm.model.RealmLevel;
 import com.selfdiscipline.realm.model.WeightRecord;
+import com.selfdiscipline.realm.ui.BadgeIconResolver;
+import com.selfdiscipline.realm.ui.RealmDialog;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -151,25 +152,25 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
 
     private void bindViews(View root) {
         realmEmblem = root.findViewById(
-                R.id.ivAchievementRealmEmblem
+                R.id.ivRealmBadge
         );
         realmName = root.findViewById(
-                R.id.tvAchievementRealmName
+                R.id.tvRealmName
         );
         totalXp = root.findViewById(
-                R.id.tvAchievementTotalXp
+                R.id.tvTotalExp
         );
         remainingXp = root.findViewById(
-                R.id.tvAchievementRemainingXp
+                R.id.tvRemainingExp
         );
         realmPercent = root.findViewById(
-                R.id.tvAchievementRealmPercent
+                R.id.tvRealmPercent
         );
         realmDescription = root.findViewById(
-                R.id.tvAchievementRealmDescription
+                R.id.tvRealmDescription
         );
         realmProgress = root.findViewById(
-                R.id.progressAchievementRealm
+                R.id.progressRealm
         );
 
         realmRecycler = root.findViewById(
@@ -497,45 +498,7 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
     }
 
     private int medalIcon(int category, int tier) {
-        int[][] icons = {
-                {
-                        R.drawable.ic_medal_discipline_bronze,
-                        R.drawable.ic_medal_discipline_silver,
-                        R.drawable.ic_medal_discipline_gold,
-                        R.drawable.ic_medal_discipline_platinum,
-                        R.drawable.ic_medal_discipline_diamond
-                },
-                {
-                        R.drawable.ic_medal_weight_bronze,
-                        R.drawable.ic_medal_weight_silver,
-                        R.drawable.ic_medal_weight_gold,
-                        R.drawable.ic_medal_weight_platinum,
-                        R.drawable.ic_medal_weight_diamond
-                },
-                {
-                        R.drawable.ic_medal_calories_bronze,
-                        R.drawable.ic_medal_calories_silver,
-                        R.drawable.ic_medal_calories_gold,
-                        R.drawable.ic_medal_calories_platinum,
-                        R.drawable.ic_medal_calories_diamond
-                },
-                {
-                        R.drawable.ic_medal_nobreak_bronze,
-                        R.drawable.ic_medal_nobreak_silver,
-                        R.drawable.ic_medal_nobreak_gold,
-                        R.drawable.ic_medal_nobreak_platinum,
-                        R.drawable.ic_medal_nobreak_diamond
-                },
-                {
-                        R.drawable.ic_medal_words_bronze,
-                        R.drawable.ic_medal_words_silver,
-                        R.drawable.ic_medal_words_gold,
-                        R.drawable.ic_medal_words_platinum,
-                        R.drawable.ic_medal_words_diamond
-                }
-        };
-
-        return icons[category][tier];
+        return BadgeIconResolver.medalIcon(category, tier);
     }
 
     private int experienceIcon(String source) {
@@ -861,15 +824,11 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
                         ? "已永久收藏"
                         : "尚未解锁");
 
-        new AlertDialog.Builder(getActivity())
-                .setTitle(
-                        medal.categoryName
-                                + " · "
-                                + medal.tierName
-                )
-                .setMessage(message)
-                .setPositiveButton("确定", null)
-                .show();
+        RealmDialog.showInfo(
+                getActivity(),
+                medal.categoryName + " · " + medal.tierName,
+                message
+        );
     }
 
     private void showRealmDetail(RealmStageItem item) {
@@ -881,11 +840,11 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
                 "化神境：自律大成，知行合一。"
         };
 
-        new AlertDialog.Builder(getActivity())
-                .setTitle(item.name)
-                .setMessage(descriptions[item.index])
-                .setPositiveButton("确定", null)
-                .show();
+        RealmDialog.showInfo(
+                getActivity(),
+                item.name,
+                descriptions[item.index]
+        );
     }
 
     private void normalizeState() {

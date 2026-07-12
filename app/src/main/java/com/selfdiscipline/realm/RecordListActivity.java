@@ -1,29 +1,58 @@
 package com.selfdiscipline.realm;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.graphics.Color;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.selfdiscipline.realm.data.AppRepository;
-import com.selfdiscipline.realm.model.*;
-import com.selfdiscipline.realm.util.ViewUtils;
+import com.selfdiscipline.realm.data.RealmCatalog;
+import com.selfdiscipline.realm.engine.RecordDeleteEngine;
+import com.selfdiscipline.realm.engine.StatsEngine;
+import com.selfdiscipline.realm.model.AppState;
+import com.selfdiscipline.realm.model.Book;
+import com.selfdiscipline.realm.model.DiaryRecord;
+import com.selfdiscipline.realm.model.ExerciseRecord;
+import com.selfdiscipline.realm.model.ExperienceLog;
+import com.selfdiscipline.realm.model.RealmLevel;
+import com.selfdiscipline.realm.model.SleepRecord;
+import com.selfdiscipline.realm.model.WeightRecord;
+import com.selfdiscipline.realm.model.WordEntry;
+import com.selfdiscipline.realm.ui.RealmDialog;
+import com.selfdiscipline.realm.util.ExerciseFormat;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class RecordListActivity extends Activity {
     private AppRepository repository;
     private AppState state;
     private String currentType;
-    private LinearLayout currentList;
+    private RecyclerView recordRecycler;
+    private TextView emptyView;
+    private RecordEntryAdapter adapter;
+
+    private ImageView realmBadge;
+    private TextView realmName;
+    private TextView realmRemainingExp;
+    private TextView realmTotalExp;
+    private TextView realmPercent;
+    private TextView realmDescription;
+    private ProgressBar realmProgress;
+
     public static final String EXTRA_TYPE = "list_type";
     public static final String TYPE_BOOKS = "books";
     public static final String TYPE_STUDY = "study";
@@ -39,19 +68,98 @@ public class RecordListActivity extends Activity {
         c.startActivity(i);
     }
 
-    @Override protected void onCreate(Bundle b) {
+    @Override
+    protected void onCreate(Bundle b) {
         super.onCreate(b);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().setNavigationBarColor(getResources().getColor(R.color.color_surface));
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         setContentView(R.layout.activity_record_list);
+
         repository = new AppRepository(this);
         state = repository.load();
+        if (state == null) state = new AppState();
         currentType = getIntent().getStringExtra(EXTRA_TYPE);
-        currentList = findViewById(R.id.record_list_container);
+        recordRecycler = findViewById(R.id.record_recycler);
+        emptyView = findViewById(R.id.text_empty_records);
+        adapter = new RecordEntryAdapter();
+        adapter.setListener(new RecordEntryAdapter.Listener() {
+            @Override
+            public void onClick(Entry entry) {
+                if (RecordDetailActivity.TYPE_BOOK.equals(entry.detailType)) {
+                    BookDetailActivity.open(RecordListActivity.this, entry.detailIndex);
+                    return;
+                }
+                RecordDetailActivity.open(RecordListActivity.this, entry.detailType, entry.detailIndex);
+            }
+
+            @Override
+            public void onLongClick(Entry entry) {
+                confirmDelete(entry);
+            }
+        });
+        recordRecycler.setLayoutManager(new LinearLayoutManager(this));
+        recordRecycler.setAdapter(adapter);
+
+        bindRealmCard();
+
         TextView title = findViewById(R.id.text_list_title);
         title.setText(titleFor(currentType));
-        renderList(state, currentType, currentList);
+
+        renderRealmCard();
+        renderList(state, currentType);
+    }
+
+    private void bindRealmCard() {
+        realmBadge = findViewById(R.id.ivRealmBadge);
+        realmName = findViewById(R.id.tvRealmName);
+        realmRemainingExp = findViewById(R.id.tvRemainingExp);
+        realmTotalExp = findViewById(R.id.tvTotalExp);
+        realmPercent = findViewById(R.id.tvRealmPercent);
+        realmDescription = findViewById(R.id.tvRealmDescription);
+        realmProgress = findViewById(R.id.progressRealm);
+    }
+
+    private void renderRealmCard() {
+        if (state == null) {
+            return;
+        }
+
+        int xp = StatsEngine.totalXp(state);
+        RealmLevel realm = RealmCatalog.current(xp);
+
+        realmName.setText(realm.nameRes);
+        realmTotalExp.setText(formatInteger(xp));
+        realmDescription.setText(realm.descRes);
+        realmBadge.setImageResource(realmIconByXp(xp));
+
+        if (realm.isCap()) {
+            realmRemainingExp.setText(R.string.text_realm_cap);
+            realmPercent.setText("100.00%");
+            realmProgress.setProgress(100);
+            return;
+        }
+
+        int remaining = Math.max(0, realm.nextXp - xp);
+        double percent = realm.nextXp <= 0
+                ? 100.0
+                : Math.min(100.0, xp * 100.0 / realm.nextXp);
+
+        realmRemainingExp.setText(formatInteger(remaining));
+        realmPercent.setText(String.format(Locale.getDefault(), "%.2f%%", percent));
+        realmProgress.setProgress((int) Math.round(percent));
+    }
+
+    private int realmIconByXp(int xp) {
+        if (xp >= 82001) return R.drawable.ic_realm_stage_spirit;
+        if (xp >= 40001) return R.drawable.ic_realm_stage_nascent;
+        if (xp >= 15001) return R.drawable.ic_realm_stage_golden;
+        if (xp >= 3501) return R.drawable.ic_realm_stage_foundation;
+        return R.drawable.ic_realm_stage_qi;
+    }
+
+    private String formatInteger(int value) {
+        return String.format(Locale.getDefault(), "%,d", value);
     }
 
     private String titleFor(String type) {
@@ -64,8 +172,7 @@ public class RecordListActivity extends Activity {
         return getString(R.string.button_view_all_history);
     }
 
-    private void renderList(AppState state, String type, LinearLayout list) {
-        list.removeAllViews();
+    private void renderList(AppState state, String type) {
         List<Entry> entries = new ArrayList<>();
         if (TYPE_BOOKS.equals(type)) addBooks(state, entries);
         else if (TYPE_STUDY.equals(type)) addStudy(state, entries);
@@ -74,25 +181,24 @@ public class RecordListActivity extends Activity {
         else if (TYPE_DIARIES.equals(type)) addDiaries(state, entries);
         else if (TYPE_EXP_LOGS.equals(type)) addExpLogs(state, entries);
         else addOverview(state, entries);
+
         Collections.sort(entries, (a, b) -> b.sortKey.compareTo(a.sortKey));
-        if (entries.isEmpty()) { list.addView(ViewUtils.card(this, getString(R.string.empty_history))); return; }
-        for (Entry e : entries) {
-            LinearLayout card = ViewUtils.iconCard(this, e.iconRes, e.summary + "\n" + getString(R.string.label_tap_detail) + "｜" + getString(R.string.label_long_press_delete), v -> RecordDetailActivity.open(this, e.detailType, e.detailIndex));
-            card.setOnLongClickListener(v -> {
-                confirmDelete(e);
-                return true;
-            });
-            list.addView(card);
-        }
+
+        boolean empty = entries.isEmpty();
+        emptyView.setVisibility(empty ? View.VISIBLE : View.GONE);
+        recordRecycler.setVisibility(empty ? View.GONE : View.VISIBLE);
+        adapter.submit(entries);
     }
 
     private void confirmDelete(Entry entry) {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_delete_record_title)
-                .setMessage(getString(R.string.dialog_delete_record_message, deleteName(entry.detailType)))
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .setPositiveButton(R.string.dialog_delete, (d, w) -> deleteEntry(entry))
-                .show();
+        RealmDialog.showConfirm(
+                this,
+                R.string.dialog_delete_record_title,
+                getString(R.string.dialog_delete_record_message, deleteName(entry.detailType)),
+                R.string.dialog_delete,
+                R.string.dialog_cancel,
+                () -> deleteEntry(entry)
+        );
     }
 
     private String deleteName(String type) {
@@ -107,42 +213,12 @@ public class RecordListActivity extends Activity {
     }
 
     private void deleteEntry(Entry entry) {
-        boolean ok = false;
         try {
-            String type = entry.detailType;
-            int index = entry.detailIndex;
-            if (RecordDetailActivity.TYPE_BOOK.equals(type) && valid(index, state.books.size())) {
-                state.books.remove(index);
-                ok = true;
-            } else if (RecordDetailActivity.TYPE_EXERCISE.equals(type) && valid(index, state.exercises.size())) {
-                ExerciseRecord removed = state.exercises.remove(index);
-                cleanupDailyAwardIfNoMoreRecord(removed.date, "exercise");
-                ok = true;
-            } else if (RecordDetailActivity.TYPE_WEIGHT.equals(type) && valid(index, state.weights.size())) {
-                state.weights.remove(index);
-                ok = true;
-            } else if (RecordDetailActivity.TYPE_SLEEP.equals(type) && valid(index, state.sleeps.size())) {
-                SleepRecord removed = state.sleeps.remove(index);
-                cleanupSleepAwardIfNoPassedRecord(removed.date);
-                ok = true;
-            } else if (RecordDetailActivity.TYPE_WORD.equals(type) && valid(index, state.words.size())) {
-                WordEntry removed = state.words.remove(index);
-                cleanupWordAwardIfNoMoreRecord(removed.createdDate);
-                ok = true;
-            } else if (RecordDetailActivity.TYPE_DIARY.equals(type) && valid(index, state.diaries.size())) {
-                DiaryRecord removed = state.diaries.remove(index);
-                cleanupDiaryAwardIfNoNoBreakRecord(removed.date);
-                ok = true;
-            } else if (RecordDetailActivity.TYPE_EXP.equals(type) && valid(index, state.expLogs.size())) {
-                ExperienceLog removed = state.expLogs.remove(index);
-                state.awardedKeys.remove(removed.key);
-                ok = true;
-            }
-            if (ok) {
-                cleanupAllDoneAwards();
+            if (RecordDeleteEngine.delete(state, entry.detailType, entry.detailIndex)) {
                 repository.save(state);
                 Toast.makeText(this, R.string.toast_deleted, Toast.LENGTH_SHORT).show();
-                renderList(state, currentType, currentList);
+                renderRealmCard();
+                renderList(state, currentType);
             } else {
                 Toast.makeText(this, R.string.toast_delete_failed, Toast.LENGTH_SHORT).show();
             }
@@ -151,121 +227,67 @@ public class RecordListActivity extends Activity {
         }
     }
 
-    private boolean valid(int index, int size) { return index >= 0 && index < size; }
-
-    private void cleanupDailyAwardIfNoMoreRecord(String date, String moduleKey) {
-        if (date == null || date.isEmpty()) return;
-        if ("exercise".equals(moduleKey)) {
-            for (ExerciseRecord r : state.exercises) if (date.equals(r.date)) return;
-        }
-        removeAwardAndLogs(moduleKey + "_" + date);
-    }
-
-    private void cleanupSleepAwardIfNoPassedRecord(String date) {
-        if (date == null || date.isEmpty()) return;
-        for (SleepRecord r : state.sleeps) if (date.equals(r.date) && r.passed) return;
-        removeAwardAndLogs("sleep_" + date);
-    }
-
-    private void cleanupWordAwardIfNoMoreRecord(String date) {
-        if (date == null || date.isEmpty()) return;
-        for (WordEntry r : state.words) if (date.equals(r.createdDate)) return;
-        state.wordDates.remove(date);
-        removeAwardAndLogs("word_" + date);
-    }
-
-    private void cleanupDiaryAwardIfNoNoBreakRecord(String date) {
-        if (date == null || date.isEmpty()) return;
-        for (DiaryRecord r : state.diaries) if (date.equals(r.date) && !r.broken) return;
-        removeAwardAndLogs("diary_" + date);
-    }
-
-    private void cleanupAllDoneAwards() {
-        List<String> remove = new ArrayList<>();
-        for (String key : state.awardedKeys) {
-            if (key != null && key.startsWith("all_done_")) {
-                String date = key.substring("all_done_".length());
-                if (!com.selfdiscipline.realm.engine.StatsEngine.allFiveDone(state, date)) remove.add(key);
-            }
-        }
-        for (String key : remove) removeAwardAndLogs(key);
-    }
-
-    private void removeAwardAndLogs(String key) {
-        if (key == null || key.isEmpty()) return;
-        state.awardedKeys.remove(key);
-        for (int i = state.expLogs.size() - 1; i >= 0; i--) {
-            ExperienceLog log = state.expLogs.get(i);
-            if (key.equals(log.key)) state.expLogs.remove(i);
-        }
-    }
-
     private void addBooks(AppState s, List<Entry> out) {
         for (int i = 0; i < s.books.size(); i++) {
             Book r = s.books.get(i);
-            out.add(new Entry("9999-99-99-" + (100000 - i), R.drawable.ic_nav_reading,
-                    getString(R.string.format_book_card, r.title, r.author == null ? "" : r.author, r.currentPage, r.fullReview == null || r.fullReview.isEmpty() ? getString(R.string.text_no) : getString(R.string.text_yes), r.pageNotes.size()),
-                    RecordDetailActivity.TYPE_BOOK, i));
+            String title = safe(r.title).isEmpty() ? getString(R.string.label_record_type_books) : r.title;
+            String author = safe(r.author);
+            String review = safe(r.fullReview).isEmpty() ? getString(R.string.text_no) : getString(R.string.text_yes);
+            String content = String.format(Locale.getDefault(), "《%s》%s｜当前 %d 页｜读后感 %s", title, author.isEmpty() ? "" : " · " + author, r.currentPage, review);
+            out.add(new Entry("9999-99-99-book-" + (100000 - i), R.drawable.ic_nav_reading, "阅读：", content, "书籍", RecordDetailActivity.TYPE_BOOK, i));
         }
     }
 
-    /**
-     * 仅添加运动记录。
-     * 用于运动页面中的“查看全部”。
-     */
     private void addExercises(AppState s, List<Entry> out) {
         for (int i = 0; i < s.exercises.size(); i++) {
             ExerciseRecord r = s.exercises.get(i);
-            out.add(new Entry(
-                    r.date + "-exercise-" + i,
-                    R.drawable.ic_nav_sport,
-                    getString(
-                            R.string.format_exercise_record,
-                            r.date,
-                            r.content,
-                            r.calories
-                    ),
-                    RecordDetailActivity.TYPE_EXERCISE,
-                    i
-            ));
+            String name = ExerciseFormat.name(r.content);
+            String metric = ExerciseFormat.metricText(r.content);
+            String content = metric.equals("--")
+                    ? String.format(Locale.getDefault(), "%s｜%d 千卡", name, r.calories)
+                    : String.format(Locale.getDefault(), "%s｜%s｜%d 千卡", name, metric, r.calories);
+            out.add(new Entry(r.date + "-exercise-" + i, R.drawable.ic_nav_sport, "运动：", content, safeDate(r.date), RecordDetailActivity.TYPE_EXERCISE, i));
         }
     }
 
-    /**
-     * 原来的综合学习/运动页面：
-     * 运动 + 体重 + 作息。
-     */
     private void addStudy(AppState s, List<Entry> out) {
         addExercises(s, out);
 
         for (int i = 0; i < s.weights.size(); i++) {
             WeightRecord r = s.weights.get(i);
-            out.add(new Entry(r.date + "-weight-" + i, R.drawable.ic_nav_sport, getString(R.string.format_weight_record, r.date, r.weight), RecordDetailActivity.TYPE_WEIGHT, i));
+            String content = String.format(Locale.getDefault(), "体重 %.1f kg", r.weight);
+            out.add(new Entry(r.date + "-weight-" + i, R.drawable.ic_ew_weight, "体重：", content, safeDate(r.date), RecordDetailActivity.TYPE_WEIGHT, i));
         }
         for (int i = 0; i < s.sleeps.size(); i++) {
             SleepRecord r = s.sleeps.get(i);
-            out.add(new Entry(r.date + "-sleep-" + i, R.drawable.ic_nav_sport, getString(R.string.format_sleep_record, r.date, r.sleepTime, r.wakeTime, r.passed ? getString(R.string.text_sleep_pass) : getString(R.string.text_sleep_fail)), RecordDetailActivity.TYPE_SLEEP, i));
+            String status = r.passed ? getString(R.string.text_sleep_pass) : getString(R.string.text_sleep_fail);
+            String content = String.format(Locale.getDefault(), "%s - %s｜%s", safe(r.sleepTime), safe(r.wakeTime), status);
+            out.add(new Entry(r.date + "-sleep-" + i, R.drawable.ic_exp_sleep, "作息：", content, safeDate(r.date), RecordDetailActivity.TYPE_SLEEP, i));
         }
     }
 
     private void addWords(AppState s, List<Entry> out) {
         for (int i = 0; i < s.words.size(); i++) {
             WordEntry r = s.words.get(i);
-            out.add(new Entry(r.createdDate + "-word-" + i, R.drawable.ic_nav_word, getString(R.string.format_word_record, r.word, r.meaning, r.correctCount, r.wrongCount, r.lastTestDate == null || r.lastTestDate.isEmpty() ? "-" : r.lastTestDate), RecordDetailActivity.TYPE_WORD, i));
+            String content = String.format(Locale.getDefault(), "%s：%s", safe(r.word), safe(r.meaning));
+            out.add(new Entry(safeDate(r.createdDate) + "-word-" + i, R.drawable.ic_nav_word, "单词：", content, safeDate(r.createdDate), RecordDetailActivity.TYPE_WORD, i));
         }
     }
 
     private void addDiaries(AppState s, List<Entry> out) {
         for (int i = 0; i < s.diaries.size(); i++) {
             DiaryRecord r = s.diaries.get(i);
-            out.add(new Entry(r.date + "-diary-" + i, R.drawable.ic_nav_diary, getString(R.string.format_diary_record, r.date, r.title, r.broken ? getString(R.string.text_broken) : getString(R.string.text_not_broken), r.body), RecordDetailActivity.TYPE_DIARY, i));
+            String title = safe(r.title).isEmpty() ? getString(R.string.label_record_type_diaries) : r.title;
+            String status = r.broken ? getString(R.string.text_broken) : getString(R.string.text_not_broken);
+            out.add(new Entry(r.date + "-diary-" + i, R.drawable.ic_nav_diary, "日记：", title + "｜" + status, safeDate(r.date), RecordDetailActivity.TYPE_DIARY, i));
         }
     }
 
     private void addExpLogs(AppState s, List<Entry> out) {
         for (int i = 0; i < s.expLogs.size(); i++) {
             ExperienceLog r = s.expLogs.get(i);
-            out.add(new Entry(r.date + "-exp-" + i, R.drawable.ic_xp, getString(R.string.format_exp_log, r.date, r.points, r.source), RecordDetailActivity.TYPE_EXP, i));
+            String content = String.format(Locale.getDefault(), "+%d 经验｜%s", r.points, safe(r.source));
+            out.add(new Entry(r.date + "-exp-" + i, R.drawable.ic_xp, "经验：", content, safeDate(r.date), RecordDetailActivity.TYPE_EXP, i));
         }
     }
 
@@ -277,14 +299,107 @@ public class RecordListActivity extends Activity {
         addExpLogs(s, out);
     }
 
+    private String safe(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private String safeDate(String value) {
+        String date = safe(value);
+        return date.isEmpty() ? "-" : date;
+    }
+
+
+    private static class RecordEntryAdapter extends RecyclerView.Adapter<RecordEntryAdapter.Holder> {
+        interface Listener {
+            void onClick(Entry entry);
+
+            void onLongClick(Entry entry);
+        }
+
+        private final List<Entry> items = new ArrayList<>();
+        private Listener listener;
+
+        void setListener(Listener listener) {
+            this.listener = listener;
+        }
+
+        void submit(List<Entry> newItems) {
+            items.clear();
+            if (newItems != null) {
+                items.addAll(newItems);
+            }
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View row = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_recent_activity, parent, false);
+            return new Holder(row);
+        }
+
+        @Override
+        public void onBindViewHolder(Holder holder, int position) {
+            Entry entry = items.get(position);
+            holder.icon.setImageResource(entry.iconRes);
+            holder.itemType.setText(entry.typeText);
+            holder.content.setText(entry.contentText);
+            holder.time.setText(entry.timeText);
+            holder.divider.setVisibility(position == items.size() - 1 ? View.INVISIBLE : View.VISIBLE);
+
+            holder.itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onClick(entry);
+                }
+            });
+            holder.itemView.setOnLongClickListener(v -> {
+                if (listener != null) {
+                    listener.onLongClick(entry);
+                }
+                return true;
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
+
+        static class Holder extends RecyclerView.ViewHolder {
+            final ImageView icon;
+            final TextView itemType;
+            final TextView content;
+            final TextView time;
+            final View divider;
+
+            Holder(View itemView) {
+                super(itemView);
+                icon = itemView.findViewById(R.id.ivActivityIcon);
+                itemType = itemView.findViewById(R.id.tvActivityType);
+                content = itemView.findViewById(R.id.tvActivityContent);
+                time = itemView.findViewById(R.id.tvActivityTime);
+                divider = itemView.findViewById(R.id.activityDivider);
+            }
+        }
+    }
+
     private static class Entry {
-        String sortKey;
-        int iconRes;
-        String summary;
-        String detailType;
-        int detailIndex;
-        Entry(String sortKey, int iconRes, String summary, String detailType, int detailIndex) {
-            this.sortKey = sortKey; this.iconRes = iconRes; this.summary = summary; this.detailType = detailType; this.detailIndex = detailIndex;
+        final String sortKey;
+        final int iconRes;
+        final String typeText;
+        final String contentText;
+        final String timeText;
+        final String detailType;
+        final int detailIndex;
+
+        Entry(String sortKey, int iconRes, String typeText, String contentText, String timeText, String detailType, int detailIndex) {
+            this.sortKey = sortKey;
+            this.iconRes = iconRes;
+            this.typeText = typeText;
+            this.contentText = contentText;
+            this.timeText = timeText;
+            this.detailType = detailType;
+            this.detailIndex = detailIndex;
         }
     }
 }

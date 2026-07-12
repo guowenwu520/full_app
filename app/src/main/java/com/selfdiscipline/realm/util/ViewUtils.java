@@ -1,6 +1,5 @@
 package com.selfdiscipline.realm.util;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.Bitmap;
@@ -13,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.selfdiscipline.realm.ui.RealmDialog;
 
 import com.selfdiscipline.realm.R;
 
@@ -128,5 +129,5 @@ public class ViewUtils {
     }
 
     public static int dp(Context c, int v) { return (int)(v * c.getResources().getDisplayMetrics().density + 0.5f); }
-    public static void info(Context c, String title, String msg) { new AlertDialog.Builder(c).setTitle(title).setMessage(msg).setPositiveButton(R.string.dialog_ok, null).show(); }
+    public static void info(Context c, String title, String msg) { RealmDialog.showInfo(c, title, msg); }
 }

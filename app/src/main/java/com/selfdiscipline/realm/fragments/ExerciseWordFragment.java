@@ -1,6 +1,5 @@
 package com.selfdiscipline.realm.fragments;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.InputType;
@@ -11,8 +10,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,10 +22,11 @@ import com.selfdiscipline.realm.data.AppRepository;
 import com.selfdiscipline.realm.model.AppState;
 import com.selfdiscipline.realm.model.ExerciseRecord;
 import com.selfdiscipline.realm.model.WeightRecord;
+import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.model.WordEntry;
 import com.selfdiscipline.realm.util.DateUtils;
+import com.selfdiscipline.realm.util.ExerciseFormat;
 import com.selfdiscipline.realm.view.WeightTrendView;
-import com.selfdiscipline.realm.view.WordMonthBarChartView;
 
 import org.json.JSONObject;
 
@@ -45,7 +43,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -86,9 +83,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
     private ExerciseAdapter exerciseAdapter;
     private WeightTrendView weightTrendView;
 
-    private View goalExerciseCount;
-    private View goalWeightCount;
-    private View goalCalories;
 
     private RecyclerView todayWordsRecycler;
     private RecyclerView recentWordsRecycler;
@@ -96,19 +90,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
     private RecentWordAdapter recentWordAdapter;
     private TextView todayWordProgress;
 
-    private TextView quizWordView;
-    private RadioGroup quizOptions;
-    private RadioButton[] quizButtons;
-    private TextView quizButton;
-    private Object quizWord;
-    private String quizAnswer = "";
-
-    private TextView wordCalendarStreak;
-    private LinearLayout wordWeekDays;
-    private ProgressBar wordWeekProgress;
-    private TextView weekWordProgressText;
-    private TextView monthWordCount;
-    private WordMonthBarChartView wordMonthBarChart;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle stateBundle) {
@@ -160,30 +141,11 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         exerciseHistoryRecycler = root.findViewById(R.id.recyclerExerciseHistory);
         weightTrendView = root.findViewById(R.id.weightTrendView);
 
-        goalExerciseCount = root.findViewById(R.id.goalExerciseCount);
-        goalWeightCount = root.findViewById(R.id.goalWeightCount);
-        goalCalories = root.findViewById(R.id.goalCalories);
 
         todayWordsRecycler = root.findViewById(R.id.recyclerTodayWords);
         recentWordsRecycler = root.findViewById(R.id.recyclerRecentWords);
         todayWordProgress = root.findViewById(R.id.tvTodayWordProgress);
 
-        quizWordView = root.findViewById(R.id.tvQuizWord);
-        quizOptions = root.findViewById(R.id.quizOptions);
-        quizButtons = new RadioButton[]{
-                root.findViewById(R.id.quizOptionA),
-                root.findViewById(R.id.quizOptionB),
-                root.findViewById(R.id.quizOptionC),
-                root.findViewById(R.id.quizOptionD)
-        };
-        quizButton = root.findViewById(R.id.buttonStartQuiz);
-
-        wordCalendarStreak = root.findViewById(R.id.tvWordCalendarStreak);
-        wordWeekDays = root.findViewById(R.id.wordWeekDays);
-        wordWeekProgress = root.findViewById(R.id.progressWordWeek);
-        weekWordProgressText = root.findViewById(R.id.tvWeekWordProgress);
-        monthWordCount = root.findViewById(R.id.tvMonthWordCount);
-        wordMonthBarChart = root.findViewById(R.id.wordMonthBarChart);
     }
 
     private void setupLists() {
@@ -210,7 +172,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         root.findViewById(R.id.buttonAddExercise).setOnClickListener(v -> dialogAddExercise());
         root.findViewById(R.id.buttonAddWeight).setOnClickListener(v -> dialogAddWeight());
         root.findViewById(R.id.buttonAddWord).setOnClickListener(v -> dialogAddWord());
-        quizButton.setOnClickListener(v -> handleQuizButton());
 
         root.findViewById(R.id.buttonAllExercises).setOnClickListener(v -> {
             try {
@@ -258,11 +219,9 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         List<Object> weights = asObjects(readCollection(state, "weights"));
         String today = DateUtils.today();
         String month = today != null && today.length() >= 7 ? today.substring(0, 7) : "";
-        String weekStart = weekStart();
 
         int todayCalories = 0;
         int monthCalories = 0;
-        int weekExerciseCount = 0;
         Object todayExercise = null;
 
         for (Object item : exercises) {
@@ -273,7 +232,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
                 if (todayExercise == null) todayExercise = item;
             }
             if (date != null && date.startsWith(month)) monthCalories += calories;
-            if (date != null && date.compareTo(weekStart) >= 0) weekExerciseCount++;
         }
 
         int streak = calculateDateStreak(exercises, "date", "day", "recordDate", "createdDate");
@@ -291,7 +249,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
             todayExerciseCalories.setText("0 kcal");
             todayExerciseTime.setText("时间：--");
         } else {
-            String type = readText(todayExercise, "type", "name", "exerciseType", "content", "title");
             String exerciseContent = safe(
                     readText(
                             todayExercise,
@@ -302,41 +259,41 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
                             "title"
                     )
             );
+            String type = ExerciseFormat.name(exerciseContent);
             double distance = readDouble(
                     todayExercise,
-                    parseDistanceFromContent(exerciseContent),
+                    ExerciseFormat.distanceKm(exerciseContent),
                     "distance",
                     "km",
                     "mileage"
             );
             int duration = readInt(
                     todayExercise,
-                    parseDurationFromContent(exerciseContent),
+                    ExerciseFormat.durationMinutes(exerciseContent),
                     "duration",
                     "minutes",
                     "durationMinutes"
             );
             int calories = readInt(todayExercise, 0, "calories", "calorie", "kcal", "burnedCalories");
             String time = readText(todayExercise, "time", "dateTime", "createdAt", "date");
-            String main = safe(type).isEmpty() ? "运动记录" : type;
-            if (distance > 0) main += String.format(Locale.getDefault(), "  %.2f 公里", distance);
-            todayExerciseMain.setText(main);
+            todayExerciseMain.setText(type);
             todayExerciseDuration.setText(duration + " 分钟");
             todayExerciseCalories.setText(calories + " kcal");
             todayExerciseTime.setText("时间：" + shortTime(time));
         }
 
-        List<Object> displayExercises = new ArrayList<>(exercises);
-        Collections.reverse(displayExercises);
+        List<Object> displayExercises = sortedByDateDesc(exercises, "date", "day", "recordDate", "createdDate", "time");
         if (displayExercises.size() > 3)
             displayExercises = new ArrayList<>(displayExercises.subList(0, 3));
         exerciseAdapter.submit(displayExercises);
 
+        List<Object> weightRows = sortedByDateAsc(weights, "date", "day", "recordDate", "createdDate");
+        if (weightRows.size() > 7) {
+            weightRows = new ArrayList<>(weightRows.subList(weightRows.size() - 7, weightRows.size()));
+        }
         List<Float> weightValues = new ArrayList<>();
         List<String> weightDates = new ArrayList<>();
-        int start = Math.max(0, weights.size() - 7);
-        for (int i = start; i < weights.size(); i++) {
-            Object item = weights.get(i);
+        for (Object item : weightRows) {
             float value = (float) readDouble(item, 0, "weight", "value", "kg", "weightKg");
             if (value > 0) {
                 weightValues.add(value);
@@ -345,13 +302,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         }
         weightTrendView.setData(weightValues, weightDates);
 
-        bindGoal(goalExerciseCount, R.drawable.ic_ew_running, "运动 ≥ 4 次",
-                weekExerciseCount + " / 4", percent(weekExerciseCount, 4));
-        int weekWeightCount = countSince(weights, weekStart);
-        bindGoal(goalWeightCount, R.drawable.ic_ew_weight, "体重记录",
-                weekWeightCount + " / 7", percent(weekWeightCount, 7));
-        bindGoal(goalCalories, R.drawable.ic_ew_calories, "累计消耗",
-                monthCalories + " kcal", Math.min(100, monthCalories * 100 / 3000));
     }
 
     private void renderWords() {
@@ -361,7 +311,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
 
         int todayCount = 0;
         int monthCount = 0;
-        int reviewed = 0;
         List<Object> todayWords = new ArrayList<>();
 
         for (Object item : words) {
@@ -371,31 +320,19 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
                 todayWords.add(item);
             }
             if (date != null && date.startsWith(month)) monthCount++;
-            if (readBoolean(item, false, "reviewed", "isReviewed", "tested", "mastered"))
-                reviewed++;
         }
 
         int streak = calculateWordStreak();
         bindStat(statWordTotal, R.drawable.ic_ew_word_book, "单词总量", formatInt(words.size()), "个");
         bindStat(statWordStreak, R.drawable.ic_ew_streak, "连续背词", String.valueOf(streak), "天");
         bindStat(statWordToday, R.drawable.ic_ew_word_star, "今日新增", String.valueOf(todayCount), "个");
-        bindStat(statWordReviewed, R.drawable.ic_ew_word_book, "今日复习", String.valueOf(reviewed), "个");
+        bindStat(statWordReviewed, R.drawable.ic_ew_word_book, "本月新增", String.valueOf(monthCount), "个");
 
         if (todayWords.size() > 3) todayWords = new ArrayList<>(todayWords.subList(0, 3));
         todayWordAdapter.submit(todayWords);
-        todayWordProgress.setText(todayCount + "/18");
+        todayWordProgress.setText(todayCount + " 个");
 
         recentWordAdapter.submit(buildRecentWordRows(words));
-
-        wordCalendarStreak.setText("连续背词 " + streak + " 天");
-        renderWeekDays();
-        int weekDays = wordDaysThisWeek();
-        wordWeekProgress.setProgress(weekDays);
-        weekWordProgressText.setText("本周进度                                  " + weekDays + "/7 天");
-        monthWordCount.setText("本月已背词                                      " + monthCount + " 个");
-        wordMonthBarChart.setValues(buildMonthWordBars(words));
-
-        prepareQuiz();
     }
 
     private void bindStat(View root, int iconRes, String label, String value, String unit) {
@@ -403,13 +340,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         ((TextView) root.findViewById(R.id.tvEwStatLabel)).setText(label);
         ((TextView) root.findViewById(R.id.tvEwStatValue)).setText(value);
         ((TextView) root.findViewById(R.id.tvEwStatUnit)).setText(unit);
-    }
-
-    private void bindGoal(View root, int iconRes, String label, String value, int progressValue) {
-        ((ImageView) root.findViewById(R.id.ivEwGoalIcon)).setImageResource(iconRes);
-        ((TextView) root.findViewById(R.id.tvEwGoalLabel)).setText(label);
-        ((TextView) root.findViewById(R.id.tvEwGoalValue)).setText(value);
-        ((ProgressBar) root.findViewById(R.id.progressEwGoal)).setProgress(progressValue);
     }
 
     private void dialogAddExercise() {
@@ -423,71 +353,76 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         box.addView(distance);
         box.addView(calories);
 
-        AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setTitle("新增运动记录").setView(box)
-                .setPositiveButton("保存", null).setNegativeButton("取消", null).create();
+        RealmDialog.showContent(
+                getActivity(),
+                "新增运动记录",
+                box,
+                "保存",
+                "取消",
+                dialog -> {
+                    String typeValue = type.getText().toString().trim();
+                    int durationValue = parseInt(duration, -1);
+                    double distanceValue = parseDouble(distance, 0);
+                    int caloriesValue = parseInt(calories, -1);
+                    if (typeValue.isEmpty() || durationValue <= 0 || caloriesValue < 0) {
+                        toast("请填写有效的运动类型、时长和卡路里");
+                        return false;
+                    }
+                    try {
+                        JSONObject obj = new JSONObject();
+                        obj.put("date", DateUtils.today());
+                        obj.put(
+                                "content",
+                                buildExerciseContent(
+                                        typeValue,
+                                        durationValue,
+                                        distanceValue
+                                )
+                        );
+                        obj.put("calories", caloriesValue);
 
-        dialog.setOnShowListener(v -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(x -> {
-            String typeValue = type.getText().toString().trim();
-            int durationValue = parseInt(duration, -1);
-            double distanceValue = parseDouble(distance, 0);
-            int caloriesValue = parseInt(calories, -1);
-            if (typeValue.isEmpty() || durationValue <= 0 || caloriesValue < 0) {
-                toast("请填写有效的运动类型、时长和卡路里");
-                return;
-            }
-            try {
-                JSONObject obj = new JSONObject();
-                obj.put("date", DateUtils.today());
-                obj.put(
-                        "content",
-                        buildExerciseContent(
-                                typeValue,
-                                durationValue,
-                                distanceValue
-                        )
-                );
-                obj.put("calories", caloriesValue);
-
-                ExerciseRecord model = ExerciseRecord.fromJson(obj);
-                state.exercises.add(0, model);
-            } catch (Exception e) {
-                toast("运动记录保存失败：" + e.getMessage());
-                return;
-            }
-            award("awardExercise");
-            saveAndRender();
-            dialog.dismiss();
-        }));
-        dialog.show();
+                        ExerciseRecord model = ExerciseRecord.fromJson(obj);
+                        state.exercises.add(0, model);
+                    } catch (Exception e) {
+                        toast("运动记录保存失败：" + e.getMessage());
+                        return false;
+                    }
+                    award("awardExercise");
+                    saveAndRender();
+                    return true;
+                }
+        );
     }
 
     private void dialogAddWeight() {
         EditText input = edit("当前体重（kg）", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setTitle("记录体重").setView(input)
-                .setPositiveButton("保存", null).setNegativeButton("取消", null).create();
-        dialog.setOnShowListener(v -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(x -> {
-            double value = parseDouble(input, -1);
-            if (value <= 0) {
-                toast("请输入有效体重");
-                return;
-            }
-            try {
-                JSONObject obj = new JSONObject();
-                obj.put("date", DateUtils.today());
-                obj.put("weight", value);
+        RealmDialog.showContent(
+                getActivity(),
+                "记录体重",
+                input,
+                "保存",
+                "取消",
+                dialog -> {
+                    double value = parseDouble(input, -1);
+                    if (value <= 0) {
+                        toast("请输入有效体重");
+                        return false;
+                    }
+                    try {
+                        JSONObject obj = new JSONObject();
+                        obj.put("date", DateUtils.today());
+                        obj.put("weight", value);
 
-                WeightRecord model = WeightRecord.fromJson(obj);
-                state.weights.add(0, model);
-            } catch (Exception e) {
-                toast("体重记录保存失败：" + e.getMessage());
-                return;
-            }
-            saveAndRender();
-            dialog.dismiss();
-        }));
-        dialog.show();
+                        WeightRecord model = WeightRecord.fromJson(obj);
+                        state.weights.add(0, model);
+                    } catch (Exception e) {
+                        toast("体重记录保存失败：" + e.getMessage());
+                        return false;
+                    }
+                    saveAndRender();
+                    return true;
+                }
+        );
     }
 
     private void dialogAddWord() {
@@ -496,96 +431,43 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         EditText meaning = edit("释义", InputType.TYPE_CLASS_TEXT);
         box.addView(word);
         box.addView(meaning);
-        AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setTitle("新增单词").setView(box)
-                .setPositiveButton("保存", null).setNegativeButton("取消", null).create();
-        dialog.setOnShowListener(v -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(x -> {
-            String w = word.getText().toString().trim();
-            String m = meaning.getText().toString().trim();
-            if (w.isEmpty() || m.isEmpty()) {
-                toast("单词和释义不能为空");
-                return;
-            }
-            try {
-                JSONObject obj = new JSONObject();
-                obj.put("word", w);
-                obj.put("meaning", m);
-                obj.put("createdDate", DateUtils.today());
-                obj.put("correctCount", 0);
-                obj.put("wrongCount", 0);
-                obj.put("lastTestDate", "");
+        RealmDialog.showContent(
+                getActivity(),
+                "新增单词",
+                box,
+                "保存",
+                "取消",
+                dialog -> {
+                    String w = word.getText().toString().trim();
+                    String m = meaning.getText().toString().trim();
+                    if (w.isEmpty() || m.isEmpty()) {
+                        toast("单词和释义不能为空");
+                        return false;
+                    }
+                    try {
+                        JSONObject obj = new JSONObject();
+                        obj.put("word", w);
+                        obj.put("meaning", m);
+                        obj.put("createdDate", DateUtils.today());
+                        obj.put("correctCount", 0);
+                        obj.put("wrongCount", 0);
+                        obj.put("lastTestDate", "");
 
-                WordEntry model = WordEntry.fromJson(obj);
-                state.words.add(0, model);
-            } catch (Exception e) {
-                toast("单词保存失败：" + e.getMessage());
-                return;
-            }
-            invokeStateDateMethod("addWordDate", DateUtils.today());
-            award("awardWord");
-            saveAndRender();
-            dialog.dismiss();
-        }));
-        dialog.show();
+                        WordEntry model = WordEntry.fromJson(obj);
+                        state.words.add(0, model);
+                    } catch (Exception e) {
+                        toast("单词保存失败：" + e.getMessage());
+                        return false;
+                    }
+                    invokeStateDateMethod("addWordDate", DateUtils.today());
+                    award("awardWord");
+                    saveAndRender();
+                    return true;
+                }
+        );
     }
 
-    private void prepareQuiz() {
-        List<Object> words = asObjects(readCollection(state, "words"));
-        if (words.isEmpty()) {
-            quizWord = null;
-            quizAnswer = "";
-            quizWordView.setText("暂无单词");
-            for (int i = 0; i < 4; i++) quizButtons[i].setText((char) ('A' + i) + "  --");
-            return;
-        }
-        Random random = new Random();
-        quizWord = words.get(random.nextInt(words.size()));
-        String word = readText(quizWord, "word", "text", "name", "english");
-        quizAnswer = safe(readText(quizWord, "meaning", "translation", "definition", "chinese"));
-        quizWordView.setText(safe(word));
 
-        List<String> options = new ArrayList<>();
-        options.add(quizAnswer);
-        List<Object> shuffled = new ArrayList<>(words);
-        Collections.shuffle(shuffled);
-        for (Object item : shuffled) {
-            String meaning = safe(readText(item, "meaning", "translation", "definition", "chinese"));
-            if (!meaning.isEmpty() && !options.contains(meaning)) options.add(meaning);
-            if (options.size() == 4) break;
-        }
-        while (options.size() < 4) options.add("--");
-        Collections.shuffle(options);
-        for (int i = 0; i < 4; i++)
-            quizButtons[i].setText((char) ('A' + i) + "  " + options.get(i));
-        quizOptions.clearCheck();
-        quizButton.setText("提交答案");
-    }
-
-    private void handleQuizButton() {
-        if (quizWord == null) {
-            toast("请先添加单词");
-            return;
-        }
-        int checked = quizOptions.getCheckedRadioButtonId();
-        if (checked == -1) {
-            toast("请选择一个释义");
-            return;
-        }
-        RadioButton selected = quizOptions.findViewById(checked);
-        String text = selected.getText().toString();
-        String answer = text.length() > 3 ? text.substring(3).trim() : text;
-        if (answer.equals(quizAnswer)) {
-            toast("回答正确，获得 +8 经验");
-            setMember(quizWord, true, "reviewed", "isReviewed", "tested", "mastered");
-            invokeStateDateMethod("addWordDate", DateUtils.today());
-            award("awardWord");
-            repo.save(state);
-        } else {
-            toast("回答错误，正确释义：" + quizAnswer);
-        }
-        prepareQuiz();
-        renderWords();
-    }
 
     private void saveAndRender() {
         repo.save(state);
@@ -736,13 +618,31 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         return c == null ? new ArrayList<>() : new ArrayList<Object>(c);
     }
 
+    private List<Object> sortedByDateDesc(List<Object> items, String... dateFields) {
+        List<Object> sorted = new ArrayList<>(items);
+        Collections.sort(sorted, (left, right) -> safe(readText(right, dateFields)).compareTo(safe(readText(left, dateFields))));
+        return sorted;
+    }
+
+    private List<Object> sortedByDateAsc(List<Object> items, String... dateFields) {
+        List<Object> sorted = new ArrayList<>(items);
+        Collections.sort(sorted, (left, right) -> safe(readText(left, dateFields)).compareTo(safe(readText(right, dateFields))));
+        return sorted;
+    }
+
     private Float latestWeight(List<Object> weights) {
-        Float result = null;
+        Object latest = null;
+        String latestDate = "";
         for (Object item : weights) {
-            double v = readDouble(item, 0, "weight", "value", "kg", "weightKg");
-            if (v > 0) result = (float) v;
+            String date = safe(readText(item, "date", "day", "recordDate", "createdDate"));
+            if (latest == null || date.compareTo(latestDate) >= 0) {
+                latest = item;
+                latestDate = date;
+            }
         }
-        return result;
+        if (latest == null) return null;
+        double value = readDouble(latest, 0, "weight", "value", "kg", "weightKg");
+        return value > 0 ? (float) value : null;
     }
 
     private int calculateDateStreak(List<Object> items, String... dateFields) {
@@ -779,94 +679,15 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         return streak;
     }
 
-    private String weekStart() {
-        Calendar c = Calendar.getInstance();
-        c.setFirstDayOfWeek(Calendar.MONDAY);
-        int delta = c.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY;
-        if (delta < 0) delta += 7;
-        c.add(Calendar.DAY_OF_MONTH, -delta);
-        return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(c.getTime());
-    }
 
-    private int countSince(List<Object> items, String startDate) {
-        int count = 0;
-        for (Object item : items) {
-            String d = readText(item, "date", "day", "recordDate", "createdDate");
-            if (d != null && d.compareTo(startDate) >= 0) count++;
-        }
-        return count;
-    }
 
-    private int wordDaysThisWeek() {
-        Set<String> days = new HashSet<>();
-        String start = weekStart();
-        Collection<?> dates = readCollection(state, "wordDates", "wordStudyDates", "vocabularyDates");
-        if (dates != null) for (Object d : dates)
-            if (d != null && String.valueOf(d).compareTo(start) >= 0) days.add(String.valueOf(d));
-        if (days.isEmpty()) {
-            for (Object word : asObjects(readCollection(state, "words"))) {
-                String d = readText(word, "date", "day", "createdDate", "addDate");
-                if (d != null && d.compareTo(start) >= 0)
-                    days.add(d.substring(0, Math.min(10, d.length())));
-            }
-        }
-        return Math.min(7, days.size());
-    }
-
-    private void renderWeekDays() {
-        wordWeekDays.removeAllViews();
-        Calendar c = Calendar.getInstance();
-        c.setFirstDayOfWeek(Calendar.MONDAY);
-        int delta = c.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY;
-        if (delta < 0) delta += 7;
-        c.add(Calendar.DAY_OF_MONTH, -delta);
-
-        Set<String> wordDays = new HashSet<>();
-        Collection<?> dates = readCollection(state, "wordDates", "wordStudyDates", "vocabularyDates");
-        if (dates != null) for (Object d : dates) if (d != null) wordDays.add(String.valueOf(d));
-
-        SimpleDateFormat full = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        SimpleDateFormat day = new SimpleDateFormat("dd", Locale.getDefault());
-        for (int i = 0; i < 7; i++) {
-            TextView tv = new TextView(getActivity());
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(36), 1);
-            lp.setMargins(dp(2), 0, dp(2), 0);
-            tv.setLayoutParams(lp);
-            tv.setGravity(17);
-            tv.setText(day.format(c.getTime()));
-            tv.setTextSize(9);
-            tv.setTextColor(getResources().getColor(R.color.color_text_main));
-            tv.setBackgroundResource(wordDays.contains(full.format(c.getTime()))
-                    ? R.drawable.bg_ew_week_day_done : R.drawable.bg_ew_week_day);
-            wordWeekDays.addView(tv);
-            c.add(Calendar.DAY_OF_MONTH, 1);
-        }
-    }
-
-    private List<Integer> buildMonthWordBars(List<Object> words) {
-        List<Integer> bars = new ArrayList<>();
-        for (int i = 0; i < 31; i++) bars.add(0);
-        String month = DateUtils.today().substring(0, 7);
-        for (Object item : words) {
-            String d = readText(item, "date", "day", "createdDate", "addDate");
-            if (d != null && d.startsWith(month) && d.length() >= 10) {
-                try {
-                    int index = Integer.parseInt(d.substring(8, 10)) - 1;
-                    if (index >= 0 && index < bars.size()) bars.set(index, bars.get(index) + 1);
-                } catch (Throwable ignored) {
-                }
-            }
-        }
-        return bars;
-    }
 
     private List<RecentWordRow> buildRecentWordRows(List<Object> words) {
         List<RecentWordRow> result = new ArrayList<>();
-        List<Object> reversed = new ArrayList<>(words);
-        Collections.reverse(reversed);
-        int count = Math.min(5, reversed.size());
+        List<Object> sorted = sortedByDateDesc(words, "date", "day", "createdDate", "addDate");
+        int count = Math.min(5, sorted.size());
         for (int i = 0; i < count; i++) {
-            Object w = reversed.get(i);
+            Object w = sorted.get(i);
             String text = safe(readText(w, "word", "text", "name", "english"));
             String date = safe(readText(w, "date", "day", "createdDate", "addDate"));
             result.add(new RecentWordRow(text, "新增 1 个", shortDate(date)));
@@ -883,55 +704,15 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
             int duration,
             double distance
     ) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(type == null ? "" : type.trim());
-        builder.append("｜用时 ").append(duration).append(" 分钟");
-
-        if (distance > 0) {
-            builder.append("｜距离 ")
-                    .append(
-                            String.format(
-                                    Locale.getDefault(),
-                                    "%.2f",
-                                    distance
-                            )
-                    )
-                    .append(" 公里");
-        }
-
-        return builder.toString();
+        return ExerciseFormat.content(type, duration, distance);
     }
 
     private int parseDurationFromContent(String content) {
-        if (content == null) return 0;
-
-        java.util.regex.Matcher matcher = java.util.regex.Pattern
-                .compile("用时\\s*(\\d+)\\s*分钟")
-                .matcher(content);
-
-        if (!matcher.find()) return 0;
-
-        try {
-            return Integer.parseInt(matcher.group(1));
-        } catch (Exception ignored) {
-            return 0;
-        }
+        return ExerciseFormat.durationMinutes(content);
     }
 
     private double parseDistanceFromContent(String content) {
-        if (content == null) return 0;
-
-        java.util.regex.Matcher matcher = java.util.regex.Pattern
-                .compile("距离\\s*([0-9]+(?:\\.[0-9]+)?)\\s*公里")
-                .matcher(content);
-
-        if (!matcher.find()) return 0;
-
-        try {
-            return Double.parseDouble(matcher.group(1));
-        } catch (Exception ignored) {
-            return 0;
-        }
+        return ExerciseFormat.distanceKm(content);
     }
 
     private LinearLayout dialogBox() {
@@ -963,10 +744,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         } catch (Throwable x) {
             return def;
         }
-    }
-
-    private int percent(int value, int target) {
-        return target <= 0 ? 0 : Math.min(100, value * 100 / target);
     }
 
     private String nowText() {
@@ -1017,7 +794,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
         @Override
         public void onBindViewHolder(Holder h, int pos) {
             Object item = items.get(pos);
-            String type = safe(readText(item, "type", "name", "exerciseType", "content", "title"));
             String date = safe(readText(item, "date", "day", "recordDate", "createdDate"));
             String exerciseContent = safe(
                     readText(
@@ -1029,22 +805,23 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
                             "title"
                     )
             );
+            String type = ExerciseFormat.name(exerciseContent);
             int duration = readInt(
                     item,
-                    parseDurationFromContent(exerciseContent),
+                    ExerciseFormat.durationMinutes(exerciseContent),
                     "duration",
                     "minutes",
                     "durationMinutes"
             );
             double distance = readDouble(
                     item,
-                    parseDistanceFromContent(exerciseContent),
+                    ExerciseFormat.distanceKm(exerciseContent),
                     "distance",
                     "km",
                     "mileage"
             );
             int calories = readInt(item, 0, "calories", "calorie", "kcal", "burnedCalories");
-            h.type.setText(type.isEmpty() ? "运动" : type);
+            h.type.setText(type);
             h.date.setText(shortDate(date));
             h.metric.setText(distance > 0 ? String.format(Locale.getDefault(), "%.1f km", distance) : duration + " 分钟");
             h.calories.setText(calories + " kcal");

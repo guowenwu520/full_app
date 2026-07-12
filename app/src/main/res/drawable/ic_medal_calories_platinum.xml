@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/ic_medal_base_platinum" />
-    <item android:drawable="@drawable/ic_medal_symbol_calories" />
-</layer-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path android:fillColor="#247989" android:pathData="M16,32L12,45L21,40L24,47L27,40L36,45L32,32Z" />
+    <path android:fillColor="#64C7D9" android:pathData="M24,4L28,8L34,8L36,14L42,18L40,24L42,30L36,34L34,40L28,40L24,44L20,40L14,40L12,34L6,30L8,24L6,18L12,14L14,8L20,8Z" />
+    <path android:fillColor="#E8FFFF" android:pathData="M24,9A15,15 0,1 1,23.99,9Z" />
+    <path android:fillColor="#64C7D9" android:pathData="M24,12A12,12 0,1 1,23.99,12Z" />
+    <path android:fillColor="#33FFFFFF" android:pathData="M17,14Q24,9 31,14Q24,12 17,14Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M24,12Q34,22 29,34Q27,39 22,39Q16,39 14,34Q12,28 19,20Q19,26 24,27Q27,23 24,12Z" />
+</vector>

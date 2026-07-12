@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/ic_medal_base_gold" />
-    <item android:drawable="@drawable/ic_medal_symbol_weight" />
-</layer-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path android:fillColor="#8A6108" android:pathData="M16,32L12,45L21,40L24,47L27,40L36,45L32,32Z" />
+    <path android:fillColor="#D9A629" android:pathData="M24,4L28,8L34,8L36,14L42,18L40,24L42,30L36,34L34,40L28,40L24,44L20,40L14,40L12,34L6,30L8,24L6,18L12,14L14,8L20,8Z" />
+    <path android:fillColor="#FFF1A8" android:pathData="M24,9A15,15 0,1 1,23.99,9Z" />
+    <path android:fillColor="#D9A629" android:pathData="M24,12A12,12 0,1 1,23.99,12Z" />
+    <path android:fillColor="#33FFFFFF" android:pathData="M17,14Q24,9 31,14Q24,12 17,14Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M17,18L31,18Q35,18 35,22L35,32Q35,36 31,36L17,36Q13,36 13,32L13,22Q13,18 17,18Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M19,23A5,5 0,0 1,29,23L26,26Q24,24 22,26Z" />
+</vector>

@@ -36,6 +36,18 @@
     <!-- Utility drawable colors -->
     <color name="ui_white_82">#D1FFFFFF</color>
 
+    <color name="ui_root_overlay_start">#22FFFFFF</color>
+    <color name="ui_root_overlay_center">#08FFFFFF</color>
+    <color name="ui_root_overlay_end">#55FFFFFF</color>
+    <color name="nav_icon_selected">#167FA2</color>
+    <color name="nav_icon_normal">#607892</color>
+
+    <!-- Dialog input fields -->
+    <color name="color_dialog_input_bg">#F9FDFF</color>
+    <color name="color_dialog_input_bg_focused">#FFFFFF</color>
+    <color name="color_dialog_input_stroke">#9CCDDD</color>
+    <color name="color_dialog_input_hint">#7A94A6</color>
+
     <!-- Legacy vector compatibility colors -->
     <color name="scifi_070b18">#070B18</color><color name="scifi_071529">#071529</color><color name="scifi_0c1030">#0C1030</color><color name="scifi_0f1730">#0F1730</color><color name="scifi_10203a">#10203A</color><color name="scifi_1538e8d4">#5538E8D4</color><color name="scifi_180e1e">#180E1E</color><color name="scifi_20142a">#20142A</color><color name="scifi_334d6e">#334D6E</color><color name="scifi_38e8d4">#38E8D4</color><color name="scifi_55281512">#55281512</color><color name="scifi_7df9ff">#7DF9FF</color><color name="scifi_f3c969">#F3C969</color><color name="scifi_fff4ba">#FFF4BA</color><color name="scifi_ffffff">#FFFFFF</color>
 </resources>

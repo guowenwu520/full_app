@@ -1,7 +1,6 @@
 package com.selfdiscipline.realm.fragments;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,6 +27,7 @@ import com.selfdiscipline.realm.model.ExperienceLog;
 import com.selfdiscipline.realm.model.RealmLevel;
 import com.selfdiscipline.realm.adapter.RecentActivity;
 import com.selfdiscipline.realm.adapter.RecentActivityAdapter;
+import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.util.DateUtils;
 
 import java.io.InputStream;
@@ -906,15 +906,14 @@ public class OverviewFragment extends BaseFragmentHelper {
     }
 
     private void readBackupAndConfirm(Uri uri) {
-        new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.dialog_import_title)
-                .setMessage(R.string.dialog_import_message)
-                .setPositiveButton(
-                        R.string.button_import_confirm,
-                        (dialog, which) -> applyImport(uri)
-                )
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .show();
+        RealmDialog.showConfirm(
+                getActivity(),
+                R.string.dialog_import_title,
+                getString(R.string.dialog_import_message),
+                R.string.button_import_confirm,
+                R.string.dialog_cancel,
+                () -> applyImport(uri)
+        );
     }
 
     private void applyImport(Uri uri) {

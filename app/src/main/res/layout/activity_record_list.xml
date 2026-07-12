@@ -1,22 +1,110 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/bg_root">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:paddingLeft="20dp" android:paddingRight="20dp" android:paddingTop="34dp" android:paddingBottom="18dp">
-        <TextView android:id="@+id/text_list_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/title_all_history_ref" android:textColor="@color/color_text_main" android:textSize="34sp" android:textStyle="bold" android:fontFamily="serif" />
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/subtitle_history_refined" android:textColor="@color/color_text_sub" android:textSize="16sp" />
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_root">
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:background="@drawable/bg_realm_foundation" android:orientation="vertical">
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="当前境界\n筑基中期\n总经验 6,280｜连续自律 18 天" android:textColor="@color/color_text_main" android:textSize="17sp" android:lineSpacingExtra="4dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="8dp"
+        android:paddingTop="34dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="18dp">
+
+        <TextView
+            android:id="@+id/text_list_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:fontFamily="serif"
+            android:text="@string/title_all_history_ref"
+            android:textColor="@color/color_text_main"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="5dp"
+            android:text="@string/subtitle_history_refined"
+            android:textColor="@color/color_text_sub"
+            android:textSize="12sp" />
+
+        <include
+            layout="@layout/view_realm_status_card"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="14dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_realm_status_card"
+            android:clipToOutline="true"
+            android:elevation="3dp"
+            android:orientation="vertical"
+            android:paddingStart="12dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="8dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="28dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_core_streak" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:fontFamily="serif"
+                        android:includeFontPadding="false"
+                        android:text="@string/section_all_history"
+                        android:textColor="@color/checkin_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/record_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:overScrollMode="never" />
+
+                <TextView
+                    android:id="@+id/text_empty_records"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/empty_history"
+                    android:textColor="@color/color_text_sub"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+            </FrameLayout>
         </LinearLayout>
-
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:orientation="horizontal">
-            <TextView android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:layout_marginEnd="8dp" android:background="@drawable/bg_input" android:gravity="center_vertical" android:paddingLeft="16dp" android:text="搜索记录（关键词 / 内容）" android:textColor="@color/color_text_sub" android:textSize="14sp" />
-            <TextView android:layout_width="110dp" android:layout_height="48dp" android:background="@drawable/bg_button_soft" android:gravity="center" android:text="全部类型⌄" android:textColor="@color/color_text_main" />
-        </LinearLayout>
-
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:text="@string/section_all_history" android:textColor="@color/color_text_main" android:textSize="22sp" android:textStyle="bold" android:fontFamily="serif" />
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_card" android:text="@string/text_manage_hint" android:textColor="@color/color_text_sub" android:textSize="14sp" />
-
-        <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="8dp" android:fillViewport="true" android:clipToPadding="false">
-            <LinearLayout android:id="@+id/record_list_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
-        </ScrollView>
     </LinearLayout>
 </FrameLayout>

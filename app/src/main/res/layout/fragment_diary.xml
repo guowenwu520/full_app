@@ -122,7 +122,7 @@
         <!-- 今日状态 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="112dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_realm_status_card"
             android:clipToOutline="true"
@@ -147,8 +147,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="7dp"
+                android:layout_height="35dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -156,13 +155,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:text="今日是否破戒："
+                    android:text="今日是否："
                     android:textColor="@color/color_text_main"
                     android:textSize="12sp" />
 
                 <LinearLayout
                     android:layout_width="180dp"
-                    android:layout_height="36dp"
+                    android:layout_height="match_parent"
                     android:layout_marginStart="12dp"
                     android:background="@drawable/bg_diary_toggle_group"
                     android:gravity="center"
@@ -203,10 +202,144 @@
                 android:textSize="10sp" />
         </LinearLayout>
 
+        <!-- 作息打卡 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_realm_status_card"
+            android:clipToOutline="true"
+            android:elevation="3dp"
+            android:orientation="vertical"
+            android:paddingStart="14dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_exp_sleep"
+                android:drawablePadding="7dp"
+                android:fontFamily="serif"
+                android:gravity="center_vertical"
+                android:text="作息打卡"
+                android:textColor="@color/color_text_main"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSleepRecordHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="23:00 前入睡，8:30 前起床即为达标"
+                android:textColor="@color/color_text_sub"
+                android:textSize="10sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/buttonPickSleepTime"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_inner"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="入睡时间"
+                        android:textColor="@color/color_text_sub"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:id="@+id/tvSleepTimeValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="22:30"
+                        android:textColor="@color/color_text_main"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/buttonPickWakeTime"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_inner"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="起床时间"
+                        android:textColor="@color/color_text_sub"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:id="@+id/tvWakeTimeValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="07:00"
+                        android:textColor="@color/color_text_main"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvSleepPassStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="作息达标，可获得 +15 经验"
+                    android:textColor="@color/checkin_done"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/buttonSaveSleepRecord"
+                    android:layout_width="128dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_button_primary"
+                    android:gravity="center"
+                    android:text="保存作息"
+                    android:textColor="@color/color_text_on_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
         <!-- 写日记 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="190dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_realm_status_card"
             android:clipToOutline="true"
@@ -332,108 +465,6 @@
                 android:nestedScrollingEnabled="false"
                 android:overScrollMode="never"
                 android:scrollbars="none" />
-        </LinearLayout>
-
-        <!-- 长期统计 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="106dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_realm_status_card"
-            android:clipToOutline="true"
-            android:elevation="3dp"
-            android:orientation="vertical"
-            android:paddingStart="14dp"
-            android:paddingTop="9dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="9dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_core_streak"
-                android:drawablePadding="7dp"
-                android:fontFamily="serif"
-                android:gravity="center_vertical"
-                android:text="长期统计"
-                android:textColor="@color/color_text_main"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="66dp"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_core_streak" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="最长连续不破戒"
-                        android:textColor="@color/color_text_sub"
-                        android:textSize="9sp" />
-
-                    <TextView
-                        android:id="@+id/tvLongestNoBreak"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="0 天"
-                        android:textColor="@color/color_text_main"
-                        android:textSize="19sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="44dp"
-                    android:background="@color/exp_divider" />
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_marginStart="14dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_core_no_break" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="本月完成日记"
-                        android:textColor="@color/color_text_sub"
-                        android:textSize="9sp" />
-
-                    <TextView
-                        android:id="@+id/tvMonthlyDiaryCompletion"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="0 / 0"
-                        android:textColor="@color/checkin_done"
-                        android:textSize="19sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>

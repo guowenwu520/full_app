@@ -63,124 +63,12 @@
                 android:src="@drawable/ic_profile_meditation" />
         </LinearLayout>
 
-        <!-- 当前境界 -->
-        <LinearLayout
+        <!-- 当前境界：复用首页境界卡片 -->
+        <include
+            layout="@layout/view_realm_status_card"
             android:layout_width="match_parent"
-            android:layout_height="170dp"
-            android:layout_marginTop="17dp"
-            android:background="@drawable/bg_realm_status_card"
-            android:clipToOutline="true"
-            android:elevation="3dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="14dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="10dp">
-
-            <ImageView
-                android:id="@+id/ivAchievementRealmEmblem"
-                android:layout_width="126dp"
-                android:layout_height="126dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_realm_stage_foundation" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="18dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="当前境界："
-                    android:textColor="@color/color_text_sub"
-                    android:textSize="10sp" />
-
-                <TextView
-                    android:id="@+id/tvAchievementRealmName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="serif"
-                    android:includeFontPadding="false"
-                    android:text="筑基中期"
-                    android:textColor="@color/color_text_main"
-                    android:textSize="27sp"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="总经验  "
-                        android:textColor="@color/color_text_sub"
-                        android:textSize="10sp" />
-
-                    <TextView
-                        android:id="@+id/tvAchievementTotalXp"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="0"
-                        android:textColor="@color/checkin_done"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="距离下一境  "
-                        android:textColor="@color/color_text_sub"
-                        android:textSize="10sp" />
-
-                    <TextView
-                        android:id="@+id/tvAchievementRemainingXp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/checkin_done"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <ProgressBar
-                    android:id="@+id/progressAchievementRealm"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="9dp"
-                    android:layout_marginTop="7dp"
-                    android:max="100"
-                    android:progressDrawable="@drawable/progress_realm" />
-
-                <TextView
-                    android:id="@+id/tvAchievementRealmPercent"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="0.00%"
-                    android:textColor="@color/color_text_sub"
-                    android:textSize="9sp" />
-
-                <TextView
-                    android:id="@+id/tvAchievementRealmDescription"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:maxLines="2"
-                    android:textColor="@color/color_text_sub"
-                    android:textSize="10sp" />
-            </LinearLayout>
-        </LinearLayout>
+            android:layout_height="150dp"
+            android:layout_marginTop="17dp" />
 
         <!-- 境界总览 -->
         <LinearLayout

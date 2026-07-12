@@ -205,6 +205,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="今日尚未记录运动"
+                            android:maxLines="1"
                             android:textColor="@color/color_text_main"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -396,65 +397,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="145dp" />
             </LinearLayout>
-
-            <!-- 本周目标 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="104dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_realm_status_card"
-                android:clipToOutline="true"
-                android:elevation="3dp"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="serif"
-                    android:text="本周目标"
-                    android:textColor="@color/color_text_main"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="66dp"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <include
-                        android:id="@+id/goalExerciseCount"
-                        layout="@layout/item_ew_goal"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" />
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="42dp"
-                        android:background="@color/exp_divider" />
-
-                    <include
-                        android:id="@+id/goalWeightCount"
-                        layout="@layout/item_ew_goal"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" />
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="42dp"
-                        android:background="@color/exp_divider" />
-
-                    <include
-                        android:id="@+id/goalCalories"
-                        layout="@layout/item_ew_goal"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" />
-                </LinearLayout>
-            </LinearLayout>
         </LinearLayout>
 
         <!-- ==================== 单词页 ==================== -->
@@ -521,308 +463,111 @@
                     android:layout_weight="1" />
             </LinearLayout>
 
-            <!-- 今日背词 + 抽查 -->
+            <!-- 今日新增单词 -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="304dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:orientation="horizontal">
+                android:background="@drawable/bg_realm_status_card"
+                android:clipToOutline="true"
+                android:elevation="3dp"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_realm_status_card"
-                    android:clipToOutline="true"
-                    android:elevation="3dp"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="28dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="start"
-                            android:fontFamily="serif"
-                            android:gravity="center_vertical"
-                            android:text="今日背词"
-                            android:textColor="@color/color_text_main"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvTodayWordProgress"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="end"
-                            android:gravity="center"
-                            android:text="0/18"
-                            android:textColor="@color/color_text_sub"
-                            android:textSize="10sp" />
-                    </FrameLayout>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerTodayWords"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_weight="1"
-                        android:overScrollMode="never"
-                        android:scrollbars="none" />
-
-                    <TextView
-                        android:id="@+id/buttonAddWord"
-                        android:layout_width="match_parent"
-                        android:layout_height="42dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@drawable/bg_button_primary"
-                        android:gravity="center"
-                        android:text="新增单词  ＋"
-                        android:textColor="@color/color_text_on_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_realm_status_card"
-                    android:clipToOutline="true"
-                    android:elevation="3dp"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="28dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="start"
-                            android:fontFamily="serif"
-                            android:gravity="center_vertical"
-                            android:text="随机抽查自测"
-                            android:textColor="@color/color_text_main"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:layout_gravity="end|center_vertical"
-                            android:gravity="center"
-                            android:text="?"
-                            android:textColor="@color/color_text_sub"
-                            android:textSize="11sp" />
-                    </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp">
 
                     <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text="Word"
-                        android:textColor="@color/color_text_sub"
-                        android:textSize="9sp" />
-
-                    <TextView
-                        android:id="@+id/tvQuizWord"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="暂无单词"
-                        android:textColor="@color/color_text_main"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="释义选项"
-                        android:textColor="@color/color_text_sub"
-                        android:textSize="9sp" />
-
-                    <RadioGroup
-                        android:id="@+id/quizOptions"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <RadioButton
-                            android:id="@+id/quizOptionA"
-                            style="@style/ExerciseWordQuizOption"
-                            android:text="A  --" />
-
-                        <RadioButton
-                            android:id="@+id/quizOptionB"
-                            style="@style/ExerciseWordQuizOption"
-                            android:text="B  --" />
-
-                        <RadioButton
-                            android:id="@+id/quizOptionC"
-                            style="@style/ExerciseWordQuizOption"
-                            android:text="C  --" />
-
-                        <RadioButton
-                            android:id="@+id/quizOptionD"
-                            style="@style/ExerciseWordQuizOption"
-                            android:text="D  --" />
-                    </RadioGroup>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="完成抽查可得 +8 经验"
-                        android:textColor="@color/color_text_sub"
-                        android:textSize="9sp" />
-
-                    <TextView
-                        android:id="@+id/buttonStartQuiz"
-                        android:layout_width="match_parent"
-                        android:layout_height="42dp"
-                        android:layout_marginTop="7dp"
-                        android:background="@drawable/bg_button_primary"
-                        android:gravity="center"
-                        android:text="开始抽查"
-                        android:textColor="@color/color_text_on_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- 最近记录 + 背词日历 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="280dp"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_realm_status_card"
-                    android:clipToOutline="true"
-                    android:elevation="3dp"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="28dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="start"
-                            android:fontFamily="serif"
-                            android:gravity="center_vertical"
-                            android:text="最近记录"
-                            android:textColor="@color/color_text_main"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/buttonAllWords"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="end"
-                            android:drawableEnd="@drawable/ic_arrow_right_small"
-                            android:drawablePadding="4dp"
-                            android:gravity="center"
-                            android:text="全部"
-                            android:textColor="@color/color_text_sub"
-                            android:textSize="9sp" />
-                    </FrameLayout>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerRecentWords"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:nestedScrollingEnabled="false"
-                        android:overScrollMode="never"
-                        android:scrollbars="none" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_realm_status_card"
-                    android:clipToOutline="true"
-                    android:elevation="3dp"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="start"
                         android:fontFamily="serif"
-                        android:text="背词日历"
+                        android:gravity="center_vertical"
+                        android:text="今日新增"
                         android:textColor="@color/color_text_main"
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tvWordCalendarStreak"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="9dp"
-                        android:text="连续背词 0 天"
-                        android:textColor="@color/color_text_main"
-                        android:textSize="11sp" />
-
-                    <LinearLayout
-                        android:id="@+id/wordWeekDays"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginTop="4dp"
+                        android:id="@+id/tvTodayWordProgress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="end"
                         android:gravity="center"
-                        android:orientation="horizontal" />
+                        android:text="0 个"
+                        android:textColor="@color/color_text_sub"
+                        android:textSize="10sp" />
+                </FrameLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerTodayWords"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:layout_marginTop="4dp"
+                    android:overScrollMode="never"
+                    android:scrollbars="none" />
+
+                <TextView
+                    android:id="@+id/buttonAddWord"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_button_primary"
+                    android:gravity="center"
+                    android:text="新增单词  ＋"
+                    android:textColor="@color/color_text_on_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- 最近单词记录 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="260dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_realm_status_card"
+                android:clipToOutline="true"
+                android:elevation="3dp"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp">
 
                     <TextView
-                        android:id="@+id/tvWeekWordProgress"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="本周进度     0/7 天"
-                        android:textColor="@color/color_text_sub"
-                        android:textSize="9sp" />
-
-                    <ProgressBar
-                        android:id="@+id/progressWordWeek"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="7dp"
-                        android:layout_marginTop="5dp"
-                        android:max="7"
-                        android:progressDrawable="@drawable/progress_realm" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="start"
+                        android:fontFamily="serif"
+                        android:gravity="center_vertical"
+                        android:text="最近记录"
+                        android:textColor="@color/color_text_main"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tvMonthWordCount"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="本月已背词 0 个"
+                        android:id="@+id/buttonAllWords"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="end"
+                        android:drawableEnd="@drawable/ic_arrow_right_small"
+                        android:drawablePadding="4dp"
+                        android:gravity="center"
+                        android:text="全部"
                         android:textColor="@color/color_text_sub"
                         android:textSize="9sp" />
+                </FrameLayout>
 
-                    <com.selfdiscipline.realm.view.WordMonthBarChartView
-                        android:id="@+id/wordMonthBarChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="90dp"
-                        android:layout_marginTop="3dp" />
-                </LinearLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerRecentWords"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never"
+                    android:scrollbars="none" />
             </LinearLayout>
         </LinearLayout>
 

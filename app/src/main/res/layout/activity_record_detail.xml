@@ -1,12 +1,98 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/bg_root">
-    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:clipToPadding="false">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingLeft="20dp" android:paddingRight="20dp" android:paddingTop="34dp" android:paddingBottom="20dp">
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="@string/title_record_detail" android:textColor="@color/color_text_main" android:textSize="24sp" android:textStyle="bold" android:fontFamily="serif" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:orientation="vertical" android:background="@drawable/bg_card">
-                <ImageView android:id="@+id/image_detail_icon" android:layout_width="92dp" android:layout_height="92dp" android:layout_gravity="center_horizontal" android:layout_marginBottom="12dp" />
-                <TextView android:id="@+id/text_detail_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="@string/title_record_detail" android:textColor="@color/color_text_main" android:textSize="30sp" android:textStyle="bold" android:fontFamily="serif" />
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_root"
+    tools:context=".RecordDetailActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingTop="34dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="26dp">
+
+            <TextView
+                android:id="@+id/text_detail_page_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="serif"
+                android:text="@string/title_record_detail"
+                android:textColor="@color/color_text_main"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/text_detail_page_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@string/subtitle_history_refined"
+                android:textColor="@color/color_text_sub"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:id="@+id/detail_header_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_realm_status_card"
+                android:clipToOutline="true"
+                android:elevation="3dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/image_detail_icon"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:contentDescription="@null"
+                    tools:src="@drawable/ic_nav_diary" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/text_detail_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="serif"
+                        android:text="@string/title_record_detail"
+                        android:textColor="@color/color_text_main"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/text_detail_summary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/text_no_detail"
+                        android:textColor="@color/color_text_sub"
+                        android:textSize="13sp" />
+                </LinearLayout>
             </LinearLayout>
-            <TextView android:id="@+id/text_detail_body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:background="@drawable/bg_card" android:text="@string/text_no_detail" android:textColor="@color/color_text_main" android:textSize="16sp" android:lineSpacingExtra="6dp" />
+
+            <LinearLayout
+                android:id="@+id/detail_content_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical" />
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

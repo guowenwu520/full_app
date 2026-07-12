@@ -9,6 +9,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_marginTop="30dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingStart="8dp"
@@ -208,6 +209,7 @@
 
             <TextView
                 android:id="@+id/buttonNewPageNote"
+                android:visibility="gone"
                 style="@style/BookDetailActionButton"
                 android:layout_marginStart="8dp"
                 android:drawableStart="@drawable/ic_page_note_small"
@@ -221,8 +223,9 @@
                 android:text="@string/button_full_review" />
         </LinearLayout>
 
-        <!-- 分页批注 -->
+        <!-- 分页批注已简化下线，保留隐藏容器兼容旧数据。 -->
         <LinearLayout
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"

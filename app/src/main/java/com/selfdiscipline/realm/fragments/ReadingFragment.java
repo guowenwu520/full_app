@@ -1,7 +1,6 @@
 package com.selfdiscipline.realm.fragments;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -29,6 +28,7 @@ import com.selfdiscipline.realm.engine.RewardEngine;
 import com.selfdiscipline.realm.model.AppState;
 import com.selfdiscipline.realm.model.Book;
 import com.selfdiscipline.realm.model.PageNote;
+import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.util.DateUtils;
 import com.selfdiscipline.realm.util.ViewUtils;
 
@@ -58,7 +58,7 @@ import java.util.UUID;
  * 2. 最近阅读
  * 3. 我的书架 RecyclerView
  * 4. 最近笔记 RecyclerView
- * 5. 添加书籍、更新页码、全书读后感、分页批注
+ * 5. 添加书籍、更新页码；全书读后感在书籍详情页维护
  */
 public class ReadingFragment extends BaseFragmentHelper {
 
@@ -84,8 +84,6 @@ public class ReadingFragment extends BaseFragmentHelper {
     private TextView currentReadingPercent;
     private ProgressBar currentBookProgress;
     private TextView continueReadingButton;
-    private TextView bookReflectionButton;
-    private TextView pageNotesButton;
 
     // 书架与笔记
     private RecyclerView bookshelfRecycler;
@@ -192,18 +190,13 @@ public class ReadingFragment extends BaseFragmentHelper {
         continueReadingButton = root.findViewById(
                 R.id.buttonContinueReading
         );
-        bookReflectionButton = root.findViewById(
-                R.id.buttonBookReflection
-        );
-        pageNotesButton = root.findViewById(
-                R.id.buttonPageNotes
-        );
 
         // RecyclerView
         bookshelfRecycler = root.findViewById(R.id.recyclerBookshelf);
         recentNotesRecycler = root.findViewById(
                 R.id.recyclerRecentNotes
         );
+        if (recentNotesRecycler != null) recentNotesRecycler.setVisibility(View.GONE);
     }
 
     private void setupRecyclerViews() {
@@ -217,12 +210,9 @@ public class ReadingFragment extends BaseFragmentHelper {
         bookshelfRecycler.setNestedScrollingEnabled(false);
         bookshelfRecycler.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
-        recentNotesRecycler.setLayoutManager(
-                new LinearLayoutManager(requireSafeContext())
-        );
-        recentNotesRecycler.setAdapter(noteAdapter);
-        recentNotesRecycler.setNestedScrollingEnabled(false);
-        recentNotesRecycler.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        if (recentNotesRecycler != null) {
+            recentNotesRecycler.setVisibility(View.GONE);
+        }
     }
 
     private void setupClicks(View root) {
@@ -230,13 +220,8 @@ public class ReadingFragment extends BaseFragmentHelper {
         root.findViewById(R.id.buttonManageBooks)
                 .setOnClickListener(v -> showBookManageMenu());
 
-        root.findViewById(R.id.buttonAllNotes)
-                .setOnClickListener(v ->
-                        RecordListActivity.open(
-                                getActivity(),
-                                RecordListActivity.TYPE_BOOKS
-                        )
-                );
+        View buttonAllNotes = root.findViewById(R.id.buttonAllNotes);
+        if (buttonAllNotes != null) buttonAllNotes.setVisibility(View.GONE);
 
         root.findViewById(R.id.ivReadingCalendar)
                 .setOnClickListener(v ->
@@ -252,17 +237,6 @@ public class ReadingFragment extends BaseFragmentHelper {
             }
         });
 
-        bookReflectionButton.setOnClickListener(v -> {
-            if (currentBook != null) {
-                dialogFullReview(currentBook);
-            }
-        });
-
-        pageNotesButton.setOnClickListener(v -> {
-            if (currentBook != null) {
-                dialogPageNote(currentBook);
-            }
-        });
 
         currentBookCover.setOnClickListener(v -> openCurrentBookDetail());
         currentBookTitle.setOnClickListener(v -> openCurrentBookDetail());
@@ -273,7 +247,6 @@ public class ReadingFragment extends BaseFragmentHelper {
         renderSummary();
         renderRecentBook();
         renderBookshelf();
-        renderRecentNotes();
     }
 
     /**
@@ -390,7 +363,6 @@ public class ReadingFragment extends BaseFragmentHelper {
 
         normalizeBook(currentBook);
         setCurrentActionsEnabled(true);
-        setFullReviewEnabled(isBookFinished(currentBook));
         loadCover(currentBookCover, currentBook.coverUri);
 
         currentBookTitle.setText(
@@ -452,23 +424,13 @@ public class ReadingFragment extends BaseFragmentHelper {
         currentReadingPercent.setText("--");
         currentBookProgress.setProgress(0);
         setCurrentActionsEnabled(false);
-        setFullReviewEnabled(false);
     }
 
     private void setCurrentActionsEnabled(boolean enabled) {
         continueReadingButton.setEnabled(enabled);
-        bookReflectionButton.setEnabled(enabled);
-        pageNotesButton.setEnabled(enabled);
 
         float alpha = enabled ? 1.0f : 0.45f;
         continueReadingButton.setAlpha(alpha);
-        bookReflectionButton.setAlpha(alpha);
-        pageNotesButton.setAlpha(alpha);
-    }
-
-    private void setFullReviewEnabled(boolean enabled) {
-        bookReflectionButton.setEnabled(enabled);
-        bookReflectionButton.setAlpha(enabled ? 1.0f : 0.45f);
     }
 
     private void openCurrentBookDetail() {
@@ -504,49 +466,7 @@ public class ReadingFragment extends BaseFragmentHelper {
      * 汇总所有书籍的批注，按日期倒序显示前三条。
      */
     private void renderRecentNotes() {
-        List<NoteRow> notes = new ArrayList<>();
-
-        for (int bookIndex = 0;
-             bookIndex < state.books.size();
-             bookIndex++) {
-
-            Book book = state.books.get(bookIndex);
-
-            if (book == null) {
-                continue;
-            }
-
-            normalizeBook(book);
-
-            for (PageNote note : book.pageNotes) {
-                if (note != null) {
-                    notes.add(
-                            new NoteRow(
-                                    bookIndex,
-                                    safe(book.title),
-                                    note
-                            )
-                    );
-                }
-            }
-        }
-
-        Collections.sort(
-                notes,
-                (left, right) -> safe(right.note.date)
-                        .compareTo(safe(left.note.date))
-        );
-
-        if (notes.size() > HOME_NOTE_LIMIT) {
-            notes = new ArrayList<>(
-                    notes.subList(0, HOME_NOTE_LIMIT)
-            );
-        }
-
-        noteAdapter.submitList(notes);
-        recentNotesRecycler.setVisibility(
-                notes.isEmpty() ? View.GONE : View.VISIBLE
-        );
+        if (recentNotesRecycler != null) recentNotesRecycler.setVisibility(View.GONE);
     }
 
     private void showBookManageMenu() {
@@ -555,9 +475,11 @@ public class ReadingFragment extends BaseFragmentHelper {
                 getString(R.string.button_view_all_books)
         };
 
-        new AlertDialog.Builder(requireSafeContext())
-                .setTitle(R.string.my_bookshelf)
-                .setItems(actions, (dialog, which) -> {
+        RealmDialog.showChoices(
+                requireSafeContext(),
+                getString(R.string.my_bookshelf),
+                actions,
+                which -> {
                     if (which == 0) {
                         showAddBookDialog();
                     } else {
@@ -566,8 +488,8 @@ public class ReadingFragment extends BaseFragmentHelper {
                                 RecordListActivity.TYPE_BOOKS
                         );
                     }
-                })
-                .show();
+                }
+        );
     }
 
     /**
@@ -628,58 +550,49 @@ public class ReadingFragment extends BaseFragmentHelper {
         box.addView(pickCoverButton);
         box.addView(pendingCoverStatusView);
 
-        AlertDialog dialog = new AlertDialog.Builder(
-                requireSafeContext()
-        )
-                .setTitle(R.string.button_add_book)
-                .setView(box)
-                .setPositiveButton(R.string.dialog_ok, null)
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .create();
+        android.app.Dialog dialog = RealmDialog.showContent(
+                requireSafeContext(),
+                R.string.button_add_book,
+                box,
+                R.string.dialog_ok,
+                R.string.dialog_cancel,
+                d -> {
+                    String title = ViewUtils.text(titleInput);
+                    String author = ViewUtils.text(authorInput);
+                    String genre = ViewUtils.text(genreInput);
+                    int totalPages = ViewUtils.parseInt(
+                            ViewUtils.text(totalPagesInput),
+                            -1
+                    );
+                    int currentPage = ViewUtils.parseInt(
+                            ViewUtils.text(pageInput),
+                            0
+                    );
 
-        dialog.setOnShowListener(ignored ->
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                        .setOnClickListener(v -> {
-                            String title = ViewUtils.text(titleInput);
-                            String author = ViewUtils.text(authorInput);
-                            String genre = ViewUtils.text(genreInput);
-                            int totalPages = ViewUtils.parseInt(
-                                    ViewUtils.text(totalPagesInput),
-                                    -1
-                            );
-                            int currentPage = ViewUtils.parseInt(
-                                    ViewUtils.text(pageInput),
-                                    0
-                            );
+                    if (title.isEmpty()
+                            || totalPages <= 0
+                            || currentPage < 0
+                            || currentPage > totalPages) {
+                        Toast.makeText(
+                                getActivity(),
+                                R.string.invalid_book_page_range,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        return false;
+                    }
 
-                            if (title.isEmpty()
-                                    || totalPages <= 0
-                                    || currentPage < 0
-                                    || currentPage > totalPages) {
-                                Toast.makeText(
-                                        getActivity(),
-                                        R.string.invalid_book_page_range,
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                                return;
-                            }
-
-                            addBook(
-                                    title,
-                                    author,
-                                    genre,
-                                    currentPage,
-                                    totalPages
-                            );
-                            dialog.dismiss();
-                        })
+                    addBook(
+                            title,
+                            author,
+                            genre,
+                            currentPage,
+                            totalPages
+                    );
+                    return true;
+                }
         );
 
-        dialog.setOnDismissListener(ignored ->
-                pendingCoverStatusView = null
-        );
-
-        dialog.show();
+        dialog.setOnDismissListener(ignored -> pendingCoverStatusView = null);
     }
 
     private void pickCover() {
@@ -787,33 +700,21 @@ public class ReadingFragment extends BaseFragmentHelper {
     ) {
         String[] actions = {
                 getString(R.string.button_update_page),
-                getString(R.string.button_full_review),
-                getString(R.string.button_page_note),
                 getString(R.string.label_tap_detail)
         };
 
-        new AlertDialog.Builder(requireSafeContext())
-                .setTitle(safe(book.title))
-                .setItems(actions, (dialog, which) -> {
-                    switch (which) {
-                        case 0:
-                            dialogUpdatePage(book);
-                            break;
-
-                        case 1:
-                            dialogFullReview(book);
-                            break;
-
-                        case 2:
-                            dialogPageNote(book);
-                            break;
-
-                        default:
-                            BookDetailActivity.open(getActivity(), bookIndex);
-                            break;
+        RealmDialog.showChoices(
+                requireSafeContext(),
+                safe(book.title),
+                actions,
+                which -> {
+                    if (which == 0) {
+                        dialogUpdatePage(book);
+                    } else {
+                        BookDetailActivity.open(getActivity(), bookIndex);
                     }
-                })
-                .show();
+                }
+        );
     }
 
     private void dialogUpdatePage(Book book) {
@@ -826,37 +727,37 @@ public class ReadingFragment extends BaseFragmentHelper {
                 )
         );
 
-        new AlertDialog.Builder(requireSafeContext())
-                .setTitle(R.string.button_update_page)
-                .setView(input)
-                .setPositiveButton(
-                        R.string.dialog_ok,
-                        (dialog, which) -> {
-                            int page = ViewUtils.parseInt(
-                                    input.getText().toString(),
-                                    -1
-                            );
+        RealmDialog.showContent(
+                requireSafeContext(),
+                R.string.button_update_page,
+                input,
+                R.string.dialog_ok,
+                R.string.dialog_cancel,
+                dialog -> {
+                    int page = ViewUtils.parseInt(
+                            input.getText().toString(),
+                            -1
+                    );
 
-                            int totalPages = getTotalPages(book);
+                    int totalPages = getTotalPages(book);
 
-                            if (page < 0
-                                    || totalPages <= 0
-                                    || page > totalPages) {
-                                Toast.makeText(
-                                        getActivity(),
-                                        R.string.invalid_book_page_range,
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                                return;
-                            }
+                    if (page < 0
+                            || totalPages <= 0
+                            || page > totalPages) {
+                        Toast.makeText(
+                                getActivity(),
+                                R.string.invalid_book_page_range,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        return false;
+                    }
 
-                            book.currentPage = page;
-                            moveBookToFront(book);
-                            finishReadingAction();
-                        }
-                )
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .show();
+                    book.currentPage = page;
+                    moveBookToFront(book);
+                    finishReadingAction();
+                    return true;
+                }
+        );
     }
 
     private void dialogFullReview(Book book) {
@@ -879,20 +780,19 @@ public class ReadingFragment extends BaseFragmentHelper {
                         : book.fullReview
         );
 
-        new AlertDialog.Builder(requireSafeContext())
-                .setTitle(R.string.button_full_review)
-                .setView(input)
-                .setPositiveButton(
-                        R.string.dialog_ok,
-                        (dialog, which) -> {
-                            book.fullReview =
-                                    input.getText().toString();
-                            moveBookToFront(book);
-                            finishReadingAction();
-                        }
-                )
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .show();
+        RealmDialog.showContent(
+                requireSafeContext(),
+                R.string.button_full_review,
+                input,
+                R.string.dialog_ok,
+                R.string.dialog_cancel,
+                dialog -> {
+                    book.fullReview = input.getText().toString();
+                    moveBookToFront(book);
+                    finishReadingAction();
+                    return true;
+                }
+        );
     }
 
     private void dialogPageNote(Book book) {
@@ -922,57 +822,52 @@ public class ReadingFragment extends BaseFragmentHelper {
         box.addView(pageInput);
         box.addView(noteInput);
 
-        new AlertDialog.Builder(requireSafeContext())
-                .setTitle(R.string.button_page_note)
-                .setView(box)
-                .setPositiveButton(
-                        R.string.dialog_ok,
-                        (dialog, which) -> {
-                            int page = ViewUtils.parseInt(
-                                    pageInput.getText().toString(),
-                                    -1
-                            );
-                            String body = noteInput
-                                    .getText()
-                                    .toString()
-                                    .trim();
+        RealmDialog.showContent(
+                requireSafeContext(),
+                R.string.button_page_note,
+                box,
+                R.string.dialog_ok,
+                R.string.dialog_cancel,
+                dialog -> {
+                    int page = ViewUtils.parseInt(
+                            pageInput.getText().toString(),
+                            -1
+                    );
+                    String body = noteInput.getText().toString().trim();
 
-                            if (page <= 0 || body.isEmpty()) {
-                                ViewUtils.toast(
-                                        getActivity(),
-                                        R.string.toast_invalid_input
-                                );
-                                return;
-                            }
+                    if (page <= 0 || body.isEmpty()) {
+                        ViewUtils.toast(
+                                getActivity(),
+                                R.string.toast_invalid_input
+                        );
+                        return false;
+                    }
 
-                            if (page > book.currentPage) {
-                                Toast.makeText(
-                                        getActivity(),
-                                        R.string.page_note_exceeds_reading_progress,
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                                return;
-                            }
+                    if (page > book.currentPage) {
+                        Toast.makeText(
+                                getActivity(),
+                                R.string.page_note_exceeds_reading_progress,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        return false;
+                    }
 
-                            normalizeBook(book);
+                    normalizeBook(book);
+                    book.pageNotes.add(
+                            0,
+                            new PageNote(
+                                    UUID.randomUUID().toString(),
+                                    DateUtils.today(),
+                                    page,
+                                    body
+                            )
+                    );
 
-                            book.pageNotes.add(
-                                    0,
-                                    new PageNote(
-                                            UUID.randomUUID()
-                                                    .toString(),
-                                            DateUtils.today(),
-                                            page,
-                                            body
-                                    )
-                            );
-
-                            moveBookToFront(book);
-                            finishReadingAction();
-                        }
-                )
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .show();
+                    moveBookToFront(book);
+                    finishReadingAction();
+                    return true;
+                }
+        );
     }
 
     private void moveBookToFront(Book book) {

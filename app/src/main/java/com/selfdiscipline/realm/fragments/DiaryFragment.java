@@ -1,11 +1,11 @@
 package com.selfdiscipline.realm.fragments;
 
-import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TimePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,9 +20,12 @@ import com.selfdiscipline.realm.RecordDetailActivity;
 import com.selfdiscipline.realm.RecordListActivity;
 import com.selfdiscipline.realm.data.AppRepository;
 import com.selfdiscipline.realm.engine.StatsEngine;
+import com.selfdiscipline.realm.engine.RewardEngine;
 import com.selfdiscipline.realm.model.AppState;
 import com.selfdiscipline.realm.model.DiaryRecord;
+import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.model.ExperienceLog;
+import com.selfdiscipline.realm.model.SleepRecord;
 import com.selfdiscipline.realm.util.DateUtils;
 
 import org.json.JSONObject;
@@ -48,7 +51,7 @@ import java.util.UUID;
  * 1. 今日破戒状态
  * 2. 每日一篇日记，重复保存时更新当天日记
  * 3. 最近日记 RecyclerView
- * 4. 当前/最长连续不破戒、本月破戒、本月完成统计
+ * 4. 当前连续不破戒、本月破戒、今日经验统计
  * 5. 与原有经验奖励、全部历史、详情页兼容
  */
 public class DiaryFragment extends BaseFragmentHelper {
@@ -67,6 +70,18 @@ public class DiaryFragment extends BaseFragmentHelper {
     private TextView buttonBroken;
     private TextView todayStatusHint;
 
+    private View pickSleepTimeButton;
+    private View pickWakeTimeButton;
+    private TextView sleepTimeValue;
+    private TextView wakeTimeValue;
+    private TextView sleepPassStatus;
+    private TextView saveSleepButton;
+    private int selectedSleepHour = 22;
+    private int selectedSleepMinute = 30;
+    private int selectedWakeHour = 7;
+    private int selectedWakeMinute = 0;
+    private int todaySleepIndex = -1;
+
     private EditText titleInput;
     private EditText bodyInput;
     private TextView saveButton;
@@ -75,8 +90,6 @@ public class DiaryFragment extends BaseFragmentHelper {
     private TextView emptyDiaries;
     private DiaryAdapter diaryAdapter;
 
-    private TextView longestNoBreak;
-    private TextView monthlyCompletion;
 
     private boolean pendingBroken;
     private int todayDiaryIndex = -1;
@@ -149,6 +162,25 @@ public class DiaryFragment extends BaseFragmentHelper {
                 R.id.tvTodayStatusHint
         );
 
+        pickSleepTimeButton = root.findViewById(
+                R.id.buttonPickSleepTime
+        );
+        pickWakeTimeButton = root.findViewById(
+                R.id.buttonPickWakeTime
+        );
+        sleepTimeValue = root.findViewById(
+                R.id.tvSleepTimeValue
+        );
+        wakeTimeValue = root.findViewById(
+                R.id.tvWakeTimeValue
+        );
+        sleepPassStatus = root.findViewById(
+                R.id.tvSleepPassStatus
+        );
+        saveSleepButton = root.findViewById(
+                R.id.buttonSaveSleepRecord
+        );
+
         titleInput = root.findViewById(
                 R.id.inputDiaryTitle
         );
@@ -166,12 +198,6 @@ public class DiaryFragment extends BaseFragmentHelper {
                 R.id.tvEmptyDiaries
         );
 
-        longestNoBreak = root.findViewById(
-                R.id.tvLongestNoBreak
-        );
-        monthlyCompletion = root.findViewById(
-                R.id.tvMonthlyDiaryCompletion
-        );
     }
 
     private void setupRecyclerView() {
@@ -196,6 +222,34 @@ public class DiaryFragment extends BaseFragmentHelper {
                 setPendingBroken(true)
         );
 
+        pickSleepTimeButton.setOnClickListener(v ->
+                showTimePicker(
+                        "选择入睡时间",
+                        selectedSleepHour,
+                        selectedSleepMinute,
+                        (hour, minute) -> {
+                            selectedSleepHour = hour;
+                            selectedSleepMinute = minute;
+                            updateSleepPreview();
+                        }
+                )
+        );
+
+        pickWakeTimeButton.setOnClickListener(v ->
+                showTimePicker(
+                        "选择起床时间",
+                        selectedWakeHour,
+                        selectedWakeMinute,
+                        (hour, minute) -> {
+                            selectedWakeHour = hour;
+                            selectedWakeMinute = minute;
+                            updateSleepPreview();
+                        }
+                )
+        );
+
+        saveSleepButton.setOnClickListener(v -> saveTodaySleep());
+
         saveButton.setOnClickListener(v -> saveTodayDiary());
 
         View.OnClickListener openAll = v ->
@@ -213,10 +267,62 @@ public class DiaryFragment extends BaseFragmentHelper {
 
     private void render() {
         normalizeState();
+        renderTodaySleep();
         renderTodayDiary();
         renderStats();
         renderRecentDiaries();
-        renderLongTermStats();
+    }
+
+    private void renderTodaySleep() {
+        String today = DateUtils.today();
+        todaySleepIndex = findSleepIndex(today);
+
+        if (todaySleepIndex >= 0
+                && todaySleepIndex < state.sleeps.size()) {
+            SleepRecord record = state.sleeps.get(todaySleepIndex);
+            int[] sleep = parseTime(record.sleepTime, 22, 30);
+            int[] wake = parseTime(record.wakeTime, 7, 0);
+            selectedSleepHour = sleep[0];
+            selectedSleepMinute = sleep[1];
+            selectedWakeHour = wake[0];
+            selectedWakeMinute = wake[1];
+            saveSleepButton.setText("更新作息");
+        } else {
+            selectedSleepHour = 22;
+            selectedSleepMinute = 30;
+            selectedWakeHour = 7;
+            selectedWakeMinute = 0;
+            saveSleepButton.setText("保存作息");
+        }
+
+        updateSleepPreview();
+    }
+
+    private void updateSleepPreview() {
+        String sleepTime = formatTime(
+                selectedSleepHour,
+                selectedSleepMinute
+        );
+        String wakeTime = formatTime(
+                selectedWakeHour,
+                selectedWakeMinute
+        );
+        boolean passed = isSleepPassed(sleepTime, wakeTime);
+
+        sleepTimeValue.setText(sleepTime);
+        wakeTimeValue.setText(wakeTime);
+
+        if (passed) {
+            sleepPassStatus.setText("作息达标，可获得 +15 经验");
+            sleepPassStatus.setTextColor(
+                    getResources().getColor(R.color.checkin_done)
+            );
+        } else {
+            sleepPassStatus.setText("未达标：需 23:00 前睡、8:30 前起");
+            sleepPassStatus.setTextColor(
+                    getResources().getColor(R.color.color_text_sub)
+            );
+        }
     }
 
     private void renderTodayDiary() {
@@ -366,30 +472,6 @@ public class DiaryFragment extends BaseFragmentHelper {
         );
     }
 
-    private void renderLongTermStats() {
-        int longest = calculateLongestNoBreakStreak();
-
-        String monthPrefix =
-                DateUtils.today().substring(0, 7);
-
-        Set<String> diaryDates = new HashSet<>();
-
-        for (DiaryRecord diary : state.diaries) {
-            if (diary != null
-                    && safe(diary.date).startsWith(monthPrefix)) {
-                diaryDates.add(diary.date);
-            }
-        }
-
-        Calendar calendar = Calendar.getInstance();
-        int daysPassed = calendar.get(Calendar.DAY_OF_MONTH);
-
-        longestNoBreak.setText(longest + " 天");
-        monthlyCompletion.setText(
-                diaryDates.size() + " / " + daysPassed
-        );
-    }
-
     private void setPendingBroken(boolean broken) {
         pendingBroken = broken;
         updateStatusToggle();
@@ -436,6 +518,68 @@ public class DiaryFragment extends BaseFragmentHelper {
             todayStatusHint.setText(
                     "保持本心，记录今日修行感悟"
             );
+        }
+    }
+
+    private void saveTodaySleep() {
+        String today = DateUtils.today();
+        String sleepTime = formatTime(
+                selectedSleepHour,
+                selectedSleepMinute
+        );
+        String wakeTime = formatTime(
+                selectedWakeHour,
+                selectedWakeMinute
+        );
+        boolean passed = isSleepPassed(sleepTime, wakeTime);
+
+        try {
+            if (todaySleepIndex >= 0
+                    && todaySleepIndex < state.sleeps.size()) {
+                SleepRecord record = state.sleeps.get(todaySleepIndex);
+                record.date = today;
+                record.sleepTime = sleepTime;
+                record.wakeTime = wakeTime;
+                record.passed = passed;
+            } else {
+                state.sleeps.add(
+                        0,
+                        new SleepRecord(
+                                today,
+                                sleepTime,
+                                wakeTime,
+                                passed
+                        )
+                );
+            }
+
+            if (passed) {
+                RewardEngine.awardSleep(
+                        getActivity(),
+                        state,
+                        today
+                );
+            } else {
+                removeAwardAndLogs("sleep_" + today);
+                removeAwardAndLogs("all_done_" + today);
+            }
+
+            repo.save(state);
+            state = repo.load();
+            normalizeState();
+            render();
+
+            Toast.makeText(
+                    getActivity(),
+                    passed ? "作息已保存，今日达标" : "作息已保存，今日未达标",
+                    Toast.LENGTH_SHORT
+            ).show();
+        } catch (Exception exception) {
+            Toast.makeText(
+                    getActivity(),
+                    "保存作息失败：" + exception.getMessage(),
+                    Toast.LENGTH_SHORT
+            ).show();
         }
     }
 
@@ -668,6 +812,133 @@ public class DiaryFragment extends BaseFragmentHelper {
         }
     }
 
+    private void showTimePicker(
+            CharSequence title,
+            int hour,
+            int minute,
+            TimePickAction action
+    ) {
+        TimePicker picker = new TimePicker(getActivity());
+        picker.setIs24HourView(true);
+
+        if (android.os.Build.VERSION.SDK_INT >=
+                android.os.Build.VERSION_CODES.M) {
+            picker.setHour(hour);
+            picker.setMinute(minute);
+        } else {
+            picker.setCurrentHour(hour);
+            picker.setCurrentMinute(minute);
+        }
+
+        RealmDialog.showContent(
+                getActivity(),
+                title,
+                picker,
+                "确定",
+                "取消",
+                dialog -> {
+                    int pickedHour;
+                    int pickedMinute;
+
+                    if (android.os.Build.VERSION.SDK_INT >=
+                            android.os.Build.VERSION_CODES.M) {
+                        pickedHour = picker.getHour();
+                        pickedMinute = picker.getMinute();
+                    } else {
+                        pickedHour = picker.getCurrentHour();
+                        pickedMinute = picker.getCurrentMinute();
+                    }
+
+                    if (action != null) {
+                        action.onPicked(
+                                pickedHour,
+                                pickedMinute
+                        );
+                    }
+
+                    return true;
+                }
+        );
+    }
+
+    private int findSleepIndex(String date) {
+        for (int i = 0; i < state.sleeps.size(); i++) {
+            SleepRecord record = state.sleeps.get(i);
+
+            if (record != null
+                    && date.equals(record.date)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private boolean isSleepPassed(
+            String sleepTime,
+            String wakeTime
+    ) {
+        int sleepMinutes = timeToMinutes(sleepTime);
+        int wakeMinutes = timeToMinutes(wakeTime);
+
+        return sleepMinutes >= 0
+                && wakeMinutes >= 0
+                && sleepMinutes < 23 * 60
+                && wakeMinutes <= 8 * 60 + 30;
+    }
+
+    private String formatTime(
+            int hour,
+            int minute
+    ) {
+        return String.format(
+                Locale.getDefault(),
+                "%02d:%02d",
+                hour,
+                minute
+        );
+    }
+
+    private int[] parseTime(
+            String value,
+            int defaultHour,
+            int defaultMinute
+    ) {
+        if (value == null) {
+            return new int[]{defaultHour, defaultMinute};
+        }
+
+        try {
+            String[] parts = value.split(":");
+
+            if (parts.length < 2) {
+                return new int[]{defaultHour, defaultMinute};
+            }
+
+            int hour = Integer.parseInt(parts[0]);
+            int minute = Integer.parseInt(parts[1]);
+
+            if (hour < 0 || hour > 23
+                    || minute < 0 || minute > 59) {
+                return new int[]{defaultHour, defaultMinute};
+            }
+
+            return new int[]{hour, minute};
+        } catch (Exception ignored) {
+            return new int[]{defaultHour, defaultMinute};
+        }
+    }
+
+    private int timeToMinutes(String value) {
+        int[] result = parseTime(value, -1, -1);
+
+        if (result[0] < 0 || result[1] < 0) {
+            return -1;
+        }
+
+        return result[0] * 60 + result[1];
+    }
+
     private int findDiaryIndex(String date) {
         for (int i = 0; i < state.diaries.size(); i++) {
             DiaryRecord diary = state.diaries.get(i);
@@ -681,69 +952,13 @@ public class DiaryFragment extends BaseFragmentHelper {
         return -1;
     }
 
-    private int calculateLongestNoBreakStreak() {
-        Set<String> noBreakDates = new HashSet<>();
-
-        for (DiaryRecord diary : state.diaries) {
-            if (diary != null
-                    && !diary.broken
-                    && diary.date != null
-                    && !diary.date.isEmpty()) {
-                noBreakDates.add(diary.date);
-            }
-        }
-
-        if (noBreakDates.isEmpty()) {
-            return 0;
-        }
-
-        List<String> dates = new ArrayList<>(noBreakDates);
-        Collections.sort(dates);
-
-        SimpleDateFormat format = new SimpleDateFormat(
-                "yyyy-MM-dd",
-                Locale.getDefault()
-        );
-
-        int longest = 1;
-        int current = 1;
-
-        for (int i = 1; i < dates.size(); i++) {
-            try {
-                Date previous = format.parse(dates.get(i - 1));
-                Date now = format.parse(dates.get(i));
-
-                if (previous == null || now == null) {
-                    current = 1;
-                    continue;
-                }
-
-                Calendar expected = Calendar.getInstance();
-                expected.setTime(previous);
-                expected.add(Calendar.DAY_OF_MONTH, 1);
-
-                String expectedDate =
-                        format.format(expected.getTime());
-
-                if (expectedDate.equals(dates.get(i))) {
-                    current++;
-                } else {
-                    current = 1;
-                }
-
-                longest = Math.max(longest, current);
-
-            } catch (Exception ignored) {
-                current = 1;
-            }
-        }
-
-        return longest;
-    }
-
     private void normalizeState() {
         if (state.diaries == null) {
             state.diaries = new ArrayList<>();
+        }
+
+        if (state.sleeps == null) {
+            state.sleeps = new ArrayList<>();
         }
 
         if (state.awardedKeys == null) {
@@ -757,6 +972,10 @@ public class DiaryFragment extends BaseFragmentHelper {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    private interface TimePickAction {
+        void onPicked(int hour, int minute);
     }
 
     private static class DiaryRow {
@@ -888,15 +1107,14 @@ public class DiaryFragment extends BaseFragmentHelper {
     }
 
     private void confirmDelete(DiaryRow row) {
-        new AlertDialog.Builder(getActivity())
-                .setTitle("删除日记")
-                .setMessage("确定删除这篇日记吗？")
-                .setNegativeButton("取消", null)
-                .setPositiveButton(
-                        "删除",
-                        (dialog, which) -> deleteDiary(row)
-                )
-                .show();
+        RealmDialog.showConfirm(
+                getActivity(),
+                "删除日记",
+                "确定删除这篇日记吗？",
+                "删除",
+                "取消",
+                () -> deleteDiary(row)
+        );
     }
 
     private void deleteDiary(DiaryRow row) {

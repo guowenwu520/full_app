@@ -1,4 +1,16 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item><bitmap android:src="@drawable/bg_xian_sky" android:gravity="fill" /></item>
-    <item><shape><gradient android:startColor="#22FFFFFF" android:centerColor="#08FFFFFF" android:endColor="#55FFFFFF" android:angle="270" /></shape></item>
+    <item>
+        <bitmap
+            android:gravity="fill"
+            android:src="@drawable/bg_xian_sky" />
+    </item>
+    <item>
+        <shape>
+            <gradient
+                android:angle="270"
+                android:centerColor="@color/ui_root_overlay_center"
+                android:endColor="@color/ui_root_overlay_end"
+                android:startColor="@color/ui_root_overlay_start" />
+        </shape>
+    </item>
 </layer-list>

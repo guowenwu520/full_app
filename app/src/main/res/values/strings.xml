@@ -84,12 +84,15 @@
     <string name="empty_history">暂无记录</string>
 
     <string name="format_realm_up_message">已突破至：%1$s\n%2$s</string>
-    <string name="format_book_card">《%1$s》 %2$s\n当前页码：%3$d\n全书读后感：%4$s\n分段批注：%5$d 条</string>
+    <string name="format_book_card">《%1$s》 %2$s
+当前页码：%3$d
+全书读后感：%4$s</string>
     <string name="format_page_note">第 %1$d 页｜%2$s\n%3$s</string>
     <string name="format_exercise_record">%1$s｜%2$s｜%3$d kcal</string>
     <string name="format_weight_record">%1$s｜体重 %2$.1f kg</string>
     <string name="format_sleep_record">%1$s｜%2$s 入睡，%3$s 起床｜%4$s</string>
-    <string name="format_word_record">%1$s：%2$s\n正确：%3$d｜错误：%4$d｜最后复习：%5$s</string>
+    <string name="format_word_record">%1$s：%2$s
+录入日期：%3$s</string>
     <string name="format_diary_record">%1$s｜%2$s｜%3$s\n%4$s</string>
     <string name="format_exp_log">%1$s｜+%2$d｜%3$s</string>
     <string name="text_realm_cap">已达巅峰</string>
@@ -209,10 +212,7 @@
 当前页码：%3$d
 
 全书读后感：
-%4$s
-
-分段批注：
-%5$s</string>
+%4$s</string>
     <string name="format_exercise_detail">日期：%1$s
 锻炼内容：%2$s
 消耗卡路里：%3$d kcal</string>
@@ -224,10 +224,7 @@
 判定：%4$s</string>
     <string name="format_word_detail">单词：%1$s
 释义：%2$s
-创建日期：%3$s
-正确次数：%4$d
-错误次数：%5$d
-最后复习：%6$s</string>
+录入日期：%3$s</string>
     <string name="format_diary_detail">日期：%1$s
 标题：%2$s
 状态：%3$s

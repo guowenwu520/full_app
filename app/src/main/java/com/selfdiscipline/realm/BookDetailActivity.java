@@ -1,7 +1,6 @@
 package com.selfdiscipline.realm;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -27,6 +26,7 @@ import com.selfdiscipline.realm.model.AppState;
 import com.selfdiscipline.realm.model.Book;
 import com.selfdiscipline.realm.model.PageNote;
 import com.selfdiscipline.realm.model.ReadingHistory;
+import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.util.DateUtils;
 import com.selfdiscipline.realm.util.ViewUtils;
 
@@ -179,8 +179,8 @@ public class BookDetailActivity extends Activity {
         findViewById(R.id.buttonUpdateBookPage)
                 .setOnClickListener(v -> dialogUpdatePage());
 
-        findViewById(R.id.buttonNewPageNote)
-                .setOnClickListener(v -> dialogPageNote());
+        View pageNoteButton = findViewById(R.id.buttonNewPageNote);
+        if (pageNoteButton != null) pageNoteButton.setVisibility(View.GONE);
 
         writeReviewButton.setOnClickListener(v -> dialogFullReview());
 
@@ -239,16 +239,12 @@ public class BookDetailActivity extends Activity {
         reviewHeading.setText(
                 "第一次读《" + safe(book.title) + "》的感受"
         );
-        boolean finished = isBookFinished();
-
-        writeReviewButton.setEnabled(finished);
-        writeReviewButton.setAlpha(finished ? 1.0f : 0.45f);
+        writeReviewButton.setEnabled(true);
+        writeReviewButton.setAlpha(1.0f);
 
         reviewPreview.setText(
                 book.fullReview.isEmpty()
-                        ? (finished
-                           ? "暂无全书读后感，点击“写读后感”开始记录。"
-                           : "读完整本书后才可以写全书读后感。")
+                        ? "暂无全书读后感，点击“写读后感”开始记录。"
                         : book.fullReview
         );
 
@@ -264,23 +260,9 @@ public class BookDetailActivity extends Activity {
     }
 
     private void renderNotes() {
-        List<PageNote> source = book.pageNotes;
-        int count = showAllNotes
-                ? source.size()
-                : Math.min(PREVIEW_LIMIT, source.size());
-
-        noteAdapter.submitList(new ArrayList<>(source.subList(0, count)));
-
-        boolean empty = source.isEmpty();
-        emptyNotes.setVisibility(empty ? View.VISIBLE : View.GONE);
-        notesRecycler.setVisibility(empty ? View.GONE : View.VISIBLE);
-
-        toggleNotes.setVisibility(
-                source.size() > PREVIEW_LIMIT ? View.VISIBLE : View.INVISIBLE
-        );
-        toggleNotes.setText(
-                showAllNotes ? R.string.collapse : R.string.all_page_notes
-        );
+        if (emptyNotes != null) emptyNotes.setVisibility(View.GONE);
+        if (notesRecycler != null) notesRecycler.setVisibility(View.GONE);
+        if (toggleNotes != null) toggleNotes.setVisibility(View.GONE);
     }
 
     private void renderHistory() {
@@ -310,57 +292,49 @@ public class BookDetailActivity extends Activity {
         input.setText(String.valueOf(Math.max(0, book.currentPage)));
         input.setSelectAllOnFocus(true);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.button_update_page)
-                .setView(input)
-                .setPositiveButton(R.string.dialog_ok, null)
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .create();
+        RealmDialog.showContent(
+                this,
+                R.string.button_update_page,
+                input,
+                R.string.dialog_ok,
+                R.string.dialog_cancel,
+                dialog -> {
+                    int newPage = ViewUtils.parseInt(
+                            input.getText().toString(),
+                            -1
+                    );
 
-        dialog.setOnShowListener(ignored ->
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                        .setOnClickListener(v -> {
-                            int newPage = ViewUtils.parseInt(
-                                    input.getText().toString(),
-                                    -1
-                            );
+                    if (newPage < 0) {
+                        ViewUtils.toast(this, R.string.toast_invalid_input);
+                        return false;
+                    }
 
-                            if (newPage < 0) {
-                                ViewUtils.toast(this, R.string.toast_invalid_input);
-                                return;
-                            }
+                    if (book.totalPages <= 0 || newPage > book.totalPages) {
+                        Toast.makeText(
+                                this,
+                                R.string.invalid_book_page_range,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        return false;
+                    }
 
-                            if (book.totalPages <= 0
-                                    || newPage > book.totalPages) {
-                                Toast.makeText(
-                                        this,
-                                        R.string.invalid_book_page_range,
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                                return;
-                            }
-
-                            int oldPage = book.currentPage;
-
-                            if (newPage != oldPage) {
-                                book.currentPage = newPage;
-                                book.readingHistory.add(
-                                        0,
-                                        new ReadingHistory(
-                                                UUID.randomUUID().toString(),
-                                                nowText(),
-                                                oldPage,
-                                                newPage
-                                        )
-                                );
-                                finishReadingAction();
-                            }
-
-                            dialog.dismiss();
-                        })
+                    int oldPage = book.currentPage;
+                    if (newPage != oldPage) {
+                        book.currentPage = newPage;
+                        book.readingHistory.add(
+                                0,
+                                new ReadingHistory(
+                                        UUID.randomUUID().toString(),
+                                        nowText(),
+                                        oldPage,
+                                        newPage
+                                )
+                        );
+                        finishReadingAction();
+                    }
+                    return true;
+                }
         );
-
-        dialog.show();
     }
 
     private void dialogPageNote() {
@@ -382,81 +356,67 @@ public class BookDetailActivity extends Activity {
         box.addView(pageInput);
         box.addView(noteInput);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.button_page_note)
-                .setView(box)
-                .setPositiveButton(R.string.dialog_ok, null)
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .create();
+        RealmDialog.showContent(
+                this,
+                R.string.button_page_note,
+                box,
+                R.string.dialog_ok,
+                R.string.dialog_cancel,
+                dialog -> {
+                    int page = ViewUtils.parseInt(
+                            pageInput.getText().toString(),
+                            -1
+                    );
+                    String body = noteInput.getText().toString().trim();
 
-        dialog.setOnShowListener(ignored ->
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                        .setOnClickListener(v -> {
-                            int page = ViewUtils.parseInt(
-                                    pageInput.getText().toString(),
-                                    -1
-                            );
-                            String body = noteInput.getText().toString().trim();
+                    if (page <= 0 || body.isEmpty()) {
+                        ViewUtils.toast(this, R.string.toast_invalid_input);
+                        return false;
+                    }
 
-                            if (page <= 0 || body.isEmpty()) {
-                                ViewUtils.toast(this, R.string.toast_invalid_input);
-                                return;
-                            }
+                    if (page > book.currentPage) {
+                        Toast.makeText(
+                                this,
+                                R.string.page_note_exceeds_reading_progress,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        return false;
+                    }
 
-                            if (page > book.currentPage) {
-                                Toast.makeText(
-                                        this,
-                                        R.string.page_note_exceeds_reading_progress,
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                                return;
-                            }
-
-                            book.pageNotes.add(
-                                    0,
-                                    new PageNote(
-                                            UUID.randomUUID().toString(),
-                                            DateUtils.today(),
-                                            page,
-                                            body
-                                    )
-                            );
-                            finishReadingAction();
-                            dialog.dismiss();
-                        })
+                    book.pageNotes.add(
+                            0,
+                            new PageNote(
+                                    UUID.randomUUID().toString(),
+                                    DateUtils.today(),
+                                    page,
+                                    body
+                            )
+                    );
+                    finishReadingAction();
+                    return true;
+                }
         );
-
-        dialog.show();
     }
 
     private void dialogFullReview() {
-        if (!isBookFinished()) {
-            Toast.makeText(
-                    this,
-                    R.string.full_review_requires_finished_book,
-                    Toast.LENGTH_SHORT
-            ).show();
-            return;
-        }
-
         EditText input = new EditText(this);
         input.setMinLines(7);
         input.setGravity(48);
         input.setHint(R.string.hint_full_review);
         input.setText(book.fullReview);
 
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.button_full_review)
-                .setView(input)
-                .setPositiveButton(
-                        R.string.dialog_ok,
-                        (dialog, which) -> {
-                            book.fullReview = input.getText().toString().trim();
-                            finishReadingAction();
-                        }
-                )
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .show();
+        RealmDialog.showContent(
+                this,
+                R.string.button_full_review,
+                input,
+                R.string.dialog_ok,
+                R.string.dialog_cancel,
+                dialog -> {
+                    book.fullReview = input.getText().toString().trim();
+                    finishReadingAction();
+                    return true;
+                }
+        );
     }
 
     private void dialogEditBookInfo() {
@@ -487,50 +447,45 @@ public class BookDetailActivity extends Activity {
         box.addView(genreInput);
         box.addView(totalInput);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.edit_book_info)
-                .setView(box)
-                .setPositiveButton(R.string.dialog_ok, null)
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .create();
+        RealmDialog.showContent(
+                this,
+                R.string.edit_book_info,
+                box,
+                R.string.dialog_ok,
+                R.string.dialog_cancel,
+                dialog -> {
+                    String newTitle = titleInput.getText().toString().trim();
+                    int totalPages = ViewUtils.parseInt(
+                            totalInput.getText().toString(),
+                            0
+                    );
 
-        dialog.setOnShowListener(ignored ->
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                        .setOnClickListener(v -> {
-                            String newTitle = titleInput.getText().toString().trim();
-                            int totalPages = ViewUtils.parseInt(
-                                    totalInput.getText().toString(),
-                                    0
-                            );
+                    if (newTitle.isEmpty()
+                            || totalPages <= 0
+                            || totalPages < book.currentPage) {
+                        Toast.makeText(
+                                this,
+                                R.string.invalid_total_pages,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        return false;
+                    }
 
-                            if (newTitle.isEmpty()
-                                    || totalPages <= 0
-                                    || totalPages < book.currentPage) {
-                                Toast.makeText(
-                                        this,
-                                        R.string.invalid_total_pages,
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                                return;
-                            }
+                    book.title = newTitle;
+                    book.author = authorInput.getText().toString().trim();
+                    book.genre = genreInput.getText().toString().trim();
+                    book.totalPages = totalPages;
+                    repo.save(state);
+                    render();
 
-                            book.title = newTitle;
-                            book.author = authorInput.getText().toString().trim();
-                            book.genre = genreInput.getText().toString().trim();
-                            book.totalPages = totalPages;
-                            repo.save(state);
-                            render();
-                            dialog.dismiss();
-
-                            Toast.makeText(
-                                    this,
-                                    R.string.book_info_saved,
-                                    Toast.LENGTH_SHORT
-                            ).show();
-                        })
+                    Toast.makeText(
+                            this,
+                            R.string.book_info_saved,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                    return true;
+                }
         );
-
-        dialog.show();
     }
 
     private boolean isBookFinished() {
@@ -539,23 +494,19 @@ public class BookDetailActivity extends Activity {
     }
 
     private void showFullReview() {
-        new AlertDialog.Builder(this)
-                .setTitle(reviewHeading.getText())
-                .setMessage(
-                        book.fullReview.isEmpty()
-                                ? "暂无全书读后感"
-                                : book.fullReview
-                )
-                .setPositiveButton(R.string.dialog_ok, null)
-                .show();
+        RealmDialog.showInfo(
+                this,
+                reviewHeading.getText(),
+                book.fullReview.isEmpty() ? "暂无全书读后感" : book.fullReview
+        );
     }
 
     private void showNote(PageNote note) {
-        new AlertDialog.Builder(this)
-                .setTitle("P" + note.page + " · " + safe(note.date))
-                .setMessage(safe(note.content))
-                .setPositiveButton(R.string.dialog_ok, null)
-                .show();
+        RealmDialog.showInfo(
+                this,
+                "P" + note.page + " · " + safe(note.date),
+                safe(note.content)
+        );
     }
 
     private void finishReadingAction() {
@@ -588,10 +539,6 @@ public class BookDetailActivity extends Activity {
     private String getLastUpdatedText() {
         if (!book.readingHistory.isEmpty()) {
             return safe(book.readingHistory.get(0).dateTime);
-        }
-
-        if (!book.pageNotes.isEmpty()) {
-            return safe(book.pageNotes.get(0).date);
         }
 
         return "暂无记录";

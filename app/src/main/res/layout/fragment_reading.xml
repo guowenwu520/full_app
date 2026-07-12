@@ -262,45 +262,11 @@
                         android:layout_height="42dp"
                         android:layout_marginTop="14dp"
                         android:background="@drawable/bg_button_primary"
-                        android:drawableStart="@drawable/ic_note_small"
-                        android:drawablePadding="7dp"
                         android:gravity="center"
                         android:text="@string/continue_record_pages"
                         android:textColor="@color/color_text_on_primary"
                         android:textSize="13sp"
                         android:textStyle="bold" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/buttonBookReflection"
-                            android:layout_width="0dp"
-                            android:layout_height="34dp"
-                            android:layout_weight="1"
-                            android:drawableStart="@drawable/ic_note_small"
-                            android:drawablePadding="6dp"
-                            android:gravity="center"
-                            android:text="@string/book_reflection"
-                            android:textColor="@color/color_text_sub"
-                            android:textSize="11sp" />
-
-                        <TextView
-                            android:id="@+id/buttonPageNotes"
-                            android:layout_width="0dp"
-                            android:layout_height="34dp"
-                            android:layout_weight="1"
-                            android:drawableStart="@drawable/ic_page_note_small"
-                            android:drawablePadding="6dp"
-                            android:gravity="center"
-                            android:text="@string/page_notes"
-                            android:textColor="@color/color_text_sub"
-                            android:textSize="11sp" />
-                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -356,8 +322,9 @@
                 android:scrollbars="none" />
         </LinearLayout>
 
-        <!-- 最近笔记 -->
+        <!-- 最近笔记：分页批注已简化下线，保留隐藏容器兼容旧数据。 -->
         <LinearLayout
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"

@@ -17,7 +17,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_nav_home_inactive" />
+            android:src="@drawable/ic_nav_home" />
 
         <TextView
             android:id="@+id/nav_overview_text"
@@ -42,7 +42,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_nav_reading_inactive" />
+            android:src="@drawable/ic_nav_reading" />
 
         <TextView
             android:id="@+id/nav_reading_text"
@@ -66,7 +66,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_nav_exercise_word_inactive" />
+            android:src="@drawable/ic_nav_exercise_word" />
 
         <TextView
             android:id="@+id/nav_study_text"
@@ -91,7 +91,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_nav_diary_inactive" />
+            android:src="@drawable/ic_nav_diary" />
 
         <TextView
             android:id="@+id/nav_diary_text"
@@ -115,7 +115,7 @@
             android:layout_width="35dp"
             android:layout_gravity="center_horizontal"
             android:layout_height="35dp"
-            android:src="@drawable/ic_nav_medal_realm_inactive" />
+            android:src="@drawable/ic_nav_medal_realm" />
 
         <TextView
             android:id="@+id/nav_badges_text"
