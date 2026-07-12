@@ -14,11 +14,10 @@
         android:paddingRight="8dp"
         android:paddingBottom="20dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_profile_meditation"
-            android:drawablePadding="8dp"
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_profile_meditation"
             android:gravity="center_vertical"
             android:text="@string/app_name"
             android:textColor="@color/color_text_main"
@@ -26,6 +25,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvGreetingTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="28dp"
@@ -36,11 +36,13 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvGreetingSubtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
+            android:textStyle="bold"
             android:text="@string/greeting_subtitle"
-            android:textColor="@color/color_text_sub"
+            android:textColor="@color/color_text_people_sub"
             android:textSize="13sp" />
 
         <include

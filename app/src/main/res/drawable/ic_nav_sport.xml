@@ -1,10 +1,41 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="28dp"
-    android:height="28dp"
-    android:viewportWidth="48"
-    android:viewportHeight="48">
-    <path android:fillColor="#FFFFFFFF" android:pathData="M34,9A5,5 0,1 1,33.99,9Z" />
-    <path android:fillColor="#FFFFFFFF" android:pathData="M25,18L33,15L38,21L35,24L31,20L27,22L31,28L39,31L38,36L28,33L22,27L18,34L13,32L18,22Q20,19 25,18Z" />
-    <path android:fillColor="#FFFFFFFF" android:pathData="M9,18L18,18L18,22L9,22Z" />
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M13,4.5 A1.6,1.6 0,1 0,13.1 4.5" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M10,21 L12,16 L9,13 L6,15" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M12,16 L16,19" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M9,13 L11,8 L15,9 L17,12" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M11,8 L8,9" />
 </vector>

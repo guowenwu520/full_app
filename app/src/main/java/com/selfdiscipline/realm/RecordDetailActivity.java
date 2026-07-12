@@ -337,11 +337,11 @@ public class RecordDetailActivity extends Activity {
     }
 
     private int badgeIcon(int rankRes) {
-        if (rankRes == R.string.rank_silver) return R.drawable.ic_badge_silver;
-        if (rankRes == R.string.rank_gold) return R.drawable.ic_badge_gold;
-        if (rankRes == R.string.rank_platinum) return R.drawable.ic_badge_platinum;
-        if (rankRes == R.string.rank_diamond) return R.drawable.ic_badge_diamond;
-        return R.drawable.ic_badge_bronze;
+        if (rankRes == R.string.rank_gold) return R.drawable.medal_tier_gold;
+        if (rankRes == R.string.rank_platinum) return R.drawable.medal_tier_platinum;
+        if (rankRes == R.string.rank_diamond) return R.drawable.medal_tier_diamond;
+        if (rankRes == R.string.rank_king) return R.drawable.medal_tier_king;
+        return R.drawable.medal_tier_silver;
     }
 
     private boolean valid(int index, List<?> list) {

@@ -27,23 +27,11 @@
         android:includeFontPadding="false"
         android:text="@string/today_available_exp"
         android:textColor="@color/checkin_text_primary"
-        android:textSize="14sp"
+        android:textSize="13sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/ivExpInfo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 说明按钮 -->
-    <ImageView
-        android:id="@+id/ivExpInfo"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:contentDescription="@string/exp_rule_description"
-        android:padding="2dp"
-        android:src="@drawable/ic_exp_info"
-        app:layout_constraintBottom_toBottomOf="@id/tvTodayExpTitle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvTodayExpTitle" />
 
     <!-- 阅读 -->
     <ImageView

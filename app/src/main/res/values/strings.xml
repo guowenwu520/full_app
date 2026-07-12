@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">自律修炼</string>
+    <string name="app_name">修炼尘世间</string>
     <string name="nav_reading">阅读</string>
     <string name="nav_study">运动单词</string>
     <string name="nav_diary">日记自律</string>
@@ -145,19 +145,20 @@
     <string name="desc_soul_early">解锁铂金勋章，长期无破戒记录，生活高度规律</string>
     <string name="desc_soul_mid">体重曲线持续向好，阅读、运动、学习全面丰收</string>
     <string name="desc_soul_late">全年连续自律天数时常破百，内心极度自律平和</string>
-    <string name="desc_soul_peak">仅差少量钻石勋章，自我管理近乎完美</string>
-    <string name="desc_spirit_early">解锁首枚钻石勋章，多维度长期坚持无断层</string>
+    <string name="desc_soul_peak">仅差少量王者勋章，自我管理近乎完美</string>
+    <string name="desc_spirit_early">解锁首枚王者勋章，多维度长期坚持无断层</string>
     <string name="desc_spirit_mid">集齐绝大多数勋章，数年稳定自律，彻底摆脱拖延</string>
     <string name="desc_spirit_late">所有自律习惯完全刻入生活，无需刻意约束自己</string>
     <string name="desc_spirit_peak">自律大道圆满，知行合一，自我提升达到极致</string>
 
 
-    <string name="rank_bronze">青铜</string>
+    <string name="rank_bronze">白银</string>
     <string name="rank_silver">白银</string>
     <string name="rank_gold">黄金</string>
     <string name="rank_platinum">铂金</string>
     <string name="rank_diamond">钻石</string>
-    <string name="badge_self_bronze">青铜自律者</string>
+    <string name="rank_king">王者</string>
+    <string name="badge_self_bronze">白银自律者</string>
     <string name="badge_self_silver">白银自律者</string>
     <string name="badge_self_gold">黄金自律者</string>
     <string name="badge_self_platinum">铂金自律者</string>
@@ -182,6 +183,31 @@
     <string name="badge_word_gold">两百词突破</string>
     <string name="badge_word_platinum">五百词长城</string>
     <string name="badge_word_diamond">千词藏书</string>
+    <string name="badge_self_tier_silver">白银自律者</string>
+    <string name="badge_self_tier_gold">黄金自律者</string>
+    <string name="badge_self_tier_platinum">铂金自律者</string>
+    <string name="badge_self_tier_diamond">钻石自律者</string>
+    <string name="badge_self_tier_king">王者自律者</string>
+    <string name="badge_weight_tier_silver">白银塑身者</string>
+    <string name="badge_weight_tier_gold">黄金塑身者</string>
+    <string name="badge_weight_tier_platinum">铂金塑身者</string>
+    <string name="badge_weight_tier_diamond">钻石塑身者</string>
+    <string name="badge_weight_tier_king">王者塑身者</string>
+    <string name="badge_cal_tier_silver">白银燃脂者</string>
+    <string name="badge_cal_tier_gold">黄金燃脂者</string>
+    <string name="badge_cal_tier_platinum">铂金燃脂者</string>
+    <string name="badge_cal_tier_diamond">钻石燃脂者</string>
+    <string name="badge_cal_tier_king">王者燃脂者</string>
+    <string name="badge_nobreak_tier_silver">白银守戒者</string>
+    <string name="badge_nobreak_tier_gold">黄金守戒者</string>
+    <string name="badge_nobreak_tier_platinum">铂金守戒者</string>
+    <string name="badge_nobreak_tier_diamond">钻石守戒者</string>
+    <string name="badge_nobreak_tier_king">王者守戒者</string>
+    <string name="badge_word_tier_silver">白银词汇者</string>
+    <string name="badge_word_tier_gold">黄金词汇者</string>
+    <string name="badge_word_tier_platinum">铂金词汇者</string>
+    <string name="badge_word_tier_diamond">钻石词汇者</string>
+    <string name="badge_word_tier_king">王者词汇者</string>
 
     <string name="badge_desc_self">连续完成全模块自律打卡达到目标天数</string>
     <string name="badge_desc_weight">体重相对历史最高记录下降达到目标</string>
@@ -273,8 +299,75 @@
 
     <string name="nav_overview_ref">首页</string>
     <string name="greeting_title">道友，早上好！</string>
-    <string name="greeting_subtitle">每一次自律，都是在塑造更强大的自己。</string>
+    <string name="greeting_subtitle">千里之行，始于足下。——老子</string>
 
 
     <string name="title_all_history_ref">全部历史</string>
+
+    <string name="realm_void_early">炼虚初期</string>
+    <string name="realm_void_mid">炼虚中期</string>
+    <string name="realm_void_late">炼虚后期</string>
+    <string name="realm_void_peak">炼虚巅峰</string>
+    <string name="realm_unity_early">合体初期</string>
+    <string name="realm_unity_mid">合体中期</string>
+    <string name="realm_unity_late">合体后期</string>
+    <string name="realm_unity_peak">合体巅峰</string>
+    <string name="realm_ascension_early">大乘初期</string>
+    <string name="realm_ascension_mid">大乘中期</string>
+    <string name="realm_ascension_late">大乘后期</string>
+    <string name="realm_ascension_peak">大乘巅峰</string>
+    <string name="realm_true_immortal_early">真仙初期</string>
+    <string name="realm_true_immortal_mid">真仙中期</string>
+    <string name="realm_true_immortal_late">真仙后期</string>
+    <string name="realm_true_immortal_peak">真仙巅峰</string>
+    <string name="realm_golden_immortal_early">金仙初期</string>
+    <string name="realm_golden_immortal_mid">金仙中期</string>
+    <string name="realm_golden_immortal_late">金仙后期</string>
+    <string name="realm_golden_immortal_peak">金仙巅峰</string>
+    <string name="realm_taiyi_early">太乙初期</string>
+    <string name="realm_taiyi_mid">太乙中期</string>
+    <string name="realm_taiyi_late">太乙后期</string>
+    <string name="realm_taiyi_peak">太乙巅峰</string>
+    <string name="realm_daluo_early">大罗初期</string>
+    <string name="realm_daluo_mid">大罗中期</string>
+    <string name="realm_daluo_late">大罗后期</string>
+    <string name="realm_daluo_peak">大罗巅峰</string>
+    <string name="realm_daozu_early">道祖初期</string>
+    <string name="realm_daozu_mid">道祖中期</string>
+    <string name="realm_daozu_late">道祖后期</string>
+    <string name="realm_daozu_peak">道祖圆满</string>
+
+    <string name="desc_void_early">开始由外在自律转向内在沉淀，能主动优化自己的节奏与边界。</string>
+    <string name="desc_void_mid">能够长期稳定执行计划，自律不再依赖临时激情。</string>
+    <string name="desc_void_late">面对忙碌与波动仍能守住核心习惯，开始形成深层定力。</string>
+    <string name="desc_void_peak">进入高阶稳定期，生活秩序与个人目标高度一致。</string>
+    <string name="desc_unity_early">学习、运动、作息与情绪管理逐渐统一，自律体系成型。</string>
+    <string name="desc_unity_mid">你能在多目标之间保持平衡，执行力与恢复力同步提升。</string>
+    <string name="desc_unity_late">高频稳定输出成为常态，外界干扰已难以撼动节奏。</string>
+    <string name="desc_unity_peak">知行渐趋合一，自律从任务完成走向自我整合。</string>
+    <string name="desc_ascension_early">持续突破舒适区，愿意主动挑战更高标准的自己。</string>
+    <string name="desc_ascension_mid">高质量习惯形成闭环，自我驱动与长期主义愈发稳固。</string>
+    <string name="desc_ascension_late">即使长周期目标也能稳步推进，自律已具备复利效应。</string>
+    <string name="desc_ascension_peak">你开始以更高视角审视成长，自律真正成为跃迁之力。</string>
+    <string name="desc_true_immortal_early">进入真仙之境，自我要求稳定而清晰，少有反复与松懈。</string>
+    <string name="desc_true_immortal_mid">各项习惯高度协同，长期进步肉眼可见，内心更加从容。</string>
+    <string name="desc_true_immortal_late">你已拥有强大的自我校准能力，可以持续修正与精进。</string>
+    <string name="desc_true_immortal_peak">稳定、专注、克制与执行力兼备，成长进入成熟阶段。</string>
+    <string name="desc_golden_immortal_early">金仙之始，自律体系足够坚固，能承载更宏大的目标。</string>
+    <string name="desc_golden_immortal_mid">长期管理能力显著提升，生活与成长进入高效运转状态。</string>
+    <string name="desc_golden_immortal_late">你能在复杂事务中保持秩序，目标推进依然清晰稳定。</string>
+    <string name="desc_golden_immortal_peak">金仙巅峰，执行与反思俱佳，自我成长进入高阶复利期。</string>
+    <string name="desc_taiyi_early">太乙之境意味着你已具备极强的长期稳定性与掌控力。</string>
+    <string name="desc_taiyi_mid">内在驱动力持续充沛，几乎任何目标都能被拆解并落实。</string>
+    <string name="desc_taiyi_late">你对节奏、精力和注意力的管理已十分精妙，少有浪费。</string>
+    <string name="desc_taiyi_peak">太乙巅峰，自律达到极深层次，行动效率与质量兼具。</string>
+    <string name="desc_daluo_early">大罗初成，你已能从更高维度统筹自己的修炼与生活。</string>
+    <string name="desc_daluo_mid">面对长期高压与复杂环境，依旧能够守住方向与节奏。</string>
+    <string name="desc_daluo_late">自律已经成为本能，你的成长系统几乎无须外力维持。</string>
+    <string name="desc_daluo_peak">大罗巅峰，习惯、意志与认知全面成熟，境界极高。</string>
+    <string name="desc_daozu_early">道祖之路开启，你已把自律修炼融入日常的一切选择。</string>
+    <string name="desc_daozu_mid">你的自我约束与长期执行几近完美，始终朝目标稳进。</string>
+    <string name="desc_daozu_late">在任何环境中都能保持清醒、克制与精进，难以动摇。</string>
+    <string name="desc_daozu_peak">道祖圆满：知行合一，自律成道，身心秩序臻于完满。</string>
+
 </resources>

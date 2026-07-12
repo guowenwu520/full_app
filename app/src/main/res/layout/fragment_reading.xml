@@ -67,8 +67,8 @@
                 android:src="@drawable/ic_reading_calendar_small" />
 
             <ImageView
-                android:layout_width="38dp"
-                android:layout_height="38dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_marginStart="16dp"
                 android:contentDescription="@string/current_realm"
                 android:src="@drawable/ic_profile_meditation" />
@@ -160,14 +160,6 @@
                     android:textColor="@color/color_text_main"
                     android:textSize="14sp"
                     android:textStyle="bold" />
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end|center_vertical"
-                    android:alpha="0.8"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_exp_all_complete" />
             </FrameLayout>
 
             <LinearLayout

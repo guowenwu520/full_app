@@ -38,6 +38,27 @@ import java.util.List;
 import java.util.Locale;
 
 public class RecordListActivity extends Activity {
+
+    private static final int[] REALM_ICON_THRESHOLDS = {
+            0, 3501, 15001, 40001, 82001, 130001, 228001, 374001,
+            568001, 810001, 1100001, 1438001, 1824001
+    };
+
+    private static final int[] REALM_ICON_RES = {
+            R.drawable.realm_stage_lianqi,
+            R.drawable.realm_stage_zhuji,
+            R.drawable.realm_stage_jindan,
+            R.drawable.realm_stage_yuanying,
+            R.drawable.realm_stage_huashen,
+            R.drawable.realm_stage_lianxu,
+            R.drawable.realm_stage_heti,
+            R.drawable.realm_stage_dacheng,
+            R.drawable.realm_stage_zhenxian,
+            R.drawable.realm_stage_jinxian,
+            R.drawable.realm_stage_taiyi,
+            R.drawable.realm_stage_daluo,
+            R.drawable.realm_stage_daozu
+    };
     private AppRepository repository;
     private AppState state;
     private String currentType;
@@ -151,11 +172,13 @@ public class RecordListActivity extends Activity {
     }
 
     private int realmIconByXp(int xp) {
-        if (xp >= 82001) return R.drawable.ic_realm_stage_spirit;
-        if (xp >= 40001) return R.drawable.ic_realm_stage_nascent;
-        if (xp >= 15001) return R.drawable.ic_realm_stage_golden;
-        if (xp >= 3501) return R.drawable.ic_realm_stage_foundation;
-        return R.drawable.ic_realm_stage_qi;
+        int index = 0;
+        for (int i = 0; i < REALM_ICON_THRESHOLDS.length; i++) {
+            if (xp >= REALM_ICON_THRESHOLDS[i]) {
+                index = i;
+            }
+        }
+        return REALM_ICON_RES[index];
     }
 
     private String formatInteger(int value) {

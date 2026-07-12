@@ -1,5 +1,27 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
-    <path android:fillColor="@color/color_realm_spirit" android:pathData="M12,3 L20,8 V16 L12,21 L4,16 V8 Z" />
-    <path android:fillColor="@color/color_accent" android:pathData="M12,6 L17,9 V15 L12,18 L7,15 V9 Z" />
-    <path android:fillColor="@color/color_surface" android:pathData="M9,10 H11 L12,12 L13,10 H15 L13,13 L15,16 H13 L12,14 L11,16 H9 L11,13 Z" />
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M12,3 L13.8,8.2 L19,10 L13.8,11.8 L12,17 L10.2,11.8 L5,10 L10.2,8.2 Z" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M19,15 L20,18 L23,19 L20,20 L19,23 L18,20 L15,19 L18,18 Z" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M4,14 L4.8,16.2 L7,17 L4.8,17.8 L4,20 L3.2,17.8 L1,17 L3.2,16.2 Z" />
 </vector>

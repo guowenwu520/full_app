@@ -1,6 +1,8 @@
 package com.selfdiscipline.realm.fragments;
 
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -52,6 +54,48 @@ import java.util.Set;
 public class AchievementRealmFragment extends BaseFragmentHelper {
 
     private static final int EXP_PREVIEW_LIMIT = 6;
+    private static final String[] REALM_STAGE_NAMES = {
+            "练气", "筑基", "金丹", "元婴", "化神",
+            "炼虚", "合体", "大乘", "真仙境", "金仙境", "太乙境", "大罗境", "道祖境"
+    };
+
+    private static final String[] REALM_STAGE_DESCRIPTIONS = {
+            "练气境：新手自律入门，逐步建立每日习惯。",
+            "筑基境：稳定自律阶段，多项习惯长期坚持。",
+            "金丹境：深度自我提升，自律逐渐成为本能。",
+            "元婴境：自律内化于心，生活高度规律。",
+            "化神境：自律大成，知行合一。",
+            "炼虚境：开始由外在约束走向内在沉淀，节奏更加稳定。",
+            "合体境：学习、运动、作息与情绪管理逐步统一。",
+            "大乘境：长期主义成熟，持续突破舒适区。",
+            "真仙境：高阶稳定输出，自律体系高度协同。",
+            "金仙境：长期管理能力显著提升，目标推进清晰稳定。",
+            "太乙境：极强的长期稳定性与掌控力，行动质量兼具。",
+            "大罗境：从更高维度统筹修炼与生活，自我系统成熟。",
+            "道祖境：知行合一，自律成道，身心秩序臻于完满。"
+    };
+
+    private static final int[] REALM_STAGE_ICONS = {
+            R.drawable.realm_stage_lianqi,
+            R.drawable.realm_stage_zhuji,
+            R.drawable.realm_stage_jindan,
+            R.drawable.realm_stage_yuanying,
+            R.drawable.realm_stage_huashen,
+            R.drawable.realm_stage_lianxu,
+            R.drawable.realm_stage_heti,
+            R.drawable.realm_stage_dacheng,
+            R.drawable.realm_stage_zhenxian,
+            R.drawable.realm_stage_jinxian,
+            R.drawable.realm_stage_taiyi,
+            R.drawable.realm_stage_daluo,
+            R.drawable.realm_stage_daozu
+    };
+
+    private static final int[] REALM_STAGE_MIN_XP = {
+            0, 3501, 15001, 40001, 82001, 130001, 228001, 374001,
+            568001, 810001, 1100001, 1438001, 1824001
+    };
+
 
     // 五个勋章品类。
     private static final String[] CATEGORY_KEYS = {
@@ -62,20 +106,27 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
             "连续自律", "减脂体重", "卡路里累计", "连续不破戒", "累计背单词"
     };
 
-    // 青铜、白银、黄金、铂金、钻石。
+    /*
+     * 旧版本持久化键继续保留，确保已有用户的解锁记录不失效。
+     * 显示等级已升级为：白银、黄金、铂金、钻石、王者。
+     */
     private static final String[] TIER_KEYS = {
             "bronze", "silver", "gold", "platinum", "diamond"
     };
 
     private static final String[] TIER_NAMES = {
-            "青铜", "白银", "黄金", "铂金", "钻石"
+            "白银", "黄金", "铂金", "钻石", "王者"
+    };
+
+    private static final String[] BADGE_TYPE_KEYS = {
+            "self", "weight", "calorie", "nobreak", "word"
     };
 
     /*
      * 若原项目已有固定门槛，只需替换此数组。
      *
      * 行：五个品类。
-     * 列：青铜、白银、黄金、铂金、钻石。
+     * 列：白银、黄金、铂金、钻石、王者。
      */
     private static final double[][] THRESHOLDS = {
             {7, 30, 100, 180, 365},              // 连续自律：天
@@ -253,7 +304,7 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
         realmName.setText(realm.nameRes);
         totalXp.setText(formatNumber(xp));
         realmEmblem.setImageResource(realmIcon(major));
-        realmDescription.setText(descriptionForXp(xp));
+        realmDescription.setText(realm.descRes);
 
         if (realm.isCap()) {
             remainingXp.setText("已圆满");
@@ -284,20 +335,14 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
         int currentMajor = majorRealmIndex(xp);
         List<RealmStageItem> items = new ArrayList<>();
 
-        String[] names = {
-                "练气", "筑基", "金丹", "元婴", "化神"
-        };
-
-        for (int i = 0; i < names.length; i++) {
-            items.add(
-                    new RealmStageItem(
-                            names[i],
-                            realmIcon(i),
-                            i,
-                            i <= currentMajor,
-                            i == currentMajor
-                    )
-            );
+        for (int i = 0; i < REALM_STAGE_NAMES.length; i++) {
+            items.add(new RealmStageItem(
+                    REALM_STAGE_NAMES[i],
+                    realmIcon(i),
+                    i,
+                    i <= currentMajor,
+                    i == currentMajor
+            ));
         }
 
         realmAdapter.submitList(items);
@@ -317,7 +362,7 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
 
         /*
          * 先按等级，再按品类添加：
-         * 第一行五枚青铜，第二行五枚白银……
+         * 第一行五枚白银，第二行五枚黄金……
          * 视觉上形成五个纵向品类。
          */
         for (int tier = 0; tier < TIER_KEYS.length; tier++) {
@@ -365,6 +410,12 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
         String tierKey = TIER_KEYS[tier];
         String categoryName = CATEGORY_NAMES[category];
         String tierName = TIER_NAMES[tier];
+        String badgeId = BADGE_TYPE_KEYS[category] + "_" + tier;
+
+        // RewardEngine 实际保存的是 type_index，优先读取永久解锁记录。
+        if (state.isBadgeUnlocked(badgeId)) {
+            return true;
+        }
 
         if (state.awardedKeys != null) {
             for (String key : state.awardedKeys) {
@@ -373,6 +424,10 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
                 }
 
                 String lower = key.toLowerCase(Locale.US);
+
+                if (("badge_" + badgeId).equals(lower)) {
+                    return true;
+                }
 
                 boolean categoryMatched =
                         lower.contains(categoryKey)
@@ -431,70 +486,23 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
     }
 
     private int majorRealmIndex(int xp) {
-        if (xp <= 3500) return 0;
-        if (xp <= 15000) return 1;
-        if (xp <= 40000) return 2;
-        if (xp <= 82000) return 3;
-        return 4;
+        int index = 0;
+        for (int i = 0; i < REALM_STAGE_MIN_XP.length; i++) {
+            if (xp >= REALM_STAGE_MIN_XP[i]) {
+                index = i;
+            }
+        }
+        return index;
     }
 
     private int realmIcon(int index) {
-        switch (index) {
-            case 0:
-                return R.drawable.ic_realm_stage_qi;
-            case 1:
-                return R.drawable.ic_realm_stage_foundation;
-            case 2:
-                return R.drawable.ic_realm_stage_golden;
-            case 3:
-                return R.drawable.ic_realm_stage_nascent;
-            default:
-                return R.drawable.ic_realm_stage_spirit;
+        if (index < 0) {
+            return REALM_STAGE_ICONS[0];
         }
-    }
-
-    private String descriptionForXp(int xp) {
-        if (xp <= 500) {
-            return "初入自律之路，偶尔懈怠，正在养成基础打卡习惯";
-        } else if (xp <= 1200) {
-            return "逐步固定每日任务，偶尔断签，但已有向上之心";
-        } else if (xp <= 2200) {
-            return "能稳定完成多项日常自律，自控力小幅提升";
-        } else if (xp <= 3500) {
-            return "极少破戒，作息、阅读基本稳定，初具恒心";
-        } else if (xp <= 5500) {
-            return "多数日子完成多模块打卡，连续自律天数稳步上涨";
-        } else if (xp <= 8000) {
-            return "体重、阅读、背词长期坚持，收获第一批白银勋章";
-        } else if (xp <= 11000) {
-            return "极少中断自律，自控力显著提升，很少破戒";
-        } else if (xp <= 15000) {
-            return "作息常年达标，运动阅读逐渐形成肌肉记忆";
-        } else if (xp <= 20000) {
-            return "解锁多类黄金勋章，长期保持多维度连续打卡";
-        } else if (xp <= 26000) {
-            return "体重稳步改善、阅读量持续积累，单词储备丰厚";
-        } else if (xp <= 33000) {
-            return "全年极少断签，自律成为日常本能";
-        } else if (xp <= 40000) {
-            return "集齐大半品类勋章，意志力远超常人";
-        } else if (xp <= 49000) {
-            return "解锁铂金勋章，长期无破戒记录，生活高度规律";
-        } else if (xp <= 59000) {
-            return "阅读、运动与学习全面丰收，自律内化于心";
-        } else if (xp <= 70000) {
-            return "全年连续自律天数时常破百，内心自律平和";
-        } else if (xp <= 82000) {
-            return "仅差少量钻石勋章，自我管理近乎完美";
-        } else if (xp <= 95000) {
-            return "解锁首枚钻石勋章，多维度长期坚持无断层";
-        } else if (xp <= 110000) {
-            return "集齐绝大多数勋章，数年稳定自律，彻底摆脱拖延";
-        } else if (xp <= 130000) {
-            return "所有自律习惯完全刻入生活，无需刻意约束自己";
+        if (index >= REALM_STAGE_ICONS.length) {
+            return REALM_STAGE_ICONS[REALM_STAGE_ICONS.length - 1];
         }
-
-        return "自律大道圆满，知行合一，自我提升达到极致";
+        return REALM_STAGE_ICONS[index];
     }
 
     private int medalIcon(int category, int tier) {
@@ -832,18 +840,11 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
     }
 
     private void showRealmDetail(RealmStageItem item) {
-        String[] descriptions = {
-                "练气境：新手自律入门，逐步建立每日习惯。",
-                "筑基境：稳定自律阶段，多项习惯长期坚持。",
-                "金丹境：深度自我提升，自律逐渐成为本能。",
-                "元婴境：自律内化于心，生活高度规律。",
-                "化神境：自律大成，知行合一。"
-        };
-
+        String description = REALM_STAGE_DESCRIPTIONS[item.index];
         RealmDialog.showInfo(
                 getActivity(),
                 item.name,
-                descriptions[item.index]
+                description
         );
     }
 
@@ -1105,11 +1106,12 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
                 holder.icon.setAlpha(1.0f);
                 holder.lock.setVisibility(View.GONE);
             } else {
+                ColorMatrix grayscale = new ColorMatrix();
+                grayscale.setSaturation(0.0f);
                 holder.icon.setColorFilter(
-                        Color.rgb(127, 143, 153),
-                        PorterDuff.Mode.SRC_IN
+                        new ColorMatrixColorFilter(grayscale)
                 );
-                holder.icon.setAlpha(0.40f);
+                holder.icon.setAlpha(0.46f);
                 holder.lock.setVisibility(View.VISIBLE);
             }
 

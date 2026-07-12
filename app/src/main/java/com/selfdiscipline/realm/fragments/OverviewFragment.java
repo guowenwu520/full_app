@@ -2,6 +2,7 @@ package com.selfdiscipline.realm.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.json.JSONObject;
 
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,14 +33,21 @@ import com.selfdiscipline.realm.adapter.RecentActivityAdapter;
 import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.util.DateUtils;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 首页总览。
@@ -52,9 +62,45 @@ import java.util.Locale;
  */
 public class OverviewFragment extends BaseFragmentHelper {
 
+    private static final int[] REALM_ICON_THRESHOLDS = {
+            0, 3501, 15001, 40001, 82001, 130001, 228001, 374001,
+            568001, 810001, 1100001, 1438001, 1824001
+    };
+
+    private static final int[] REALM_ICON_RES = {
+            R.drawable.realm_stage_lianqi,
+            R.drawable.realm_stage_zhuji,
+            R.drawable.realm_stage_jindan,
+            R.drawable.realm_stage_yuanying,
+            R.drawable.realm_stage_huashen,
+            R.drawable.realm_stage_lianxu,
+            R.drawable.realm_stage_heti,
+            R.drawable.realm_stage_dacheng,
+            R.drawable.realm_stage_zhenxian,
+            R.drawable.realm_stage_jinxian,
+            R.drawable.realm_stage_taiyi,
+            R.drawable.realm_stage_daluo,
+            R.drawable.realm_stage_daozu
+    };
+
     private static final int REQ_EXPORT_BACKUP = 501;
     private static final int REQ_IMPORT_BACKUP = 502;
     private static final int RECENT_ACTIVITY_LIMIT = 3;
+    private static final String QUOTE_PREF = "daily_quote_cache";
+    private static final String QUOTE_DATE_KEY = "quote_date";
+    private static final String QUOTE_TEXT_KEY = "quote_text";
+    private static final String QUOTE_AUTHOR_KEY = "quote_author";
+    private static final String QUOTE_API = "https://v1.hitokoto.cn/?encode=json&max_length=26";
+
+    private static final String[] FALLBACK_QUOTES = {
+            "千里之行，始于足下。——老子",
+            "真正的才智是刚毅的志向。——拿破仑",
+            "天才是百分之一的灵感加百分之九十九的汗水。——爱迪生",
+            "志不立，天下无可成之事。——王阳明",
+            "不要等待时机，而要创造时机。——萧伯纳",
+            "业精于勤，荒于嬉。——韩愈",
+            "吾生也有涯，而知也无涯。——庄子"
+    };
 
     private AppRepository repo;
     private AppState state;
@@ -65,6 +111,10 @@ public class OverviewFragment extends BaseFragmentHelper {
     private TextView realmTotalExp;
     private TextView realmPercent;
     private ProgressBar realmProgress;
+    private ImageView realmBadge;
+    private TextView greetingTitle;
+    private TextView greetingSubtitle;
+    private final ExecutorService quoteExecutor = Executors.newSingleThreadExecutor();
 
     // 今日打卡
     private TextView checkinCount;
@@ -130,6 +180,9 @@ public class OverviewFragment extends BaseFragmentHelper {
         realmTotalExp = root.findViewById(R.id.tvTotalExp);
         realmPercent = root.findViewById(R.id.tvRealmPercent);
         realmProgress = root.findViewById(R.id.progressRealm);
+        realmBadge = root.findViewById(R.id.ivRealmBadge);
+        greetingTitle = root.findViewById(R.id.tvGreetingTitle);
+        greetingSubtitle = root.findViewById(R.id.tvGreetingSubtitle);
 
         // 今日打卡卡片
         checkinCount = root.findViewById(R.id.tvCheckinCount);
@@ -219,11 +272,144 @@ public class OverviewFragment extends BaseFragmentHelper {
             return;
         }
 
+        renderGreetingSection();
         renderRealm();
         renderTodayCheckin();
         renderTodayExperience();
         renderCoreStats();
         renderRecentActivity();
+    }
+
+    private void renderGreetingSection() {
+        greetingTitle.setText(buildGreetingTitle());
+        renderDailyQuote();
+    }
+
+    private String buildGreetingTitle() {
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        String timeWord;
+        if (hour < 5) {
+            timeWord = "夜深了";
+        } else if (hour < 9) {
+            timeWord = "早上好";
+        } else if (hour < 12) {
+            timeWord = "上午好";
+        } else if (hour < 14) {
+            timeWord = "中午好";
+        } else if (hour < 18) {
+            timeWord = "下午好";
+        } else if (hour < 22) {
+            timeWord = "晚上好";
+        } else {
+            timeWord = "夜深了";
+        }
+        return "道友，" + timeWord + "！";
+    }
+
+    private void renderDailyQuote() {
+        greetingSubtitle.setText(cachedQuoteOrFallback());
+
+        final Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+
+        final SharedPreferences sp = activity.getSharedPreferences(QUOTE_PREF, Activity.MODE_PRIVATE);
+        final String today = DateUtils.today();
+        if (today.equals(sp.getString(QUOTE_DATE_KEY, ""))
+                && sp.contains(QUOTE_TEXT_KEY)) {
+            return;
+        }
+
+        quoteExecutor.execute(() -> {
+            String quote = fetchQuoteFromApi();
+            if (quote == null || quote.trim().isEmpty()) {
+                quote = fallbackQuoteForDate(today);
+            }
+            final String finalQuote = quote;
+            sp.edit()
+                    .putString(QUOTE_DATE_KEY, today)
+                    .putString(QUOTE_TEXT_KEY, finalQuote)
+                    .apply();
+
+            Activity current = getActivity();
+            if (current == null) {
+                return;
+            }
+            current.runOnUiThread(() -> greetingSubtitle.setText(finalQuote));
+        });
+    }
+
+    private String cachedQuoteOrFallback() {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return fallbackQuoteForDate(DateUtils.today());
+        }
+
+        SharedPreferences sp = activity.getSharedPreferences(QUOTE_PREF, Activity.MODE_PRIVATE);
+        String today = DateUtils.today();
+        String savedDate = sp.getString(QUOTE_DATE_KEY, "");
+        String savedQuote = sp.getString(QUOTE_TEXT_KEY, "");
+
+        if (today.equals(savedDate) && savedQuote != null && !savedQuote.trim().isEmpty()) {
+            return savedQuote;
+        }
+        return fallbackQuoteForDate(today);
+    }
+
+    private String fetchQuoteFromApi() {
+        HttpURLConnection connection = null;
+        BufferedReader reader = null;
+        try {
+            URL url = new URL(QUOTE_API);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("User-Agent", "SelfDisciplineRealm/1.0");
+
+            if (connection.getResponseCode() != 200) {
+                return null;
+            }
+
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+
+            JSONObject json = new JSONObject(sb.toString());
+            String hitokoto = json.optString("hitokoto", "").trim();
+            String fromWho = json.optString("from_who", "").trim();
+            String from = json.optString("from", "").trim();
+            String author = !fromWho.isEmpty() ? fromWho : from;
+
+            if (hitokoto.isEmpty()) {
+                return null;
+            }
+
+            if (!author.isEmpty()) {
+                return "“" + hitokoto + "” —— " + author;
+            }
+            return "“" + hitokoto + "”";
+        } catch (Exception ignored) {
+            return null;
+        } finally {
+            try {
+                if (reader != null) reader.close();
+            } catch (Exception ignored) {
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    private String fallbackQuoteForDate(String date) {
+        int index = Math.abs(date.hashCode()) % FALLBACK_QUOTES.length;
+        return FALLBACK_QUOTES[index];
     }
 
     /**
@@ -238,6 +424,7 @@ public class OverviewFragment extends BaseFragmentHelper {
 
         realmName.setText(realm.nameRes);
         realmTotalExp.setText(formatInteger(xp));
+        realmBadge.setImageResource(realmIconByXp(xp));
 
         if (realm.isCap()) {
             realmRemainingExp.setText(R.string.text_realm_cap);
@@ -256,6 +443,16 @@ public class OverviewFragment extends BaseFragmentHelper {
                 String.format(Locale.getDefault(), "%.2f%%", percent)
         );
         realmProgress.setProgress((int) Math.round(percent));
+    }
+
+    private int realmIconByXp(int xp) {
+        int index = 0;
+        for (int i = 0; i < REALM_ICON_THRESHOLDS.length; i++) {
+            if (xp >= REALM_ICON_THRESHOLDS[i]) {
+                index = i;
+            }
+        }
+        return REALM_ICON_RES[index];
     }
 
     /**
@@ -959,5 +1156,12 @@ public class OverviewFragment extends BaseFragmentHelper {
         if (backupStatus != null) {
             backupStatus.setText(text);
         }
+    }
+
+
+    @Override
+    public void onDestroy() {
+        quoteExecutor.shutdownNow();
+        super.onDestroy();
     }
 }

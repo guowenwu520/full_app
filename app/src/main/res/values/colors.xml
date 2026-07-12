@@ -8,6 +8,7 @@
     <color name="color_text_main">#12304A</color>
     <color name="color_text_sub">#607892</color>
     <color name="color_text_on_primary">#FFFFFF</color>
+    <color name="color_text_people_sub">#ff1122</color>
     <color name="checkin_text_primary">#17394F</color>
     <color name="checkin_done">#0788A7</color>
     <color name="exp_text_secondary">#536E7E</color>
@@ -50,4 +51,14 @@
 
     <!-- Legacy vector compatibility colors -->
     <color name="scifi_070b18">#070B18</color><color name="scifi_071529">#071529</color><color name="scifi_0c1030">#0C1030</color><color name="scifi_0f1730">#0F1730</color><color name="scifi_10203a">#10203A</color><color name="scifi_1538e8d4">#5538E8D4</color><color name="scifi_180e1e">#180E1E</color><color name="scifi_20142a">#20142A</color><color name="scifi_334d6e">#334D6E</color><color name="scifi_38e8d4">#38E8D4</color><color name="scifi_55281512">#55281512</color><color name="scifi_7df9ff">#7DF9FF</color><color name="scifi_f3c969">#F3C969</color><color name="scifi_fff4ba">#FFF4BA</color><color name="scifi_ffffff">#FFFFFF</color>
+
+    <!-- Tabler icon palette: fresh, consistent line icons -->
+    <color name="icon_tabler_line">#2A88A4</color>
+    <color name="icon_tabler_line_soft">#6FAFC2</color>
+    <color name="icon_tabler_gold">#D8A73E</color>
+    <color name="icon_tabler_bronze">#C7834B</color>
+    <color name="icon_tabler_silver">#AFC5D8</color>
+    <color name="icon_tabler_platinum">#65CDE5</color>
+    <color name="icon_tabler_diamond">#8A92E8</color>
+    <color name="icon_tabler_fill_soft">#EAF8FC</color>
 </resources>

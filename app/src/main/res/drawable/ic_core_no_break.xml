@@ -1,12 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="38dp" android:height="38dp"
-    android:viewportWidth="48" android:viewportHeight="48">
-    <path android:fillColor="#E7F9FC"
-        android:pathData="M24,2A22,22 0,1 1,23.99,2Z"
-        android:strokeColor="#77C8D7" android:strokeWidth="1"/>
-    <path android:fillColor="#199DB7"
-        android:pathData="M24,8L36,13L34,29C33,35 29,39 24,42C19,39 15,35 14,29L12,13Z"/>
-    <path android:fillColor="#E9FDFF"
-        android:pathData="M24,14L27,20L34,21L29,26L30,33L24,30L18,33L19,26L14,21L21,20Z"/>
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M12,3 L20,6 L20,12 C20,16.5 16.8,19.8 12,21 C7.2,19.8 4,16.5 4,12 L4,6 L12,3" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M8.5,12 L11,14.5 L16,9.5" />
 </vector>

@@ -9,20 +9,25 @@ public final class BadgeIconResolver {
     public static final int CATEGORY_NOBREAK = 3;
     public static final int CATEGORY_WORDS = 4;
 
-    private static final int[][] ICONS = {
-            {R.drawable.ic_medal_discipline_bronze, R.drawable.ic_medal_discipline_silver, R.drawable.ic_medal_discipline_gold, R.drawable.ic_medal_discipline_platinum, R.drawable.ic_medal_discipline_diamond},
-            {R.drawable.ic_medal_weight_bronze, R.drawable.ic_medal_weight_silver, R.drawable.ic_medal_weight_gold, R.drawable.ic_medal_weight_platinum, R.drawable.ic_medal_weight_diamond},
-            {R.drawable.ic_medal_calories_bronze, R.drawable.ic_medal_calories_silver, R.drawable.ic_medal_calories_gold, R.drawable.ic_medal_calories_platinum, R.drawable.ic_medal_calories_diamond},
-            {R.drawable.ic_medal_nobreak_bronze, R.drawable.ic_medal_nobreak_silver, R.drawable.ic_medal_nobreak_gold, R.drawable.ic_medal_nobreak_platinum, R.drawable.ic_medal_nobreak_diamond},
-            {R.drawable.ic_medal_words_bronze, R.drawable.ic_medal_words_silver, R.drawable.ic_medal_words_gold, R.drawable.ic_medal_words_platinum, R.drawable.ic_medal_words_diamond}
+    /**
+     * 五个等级统一使用用户提供的勋章素材：
+     * 白银、黄金、铂金、钻石、王者。
+     *
+     * category 参数继续保留，避免影响现有调用和业务结构。
+     */
+    private static final int[] TIER_ICONS = {
+            R.drawable.medal_tier_silver,
+            R.drawable.medal_tier_gold,
+            R.drawable.medal_tier_platinum,
+            R.drawable.medal_tier_diamond,
+            R.drawable.medal_tier_king
     };
 
     private BadgeIconResolver() {}
 
     public static int medalIcon(int category, int tier) {
-        int safeCategory = clamp(category, 0, ICONS.length - 1);
-        int safeTier = clamp(tier, 0, ICONS[safeCategory].length - 1);
-        return ICONS[safeCategory][safeTier];
+        int safeTier = clamp(tier, 0, TIER_ICONS.length - 1);
+        return TIER_ICONS[safeTier];
     }
 
     private static int clamp(int value, int min, int max) {

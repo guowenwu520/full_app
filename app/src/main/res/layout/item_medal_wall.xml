@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="112dp"
+    android:layout_height="120dp"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:paddingHorizontal="2dp">
@@ -17,20 +17,21 @@
         android:textSize="8sp" />
 
     <FrameLayout
-        android:layout_width="54dp"
-        android:layout_height="54dp">
+        android:layout_width="60dp"
+        android:layout_height="60dp">
 
         <ImageView
             android:id="@+id/ivMedalIcon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@null" />
+            android:contentDescription="@null"
+            android:scaleType="centerInside" />
 
         <ImageView
             android:id="@+id/ivMedalLock"
             android:layout_width="17dp"
             android:layout_height="17dp"
-            android:layout_gravity="bottom|end"
+            android:layout_gravity="top|end"
             android:contentDescription="@null"
             android:src="@drawable/ic_medal_lock"
             android:visibility="gone" />

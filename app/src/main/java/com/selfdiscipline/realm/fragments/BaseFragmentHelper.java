@@ -25,7 +25,15 @@ public class BaseFragmentHelper extends Fragment {
         if (RealmLevel.MAJOR_FOUNDATION.equals(realm.major)) return R.drawable.bg_realm_foundation;
         if (RealmLevel.MAJOR_CORE.equals(realm.major)) return R.drawable.bg_realm_core;
         if (RealmLevel.MAJOR_SOUL.equals(realm.major)) return R.drawable.bg_realm_soul;
-        if (RealmLevel.MAJOR_SPIRIT.equals(realm.major)) return R.drawable.bg_realm_spirit;
+        if (RealmLevel.MAJOR_SPIRIT.equals(realm.major)
+                || RealmLevel.MAJOR_VOID.equals(realm.major)
+                || RealmLevel.MAJOR_UNITY.equals(realm.major)
+                || RealmLevel.MAJOR_ASCENSION.equals(realm.major)
+                || RealmLevel.MAJOR_TRUE_IMMORTAL.equals(realm.major)
+                || RealmLevel.MAJOR_GOLDEN_IMMORTAL.equals(realm.major)
+                || RealmLevel.MAJOR_TAIYI.equals(realm.major)
+                || RealmLevel.MAJOR_DALUO.equals(realm.major)
+                || RealmLevel.MAJOR_DAOZU.equals(realm.major)) return R.drawable.bg_realm_spirit;
         return R.drawable.bg_realm_qi;
     }
 }

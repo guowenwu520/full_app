@@ -1,10 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="32dp"
-    android:height="32dp"
+    android:width="24dp"
+    android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="#557487"
-        android:pathData="M12,2L15,5L19,5L20,9L23,12L20,15L19,19L15,19L12,22L9,19L5,19L4,15L1,12L4,9L5,5L9,5ZM12,7L13.5,10L17,10.5L14.5,13L15,16.5L12,15L9,16.5L9.5,13L7,10.5L10.5,10Z" />
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M12,3 L13.8,8.2 L19,10 L13.8,11.8 L12,17 L10.2,11.8 L5,10 L10.2,8.2 Z" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M19,15 L20,18 L23,19 L20,20 L19,23 L18,20 L15,19 L18,18 Z" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/icon_tabler_line"
+        android:strokeWidth="1.85"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M4,14 L4.8,16.2 L7,17 L4.8,17.8 L4,20 L3.2,17.8 L1,17 L3.2,16.2 Z" />
 </vector>
