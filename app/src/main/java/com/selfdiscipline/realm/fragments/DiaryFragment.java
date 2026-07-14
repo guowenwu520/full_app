@@ -1,6 +1,7 @@
 package com.selfdiscipline.realm.fragments;
 
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.TimePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.selfdiscipline.realm.R;
+import com.selfdiscipline.realm.DiaryWriteActivity;
 import com.selfdiscipline.realm.RecordDetailActivity;
 import com.selfdiscipline.realm.RecordListActivity;
 import com.selfdiscipline.realm.data.AppRepository;
@@ -27,6 +30,7 @@ import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.model.ExperienceLog;
 import com.selfdiscipline.realm.model.SleepRecord;
 import com.selfdiscipline.realm.util.DateUtils;
+import com.selfdiscipline.realm.util.NumberFormatUtils;
 
 import org.json.JSONObject;
 
@@ -56,9 +60,12 @@ import java.util.UUID;
  */
 public class DiaryFragment extends BaseFragmentHelper {
 
+    private static final String BREAK_PLACEHOLDER_TITLE = "破戒记录";
+
     private static final int RECENT_LIMIT = 3;
 
     private AppRepository repo;
+    private ScrollView diaryScrollView;
     private AppState state;
 
     private View statCurrentNoBreak;
@@ -82,9 +89,8 @@ public class DiaryFragment extends BaseFragmentHelper {
     private int selectedWakeMinute = 0;
     private int todaySleepIndex = -1;
 
-    private EditText titleInput;
-    private EditText bodyInput;
-    private TextView saveButton;
+    private TextView openDiaryEditorButton;
+    private TextView diaryWriteHint;
 
     private RecyclerView recentRecycler;
     private TextView emptyDiaries;
@@ -139,6 +145,7 @@ public class DiaryFragment extends BaseFragmentHelper {
     }
 
     private void bindViews(View root) {
+        diaryScrollView = root.findViewById(R.id.diaryScrollView);
         statCurrentNoBreak = root.findViewById(
                 R.id.statCurrentNoBreak
         );
@@ -181,14 +188,11 @@ public class DiaryFragment extends BaseFragmentHelper {
                 R.id.buttonSaveSleepRecord
         );
 
-        titleInput = root.findViewById(
-                R.id.inputDiaryTitle
+        openDiaryEditorButton = root.findViewById(
+                R.id.buttonOpenDiaryEditor
         );
-        bodyInput = root.findViewById(
-                R.id.inputDiaryBody
-        );
-        saveButton = root.findViewById(
-                R.id.buttonSaveDiary
+        diaryWriteHint = root.findViewById(
+                R.id.tvDiaryWriteHint
         );
 
         recentRecycler = root.findViewById(
@@ -214,13 +218,9 @@ public class DiaryFragment extends BaseFragmentHelper {
     }
 
     private void setupClicks(View root) {
-        buttonNotBroken.setOnClickListener(v ->
-                setPendingBroken(false)
-        );
+        buttonNotBroken.setOnClickListener(v -> saveBreakStatus(false));
 
-        buttonBroken.setOnClickListener(v ->
-                setPendingBroken(true)
-        );
+        buttonBroken.setOnClickListener(v -> saveBreakStatus(true));
 
         pickSleepTimeButton.setOnClickListener(v ->
                 showTimePicker(
@@ -250,7 +250,9 @@ public class DiaryFragment extends BaseFragmentHelper {
 
         saveSleepButton.setOnClickListener(v -> saveTodaySleep());
 
-        saveButton.setOnClickListener(v -> saveTodayDiary());
+        openDiaryEditorButton.setOnClickListener(v ->
+                DiaryWriteActivity.open(getActivity())
+        );
 
         View.OnClickListener openAll = v ->
                 RecordListActivity.open(
@@ -264,6 +266,8 @@ public class DiaryFragment extends BaseFragmentHelper {
         root.findViewById(R.id.buttonDiaryCalendar)
                 .setOnClickListener(openAll);
     }
+
+
 
     private void render() {
         normalizeState();
@@ -318,7 +322,7 @@ public class DiaryFragment extends BaseFragmentHelper {
                     getResources().getColor(R.color.checkin_done)
             );
         } else {
-            sleepPassStatus.setText("未达标：需 23:00 前睡、8:30 前起");
+            sleepPassStatus.setText("未达标：需 23:30 前睡、8:30 前起");
             sleepPassStatus.setTextColor(
                     getResources().getColor(R.color.color_text_sub)
             );
@@ -329,19 +333,25 @@ public class DiaryFragment extends BaseFragmentHelper {
         String today = DateUtils.today();
         todayDiaryIndex = findDiaryIndex(today);
 
-        if (todayDiaryIndex >= 0) {
+        boolean hasWrittenDiary = false;
+        if (todayDiaryIndex >= 0 && todayDiaryIndex < state.diaries.size()) {
             DiaryRecord diary = state.diaries.get(todayDiaryIndex);
             pendingBroken = diary.broken;
-            titleInput.setText(safe(diary.title));
-            bodyInput.setText(safe(diary.body));
-            saveButton.setText("更新今日日记");
+            boolean placeholder = BREAK_PLACEHOLDER_TITLE.equals(safe(diary.title))
+                    && safe(diary.body).trim().isEmpty();
+            hasWrittenDiary = !placeholder;
         } else {
             pendingBroken = false;
-            titleInput.setText("");
-            bodyInput.setText("");
-            saveButton.setText("保存今日日记");
         }
 
+        openDiaryEditorButton.setText(
+                hasWrittenDiary ? "编辑今日日记" : "写今日日记"
+        );
+        diaryWriteHint.setText(
+                hasWrittenDiary
+                        ? "今日日记已保存，点击进入独立页面继续修改"
+                        : "点击进入独立页面记录今日心境，输入时不再被主页内容遮挡"
+        );
         updateStatusToggle();
     }
 
@@ -370,7 +380,7 @@ public class DiaryFragment extends BaseFragmentHelper {
                 statCurrentNoBreak,
                 R.drawable.ic_core_no_break,
                 "连续不破戒",
-                String.valueOf(currentStreak),
+                NumberFormatUtils.compact(currentStreak),
                 "天",
                 false
         );
@@ -379,7 +389,7 @@ public class DiaryFragment extends BaseFragmentHelper {
                 statMonthlyBroken,
                 R.drawable.ic_core_streak,
                 "本月破戒",
-                String.valueOf(monthlyBrokenCount),
+                NumberFormatUtils.compact(monthlyBrokenCount),
                 "次",
                 false
         );
@@ -388,7 +398,7 @@ public class DiaryFragment extends BaseFragmentHelper {
                 statDiaryTotal,
                 R.drawable.ic_exp_diary,
                 "日记累计",
-                String.valueOf(state.diaries.size()),
+                NumberFormatUtils.compact(state.diaries.size()),
                 "篇",
                 false
         );
@@ -397,7 +407,7 @@ public class DiaryFragment extends BaseFragmentHelper {
                 statTodayDiaryExp,
                 R.drawable.ic_exp_all_complete,
                 "今日经验",
-                "+" + todayExp,
+                NumberFormatUtils.compactSigned(todayExp),
                 "",
                 true
         );
@@ -516,8 +526,65 @@ public class DiaryFragment extends BaseFragmentHelper {
             );
 
             todayStatusHint.setText(
-                    "保持本心，记录今日修行感悟"
+                    "今日默认未破戒；若发生破戒，请点击“是”立即记录"
             );
+        }
+    }
+
+    /**
+     * 破戒状态独立于日记正文，点击后立即保存。
+     * 未破戒为默认状态；选择破戒会立刻撤销当日不破戒经验和全完成奖励。
+     */
+    private void saveBreakStatus(boolean broken) {
+        String today = DateUtils.today();
+        int index = findDiaryIndex(today);
+
+        try {
+            if (index >= 0 && index < state.diaries.size()) {
+                DiaryRecord diary = state.diaries.get(index);
+                boolean placeholder = BREAK_PLACEHOLDER_TITLE.equals(safe(diary.title))
+                        && safe(diary.body).trim().isEmpty();
+
+                if (!broken && placeholder) {
+                    state.diaries.remove(index);
+                } else {
+                    diary.broken = broken;
+                    diary.date = today;
+                }
+            } else if (broken) {
+                state.diaries.add(0, new DiaryRecord(
+                        today,
+                        BREAK_PLACEHOLDER_TITLE,
+                        "",
+                        true
+                ));
+            }
+
+            pendingBroken = broken;
+            RewardEngine.syncNoBreakBadges(state);
+            if (broken) {
+                removeDiaryReward(today);
+            } else {
+                RewardEngine.awardDiary(getActivity(), state, today);
+            }
+
+            repo.save(state);
+            state = repo.load();
+            normalizeState();
+            render();
+
+            Toast.makeText(
+                    getActivity(),
+                    broken ? "已记录破戒，今日状态切换为失败，连续记录已中断"
+                            : "已恢复为未破戒，今日默认打卡完成",
+                    Toast.LENGTH_SHORT
+            ).show();
+        } catch (Exception exception) {
+            Toast.makeText(
+                    getActivity(),
+                    "状态保存失败：" + exception.getMessage(),
+                    Toast.LENGTH_SHORT
+            ).show();
         }
     }
 
@@ -583,214 +650,6 @@ public class DiaryFragment extends BaseFragmentHelper {
         }
     }
 
-    /**
-     * 每个日期只保留一篇日记。
-     * 当天已存在时更新原记录，不重复插入。
-     */
-    private void saveTodayDiary() {
-        String title = titleInput.getText()
-                .toString()
-                .trim();
-
-        String body = bodyInput.getText()
-                .toString()
-                .trim();
-
-        if (title.isEmpty() || body.isEmpty()) {
-            Toast.makeText(
-                    getActivity(),
-                    "标题和正文不能为空",
-                    Toast.LENGTH_SHORT
-            ).show();
-            return;
-        }
-
-        String today = DateUtils.today();
-
-        try {
-            if (todayDiaryIndex >= 0
-                    && todayDiaryIndex < state.diaries.size()) {
-                DiaryRecord diary =
-                        state.diaries.get(todayDiaryIndex);
-
-                diary.title = title;
-                diary.body = body;
-                diary.broken = pendingBroken;
-                diary.date = today;
-
-            } else {
-                DiaryRecord diary = createDiaryRecord(
-                        today,
-                        title,
-                        pendingBroken,
-                        body
-                );
-
-                if (diary == null) {
-                    Toast.makeText(
-                            getActivity(),
-                            "无法创建日记记录，请检查 DiaryRecord 模型",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                    return;
-                }
-
-                state.diaries.add(0, diary);
-            }
-
-            if (pendingBroken) {
-                removeDiaryReward(today);
-            } else {
-                awardDiary(today);
-            }
-
-            repo.save(state);
-
-            Toast.makeText(
-                    getActivity(),
-                    todayDiaryIndex >= 0
-                            ? "今日日记已更新"
-                            : "今日日记已保存",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-            state = repo.load();
-            normalizeState();
-            render();
-
-        } catch (Exception exception) {
-            Toast.makeText(
-                    getActivity(),
-                    "保存失败：" + exception.getMessage(),
-                    Toast.LENGTH_SHORT
-            ).show();
-        }
-    }
-
-    /**
-     * 优先使用现有 DiaryRecord.fromJson(JSONObject)，
-     * 若模型没有该方法，再尝试常见构造函数。
-     */
-    private DiaryRecord createDiaryRecord(
-            String date,
-            String title,
-            boolean broken,
-            String body
-    ) {
-        try {
-            JSONObject object = new JSONObject();
-            object.put("id", UUID.randomUUID().toString());
-            object.put("date", date);
-            object.put("title", title);
-            object.put("broken", broken);
-            object.put("body", body);
-
-            Method fromJson = DiaryRecord.class.getMethod(
-                    "fromJson",
-                    JSONObject.class
-            );
-
-            Object result = fromJson.invoke(null, object);
-
-            if (result instanceof DiaryRecord) {
-                return (DiaryRecord) result;
-            }
-        } catch (Throwable ignored) {
-            // 继续尝试构造函数。
-        }
-
-        try {
-            Constructor<DiaryRecord> constructor =
-                    DiaryRecord.class.getDeclaredConstructor(
-                            String.class,
-                            String.class,
-                            boolean.class,
-                            String.class
-                    );
-
-            constructor.setAccessible(true);
-
-            return constructor.newInstance(
-                    date,
-                    title,
-                    broken,
-                    body
-            );
-        } catch (Throwable ignored) {
-        }
-
-        try {
-            Constructor<DiaryRecord> constructor =
-                    DiaryRecord.class.getDeclaredConstructor();
-
-            constructor.setAccessible(true);
-            DiaryRecord diary = constructor.newInstance();
-
-            diary.date = date;
-            diary.title = title;
-            diary.broken = broken;
-            diary.body = body;
-
-            trySetId(diary);
-
-            return diary;
-        } catch (Throwable ignored) {
-            return null;
-        }
-    }
-
-    private void trySetId(DiaryRecord diary) {
-        try {
-            Field field = DiaryRecord.class.getDeclaredField("id");
-            field.setAccessible(true);
-            field.set(
-                    diary,
-                    UUID.randomUUID().toString()
-            );
-        } catch (Throwable ignored) {
-        }
-    }
-
-    private void awardDiary(String date) {
-        try {
-            Class<?> engine = Class.forName(
-                    "com.selfdiscipline.realm.engine.RewardEngine"
-            );
-
-            for (Method method : engine.getMethods()) {
-                if ("awardDiary".equals(method.getName())
-                        && method.getParameterTypes().length == 3) {
-                    method.invoke(
-                            null,
-                            getActivity(),
-                            state,
-                            date
-                    );
-                    break;
-                }
-            }
-
-            // 如果项目中提供统一的“全完成”检查，则一并调用。
-            for (Method method : engine.getMethods()) {
-                if (("awardAllDone".equals(method.getName())
-                        || "checkAllDone".equals(method.getName()))
-                        && method.getParameterTypes().length == 3) {
-                    method.invoke(
-                            null,
-                            getActivity(),
-                            state,
-                            date
-                    );
-                    break;
-                }
-            }
-        } catch (Throwable ignored) {
-        }
-    }
-
-    /**
-     * 当日改为“破戒”时，撤销当天日记经验和全完成经验。
-     */
     private void removeDiaryReward(String date) {
         removeAwardAndLogs("diary_" + date);
         removeAwardAndLogs("all_done_" + date);
@@ -883,7 +742,7 @@ public class DiaryFragment extends BaseFragmentHelper {
 
         return sleepMinutes >= 0
                 && wakeMinutes >= 0
-                && sleepMinutes < 23 * 60
+                && sleepMinutes <= 23 * 60 + 30
                 && wakeMinutes <= 8 * 60 + 30;
     }
 

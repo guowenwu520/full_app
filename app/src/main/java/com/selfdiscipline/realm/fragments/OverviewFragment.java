@@ -32,6 +32,7 @@ import com.selfdiscipline.realm.adapter.RecentActivity;
 import com.selfdiscipline.realm.adapter.RecentActivityAdapter;
 import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.util.DateUtils;
+import com.selfdiscipline.realm.util.NumberFormatUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -122,26 +123,23 @@ public class OverviewFragment extends BaseFragmentHelper {
     private ImageView readingStatusIcon;
     private ImageView exerciseStatusIcon;
     private ImageView sleepStatusIcon;
-    private ImageView wordStatusIcon;
     private ImageView diaryStatusIcon;
 
     private TextView readingStatusText;
     private TextView exerciseStatusText;
     private TextView sleepStatusText;
-    private TextView wordStatusText;
     private TextView diaryStatusText;
 
     // 今日经验
     private TextView readingExpValue;
     private TextView exerciseExpValue;
     private TextView sleepExpValue;
-    private TextView wordExpValue;
     private TextView diaryExpValue;
     private TextView allCompleteExpValue;
 
     // 核心数据
     private TextView disciplineStreakValue;
-    private TextView wordStreakValue;
+    private TextView futuresIncomeValue;
     private TextView noBreakStreakValue;
     private TextView todayCaloriesValue;
     private TextView currentWeightValue;
@@ -190,26 +188,23 @@ public class OverviewFragment extends BaseFragmentHelper {
         readingStatusIcon = root.findViewById(R.id.ivReadingStatus);
         exerciseStatusIcon = root.findViewById(R.id.ivExerciseStatus);
         sleepStatusIcon = root.findViewById(R.id.ivSleepStatus);
-        wordStatusIcon = root.findViewById(R.id.ivWordStatus);
         diaryStatusIcon = root.findViewById(R.id.ivDiaryStatus);
 
         readingStatusText = root.findViewById(R.id.tvReadingStatus);
         exerciseStatusText = root.findViewById(R.id.tvExerciseStatus);
         sleepStatusText = root.findViewById(R.id.tvSleepStatus);
-        wordStatusText = root.findViewById(R.id.tvWordStatus);
         diaryStatusText = root.findViewById(R.id.tvDiaryStatus);
 
         // 今日经验卡片
         readingExpValue = root.findViewById(R.id.tvReadingExpValue);
         exerciseExpValue = root.findViewById(R.id.tvExerciseExpValue);
         sleepExpValue = root.findViewById(R.id.tvSleepExpValue);
-        wordExpValue = root.findViewById(R.id.tvWordExpValue);
         diaryExpValue = root.findViewById(R.id.tvDiaryExpValue);
         allCompleteExpValue = root.findViewById(R.id.tvAllCompleteExpValue);
 
         // 核心数据卡片
         disciplineStreakValue = root.findViewById(R.id.tvDisciplineStreakValue);
-        wordStreakValue = root.findViewById(R.id.tvWordStreakValue);
+        futuresIncomeValue = root.findViewById(R.id.tvFuturesIncomeValue);
         noBreakStreakValue = root.findViewById(R.id.tvNoBreakStreakValue);
         todayCaloriesValue = root.findViewById(R.id.tvTodayCaloriesValue);
         currentWeightValue = root.findViewById(R.id.tvCurrentWeightValue);
@@ -436,7 +431,7 @@ public class OverviewFragment extends BaseFragmentHelper {
         int remaining = Math.max(0, realm.nextXp - xp);
         double percent = realm.nextXp <= 0
                 ? 100.0
-                : Math.min(100.0, xp * 100.0 / realm.nextXp);
+                : Math.max(0.0, Math.min(100.0, xp * 100.0 / realm.nextXp));
 
         realmRemainingExp.setText(formatInteger(remaining));
         realmPercent.setText(
@@ -464,18 +459,16 @@ public class OverviewFragment extends BaseFragmentHelper {
         boolean readingDone = StatsEngine.hasReading(state, today);
         boolean exerciseDone = StatsEngine.hasExercise(state, today);
         boolean sleepDone = StatsEngine.hasSleepPassed(state, today);
-        boolean wordDone = StatsEngine.hasWord(state, today);
-        boolean diaryDone = StatsEngine.hasDiaryNoBreak(state, today);
+        boolean noBreakDone = StatsEngine.hasDiaryNoBreak(state, today);
 
         int completedCount = 0;
         if (readingDone) completedCount++;
         if (exerciseDone) completedCount++;
         if (sleepDone) completedCount++;
-        if (wordDone) completedCount++;
-        if (diaryDone) completedCount++;
+        if (noBreakDone) completedCount++;
 
         checkinCount.setText(
-                String.format(Locale.getDefault(), "%d/5", completedCount)
+                String.format(Locale.getDefault(), "%d/4", completedCount)
         );
 
         bindCheckinStatus(
@@ -502,20 +495,17 @@ public class OverviewFragment extends BaseFragmentHelper {
                 R.drawable.ic_checkin_sleep_pending
         );
 
-        bindCheckinStatus(
-                wordStatusIcon,
-                wordStatusText,
-                wordDone,
-                R.drawable.ic_checkin_word_done,
-                R.drawable.ic_checkin_word_pending
+        diaryStatusIcon.setImageResource(
+                noBreakDone
+                        ? R.drawable.ic_checkin_diary_done
+                        : R.drawable.ic_checkin_diary_pending
         );
-
-        bindCheckinStatus(
-                diaryStatusIcon,
-                diaryStatusText,
-                diaryDone,
-                R.drawable.ic_checkin_diary_done,
-                R.drawable.ic_checkin_diary_pending
+        diaryStatusText.setText(noBreakDone ? "未破戒" : "已破戒");
+        diaryStatusText.setTextColor(
+                ContextCompat.getColor(
+                        getActivity(),
+                        noBreakDone ? R.color.checkin_done : R.color.checkin_pending
+                )
         );
     }
 
@@ -550,10 +540,9 @@ public class OverviewFragment extends BaseFragmentHelper {
      * 这些值是规则常量，不应再从旧的 format_today_progress 文本中拼接。
      */
     private void renderTodayExperience() {
-        readingExpValue.setText("+10");
+        readingExpValue.setText("每页+1");
         exerciseExpValue.setText("+10");
         sleepExpValue.setText("+15");
-        wordExpValue.setText("+8");
         diaryExpValue.setText("+12");
         allCompleteExpValue.setText("+50");
     }
@@ -565,19 +554,19 @@ public class OverviewFragment extends BaseFragmentHelper {
         String today = DateUtils.today();
 
         disciplineStreakValue.setText(
-                String.valueOf(StatsEngine.maxSelfDisciplineStreak(state))
+                NumberFormatUtils.compact(StatsEngine.currentSelfDisciplineStreak(state))
         );
 
-        wordStreakValue.setText(
-                String.valueOf(StatsEngine.currentWordStreak(state))
+        futuresIncomeValue.setText(
+                NumberFormatUtils.compact(StatsEngine.totalFuturesIncome(state))
         );
 
         noBreakStreakValue.setText(
-                String.valueOf(StatsEngine.currentNoBreakStreak(state))
+                NumberFormatUtils.compact(StatsEngine.currentNoBreakStreak(state))
         );
 
         todayCaloriesValue.setText(
-                String.valueOf(calculateTodayCalories(today))
+                NumberFormatUtils.compact(calculateTodayCalories(today))
         );
 
         Double latestWeight = findLatestWeight();
@@ -592,7 +581,7 @@ public class OverviewFragment extends BaseFragmentHelper {
         );
 
         monthlyReadingValue.setText(
-                String.valueOf(calculateMonthlyReadingPages(today))
+                NumberFormatUtils.compact(calculateMonthlyReadingPages(today))
         );
     }
 
@@ -654,6 +643,9 @@ public class OverviewFragment extends BaseFragmentHelper {
         if (containsAny(source, "阅读", "书籍", "读书")) {
             return "阅读打卡：";
         }
+        if (containsAny(source, "期货", "盈利", "亏损")) {
+            return "期货收入：";
+        }
         if (containsAny(source, "运动", "卡路里", "健身")) {
             return "运动打卡：";
         }
@@ -676,19 +668,11 @@ public class OverviewFragment extends BaseFragmentHelper {
         String source = log.source == null ? "" : log.source.trim();
 
         if (source.isEmpty()) {
-            return String.format(
-                    Locale.getDefault(),
-                    "+%d 经验",
-                    log.points
-            );
+            return NumberFormatUtils.compactSigned(log.points) + " 经验";
         }
 
-        return String.format(
-                Locale.getDefault(),
-                "%s，+%d 经验",
-                source,
-                log.points
-        );
+        String signed = NumberFormatUtils.compactSigned(log.points);
+        return source + "，" + signed + " 经验";
     }
 
     /**
@@ -722,7 +706,7 @@ public class OverviewFragment extends BaseFragmentHelper {
     }
 
     private String formatInteger(int value) {
-        return String.format(Locale.getDefault(), "%,d", value);
+        return NumberFormatUtils.compact(value);
     }
 
     /*

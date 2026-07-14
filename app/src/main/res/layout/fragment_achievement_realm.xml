@@ -60,6 +60,9 @@
                 android:layout_height="38dp"
                 android:layout_marginStart="14dp"
                 android:contentDescription="@null"
+                android:background="@drawable/bg_circle_image_clip"
+                android:clipToOutline="true"
+                android:scaleType="centerCrop"
                 android:src="@drawable/ic_profile_meditation" />
         </LinearLayout>
 

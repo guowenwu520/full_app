@@ -7,7 +7,8 @@ public final class BadgeIconResolver {
     public static final int CATEGORY_WEIGHT = 1;
     public static final int CATEGORY_CALORIES = 2;
     public static final int CATEGORY_NOBREAK = 3;
-    public static final int CATEGORY_WORDS = 4;
+    public static final int CATEGORY_FUTURES = 4;
+    public static final int CATEGORY_WORDS = CATEGORY_FUTURES;
 
     /**
      * 五个等级统一使用用户提供的勋章素材：

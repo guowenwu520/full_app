@@ -5,6 +5,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,15 +21,19 @@ import com.selfdiscipline.realm.R;
 import com.selfdiscipline.realm.RecordDetailActivity;
 import com.selfdiscipline.realm.RecordListActivity;
 import com.selfdiscipline.realm.data.AppRepository;
+import com.selfdiscipline.realm.data.BadgeCatalog;
 import com.selfdiscipline.realm.data.RealmCatalog;
+import com.selfdiscipline.realm.engine.RewardEngine;
 import com.selfdiscipline.realm.engine.StatsEngine;
 import com.selfdiscipline.realm.model.AppState;
+import com.selfdiscipline.realm.model.Badge;
 import com.selfdiscipline.realm.model.DiaryRecord;
 import com.selfdiscipline.realm.model.ExperienceLog;
 import com.selfdiscipline.realm.model.RealmLevel;
 import com.selfdiscipline.realm.model.WeightRecord;
 import com.selfdiscipline.realm.ui.BadgeIconResolver;
 import com.selfdiscipline.realm.ui.RealmDialog;
+import com.selfdiscipline.realm.util.NumberFormatUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -48,8 +53,8 @@ import java.util.Set;
  * 说明：
  * - 境界使用现有 RealmCatalog、RealmLevel、StatsEngine。
  * - 经验明细使用 state.expLogs。
- * - 勋章优先识别 state.awardedKeys 中已有的永久解锁记录；
- *   若旧项目没有统一的勋章 key，则使用历史最高指标作为显示兜底。
+ * - 卡路里勋章永久保留；其余勋章按当前指标动态锁定和收回经验。
+ * - 所有勋章始终显示当前值/目标值。
  */
 public class AchievementRealmFragment extends BaseFragmentHelper {
 
@@ -99,11 +104,11 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
 
     // 五个勋章品类。
     private static final String[] CATEGORY_KEYS = {
-            "discipline", "weight", "calories", "nobreak", "words"
+            "discipline", "weight", "calories", "nobreak", "futures"
     };
 
     private static final String[] CATEGORY_NAMES = {
-            "连续自律", "减脂体重", "卡路里累计", "连续不破戒", "累计背单词"
+            "连续自律", "减脂体重", "卡路里累计", "连续不破戒", "期货累计收入"
     };
 
     /*
@@ -119,22 +124,9 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
     };
 
     private static final String[] BADGE_TYPE_KEYS = {
-            "self", "weight", "calorie", "nobreak", "word"
+            "self", "weight", "calorie", "nobreak", "futures"
     };
 
-    /*
-     * 若原项目已有固定门槛，只需替换此数组。
-     *
-     * 行：五个品类。
-     * 列：白银、黄金、铂金、钻石、王者。
-     */
-    private static final double[][] THRESHOLDS = {
-            {7, 30, 100, 180, 365},              // 连续自律：天
-            {2, 5, 10, 15, 20},                  // 最大减重：kg
-            {5000, 20000, 50000, 100000, 200000},// 累计卡路里
-            {7, 30, 100, 180, 365},              // 最长不破戒：天
-            {100, 500, 1000, 3000, 5000}         // 累计单词：个
-    };
 
     private AppRepository repo;
     private AppState state;
@@ -316,7 +308,7 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
         int remaining = Math.max(0, realm.nextXp - xp);
         double percent = realm.nextXp <= 0
                 ? 100.0
-                : Math.min(100.0, xp * 100.0 / realm.nextXp);
+                : Math.max(0.0, Math.min(100.0, xp * 100.0 / realm.nextXp));
 
         remainingXp.setText(formatNumber(remaining));
         realmPercent.setText(
@@ -350,111 +342,48 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
 
     private void renderMedals() {
         double[] metrics = {
-                StatsEngine.maxSelfDisciplineStreak(state),
-                calculateMaxWeightLoss(),
-                calculateTotalCalories(),
-                calculateLongestNoBreakStreak(),
-                state.words == null ? 0 : state.words.size()
+                Math.min(30, StatsEngine.currentSelfDisciplineStreak(state)),
+                StatsEngine.weightLoss(state),
+                StatsEngine.totalCalories(state),
+                Math.min(30, StatsEngine.currentNoBreakStreak(state)),
+                Math.max(0, StatsEngine.totalFuturesIncome(state))
         };
 
+        List<Badge> catalog = BadgeCatalog.all();
         List<MedalItem> medals = new ArrayList<>();
-        int unlocked = 0;
+        long totalEarned = 0;
 
-        /*
-         * 先按等级，再按品类添加：
-         * 第一行五枚白银，第二行五枚黄金……
-         * 视觉上形成五个纵向品类。
-         */
+        // 先按等级、再按品类：第一行五枚白银，第二行五枚黄金……
         for (int tier = 0; tier < TIER_KEYS.length; tier++) {
-            for (int category = 0;
-                 category < CATEGORY_KEYS.length;
-                 category++) {
+            for (int category = 0; category < CATEGORY_KEYS.length; category++) {
+                Badge badge = catalog.get(category * TIER_KEYS.length + tier);
+                double metric = metrics[category];
+                boolean isUnlocked = isMedalUnlocked(category, badge, metric);
+                int unlockCount = RewardEngine.badgeUnlockCount(state, badge);
+                totalEarned += unlockCount;
 
-                boolean isUnlocked = isMedalUnlocked(
+                medals.add(new MedalItem(
                         category,
                         tier,
-                        metrics[category]
-                );
-
-                if (isUnlocked) {
-                    unlocked++;
-                }
-
-                medals.add(
-                        new MedalItem(
-                                category,
-                                tier,
-                                CATEGORY_NAMES[category],
-                                TIER_NAMES[tier],
-                                medalIcon(category, tier),
-                                metrics[category],
-                                THRESHOLDS[category][tier],
-                                isUnlocked
-                        )
-                );
+                        CATEGORY_NAMES[category],
+                        TIER_NAMES[tier],
+                        medalIcon(category, tier),
+                        metric,
+                        badge.target,
+                        isUnlocked,
+                        unlockCount
+                ));
             }
         }
 
-        unlockedCount.setText(
-                "已获 " + unlocked + " 枚"
-        );
+        unlockedCount.setText("已获 " + NumberFormatUtils.compact(totalEarned) + " 枚");
         medalAdapter.submitList(medals);
     }
 
-    private boolean isMedalUnlocked(
-            int category,
-            int tier,
-            double metric
-    ) {
-        String categoryKey = CATEGORY_KEYS[category];
-        String tierKey = TIER_KEYS[tier];
-        String categoryName = CATEGORY_NAMES[category];
-        String tierName = TIER_NAMES[tier];
-        String badgeId = BADGE_TYPE_KEYS[category] + "_" + tier;
+    private boolean isMedalUnlocked(int category, Badge badge, double metric) {
+        if (badge == null) return false;
 
-        // RewardEngine 实际保存的是 type_index，优先读取永久解锁记录。
-        if (state.isBadgeUnlocked(badgeId)) {
-            return true;
-        }
-
-        if (state.awardedKeys != null) {
-            for (String key : state.awardedKeys) {
-                if (key == null) {
-                    continue;
-                }
-
-                String lower = key.toLowerCase(Locale.US);
-
-                if (("badge_" + badgeId).equals(lower)) {
-                    return true;
-                }
-
-                boolean categoryMatched =
-                        lower.contains(categoryKey)
-                                || key.contains(categoryName);
-
-                boolean tierMatched =
-                        lower.contains(tierKey)
-                                || key.contains(tierName);
-
-                if (categoryMatched && tierMatched) {
-                    return true;
-                }
-
-                String canonical =
-                        "medal_" + categoryKey + "_" + tierKey;
-
-                if (canonical.equals(lower)) {
-                    return true;
-                }
-            }
-        }
-
-        /*
-         * 旧项目未保存统一勋章 key 时，用历史指标兜底。
-         * 使用历史最高值，不采用当前连续值，避免普通断签导致已展示勋章消失。
-         */
-        return metric >= THRESHOLDS[category][tier];
+        return state.isBadgeUnlocked(badge.id);
     }
 
     private void renderExperience() {
@@ -512,6 +441,9 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
     private int experienceIcon(String source) {
         if (containsAny(source, "阅读", "书籍", "读书")) {
             return R.drawable.ic_exp_reading;
+        }
+        if (containsAny(source, "期货", "盈利", "亏损")) {
+            return R.drawable.ic_xp;
         }
         if (containsAny(source, "运动", "卡路里", "健身")) {
             return R.drawable.ic_exp_exercise;
@@ -745,6 +677,8 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
 
         switch (medal.category) {
             case 0:
+                unit = "天";
+                break;
             case 3:
                 unit = "天";
                 break;
@@ -754,8 +688,11 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
             case 2:
                 unit = "kcal";
                 break;
+            case 4:
+                unit = "元";
+                break;
             default:
-                unit = "个";
+                unit = "";
                 break;
         }
 
@@ -764,14 +701,12 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
     }
 
     private String progressText(MedalItem medal) {
-        if (medal.unlocked) {
-            return "已解锁";
-        }
-
         String unit;
 
         switch (medal.category) {
             case 0:
+                unit = "天";
+                break;
             case 3:
                 unit = "天";
                 break;
@@ -781,42 +716,69 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
             case 2:
                 unit = "kcal";
                 break;
+            case 4:
+                unit = "元";
+                break;
             default:
-                unit = "个";
+                unit = "";
                 break;
         }
 
-        return formatMetric(medal.metric, medal.category)
+        return formatProgressMetric(medal.metric, medal.category)
                 + "/"
-                + formatMetric(medal.threshold, medal.category)
+                + formatProgressMetric(medal.threshold, medal.category)
                 + unit;
+    }
+
+    private String formatProgressMetric(double value, int category) {
+        return category == 1
+                ? NumberFormatUtils.compact(value, 1)
+                : NumberFormatUtils.compact(value);
     }
 
     private String formatMetric(
             double value,
             int category
     ) {
-        if (category == 1) {
-            return String.format(
-                    Locale.getDefault(),
-                    "%.1f",
-                    value
-            );
-        }
-
-        return String.format(
-                Locale.getDefault(),
-                "%,.0f",
-                value
-        );
+        return category == 1
+                ? NumberFormatUtils.compact(value, 1)
+                : NumberFormatUtils.compact(value);
     }
 
     private String formatNumber(int value) {
-        return String.format(
-                Locale.getDefault(),
-                "%,d",
-                value
-        );
+        return NumberFormatUtils.compact(value);
+    }
+
+    private int unlockCountBadgeRes(int count) {
+        switch (count) {
+            case 1:
+                return R.drawable.ic_badge_count_1;
+            case 2:
+                return R.drawable.ic_badge_count_2;
+            case 3:
+                return R.drawable.ic_badge_count_3;
+            case 4:
+                return R.drawable.ic_badge_count_4;
+            case 5:
+                return R.drawable.ic_badge_count_5;
+            case 6:
+                return R.drawable.ic_badge_count_6;
+            case 7:
+                return R.drawable.ic_badge_count_7;
+            default:
+                return R.drawable.ic_badge_count_up;
+        }
+    }
+
+    private String unlockCountText(int count) {
+        return count >= 8 ? NumberFormatUtils.compact(count) : "";
+    }
+
+    private float unlockCountTextSizeSp(int count) {
+        if (count >= 10000) return 5.2f;
+        if (count >= 1000) return 6.0f;
+        if (count >= 100) return 6.8f;
+        return 7.8f;
     }
 
     private void showMedalDetail(MedalItem medal) {
@@ -828,9 +790,10 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
                         + "\n当前进度："
                         + progressText(medal)
                         + "\n状态："
-                        + (medal.unlocked
-                        ? "已永久收藏"
-                        : "尚未解锁");
+                        + (medal.unlocked ? "已解锁" : "尚未解锁")
+                        + "\n累计解锁次数："
+                        + medal.unlockCount
+                        + " 次";
 
         RealmDialog.showInfo(
                 getActivity(),
@@ -857,12 +820,16 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
             state.expLogs = new ArrayList<>();
         }
 
-        if (state.words == null) {
-            state.words = new ArrayList<>();
+        if (state.futuresIncomes == null) {
+            state.futuresIncomes = new ArrayList<>();
         }
 
         if (state.diaries == null) {
             state.diaries = new ArrayList<>();
+        }
+
+        if (state.badgeUnlockCounts == null) {
+            state.badgeUnlockCounts = new java.util.HashMap<>();
         }
     }
 
@@ -907,6 +874,7 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
         final double metric;
         final double threshold;
         final boolean unlocked;
+        final int unlockCount;
 
         MedalItem(
                 int category,
@@ -916,7 +884,8 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
                 int iconRes,
                 double metric,
                 double threshold,
-                boolean unlocked
+                boolean unlocked,
+                int unlockCount
         ) {
             this.category = category;
             this.tier = tier;
@@ -926,6 +895,7 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
             this.metric = metric;
             this.threshold = threshold;
             this.unlocked = unlocked;
+            this.unlockCount = unlockCount;
         }
     }
 
@@ -1100,6 +1070,7 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
             holder.progress.setText(
                     progressText(medal)
             );
+            bindUnlockBadge(holder, medal.unlockCount);
 
             if (medal.unlocked) {
                 holder.icon.clearColorFilter();
@@ -1120,6 +1091,33 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
             );
         }
 
+        private void bindUnlockBadge(Holder holder, int unlockCount) {
+            if (unlockCount <= 0) {
+                holder.unlockBadgeContainer.setVisibility(View.GONE);
+                holder.unlockBadgeText.setVisibility(View.GONE);
+                return;
+            }
+
+            holder.unlockBadgeContainer.setVisibility(View.VISIBLE);
+            holder.unlockBadgeIcon.setImageResource(
+                    unlockCountBadgeRes(unlockCount)
+            );
+
+            if (unlockCount >= 8) {
+                holder.unlockBadgeText.setVisibility(View.VISIBLE);
+                holder.unlockBadgeText.setText(
+                        unlockCountText(unlockCount)
+                );
+                holder.unlockBadgeText.setTextSize(
+                        TypedValue.COMPLEX_UNIT_SP,
+                        unlockCountTextSizeSp(unlockCount)
+                );
+            } else {
+                holder.unlockBadgeText.setVisibility(View.GONE);
+                holder.unlockBadgeText.setText("");
+            }
+        }
+
         @Override
         public int getItemCount() {
             return items.size();
@@ -1131,6 +1129,9 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
             final ImageView lock;
             final TextView tier;
             final TextView progress;
+            final View unlockBadgeContainer;
+            final ImageView unlockBadgeIcon;
+            final TextView unlockBadgeText;
 
             Holder(View itemView) {
                 super(itemView);
@@ -1149,6 +1150,15 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
                 );
                 progress = itemView.findViewById(
                         R.id.tvMedalProgress
+                );
+                unlockBadgeContainer = itemView.findViewById(
+                        R.id.layoutMedalUnlockBadge
+                );
+                unlockBadgeIcon = itemView.findViewById(
+                        R.id.ivMedalUnlockBadge
+                );
+                unlockBadgeText = itemView.findViewById(
+                        R.id.tvMedalUnlockCount
                 );
             }
         }
@@ -1206,7 +1216,7 @@ public class AchievementRealmFragment extends BaseFragmentHelper {
                             : log.source
             );
             holder.points.setText(
-                    "+" + log.points
+                    NumberFormatUtils.compactSigned(log.points)
             );
 
             holder.itemView.setOnClickListener(v ->

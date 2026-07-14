@@ -35,6 +35,36 @@
             android:contentDescription="@null"
             android:src="@drawable/ic_medal_lock"
             android:visibility="gone" />
+
+        <FrameLayout
+            android:id="@+id/layoutMedalUnlockBadge"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:layout_gravity="bottom|end"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/ivMedalUnlockBadge"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:id="@+id/tvMedalUnlockCount"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="#F6FFFF"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:shadowColor="#CC2FD6FF"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="2" />
+        </FrameLayout>
     </FrameLayout>
 
     <TextView

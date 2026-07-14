@@ -5,6 +5,7 @@ import com.selfdiscipline.realm.model.AppState;
 import com.selfdiscipline.realm.model.DiaryRecord;
 import com.selfdiscipline.realm.model.ExerciseRecord;
 import com.selfdiscipline.realm.model.ExperienceLog;
+import com.selfdiscipline.realm.model.FuturesIncomeRecord;
 import com.selfdiscipline.realm.model.SleepRecord;
 import com.selfdiscipline.realm.model.WordEntry;
 
@@ -27,6 +28,10 @@ public final class RecordDeleteEngine {
         } else if (RecordDetailActivity.TYPE_WEIGHT.equals(type) && valid(index, state.weights.size())) {
             state.weights.remove(index);
             deleted = true;
+        } else if (RecordDetailActivity.TYPE_FUTURES_INCOME.equals(type) && valid(index, state.futuresIncomes.size())) {
+            FuturesIncomeRecord removed = state.futuresIncomes.remove(index);
+            removeExperienceLogByKey(state, removed.experienceKey);
+            deleted = true;
         } else if (RecordDetailActivity.TYPE_SLEEP.equals(type) && valid(index, state.sleeps.size())) {
             SleepRecord removed = state.sleeps.remove(index);
             cleanupSleepAwardIfNoPassedRecord(state, removed.date);
@@ -42,6 +47,9 @@ public final class RecordDeleteEngine {
         } else if (RecordDetailActivity.TYPE_EXP.equals(type) && valid(index, state.expLogs.size())) {
             ExperienceLog removed = state.expLogs.remove(index);
             state.awardedKeys.remove(removed.key);
+            if (removed.key != null && removed.key.startsWith("futures_income_")) {
+                removeFuturesRecordByKey(state, removed.key);
+            }
             deleted = true;
         }
         if (deleted) cleanupAllDoneAwards(state);
@@ -73,8 +81,27 @@ public final class RecordDeleteEngine {
 
     private static void cleanupDiaryAwardIfNoNoBreakRecord(AppState state, String date) {
         if (date == null || date.isEmpty()) return;
-        for (DiaryRecord r : state.diaries) if (date.equals(r.date) && !r.broken) return;
-        removeAwardAndLogs(state, "diary_" + date);
+        // 当前逻辑为“未破戒默认完成”。只有当天仍存在破戒记录时才撤销奖励。
+        if (StatsEngine.hasBroken(state, date)) {
+            removeAwardAndLogs(state, "diary_" + date);
+        }
+    }
+
+
+    private static void removeExperienceLogByKey(AppState state, String key) {
+        if (key == null || key.isEmpty()) return;
+        for (int i = state.expLogs.size() - 1; i >= 0; i--) {
+            ExperienceLog log = state.expLogs.get(i);
+            if (key.equals(log.key)) state.expLogs.remove(i);
+        }
+    }
+
+    private static void removeFuturesRecordByKey(AppState state, String key) {
+        if (key == null || key.isEmpty()) return;
+        for (int i = state.futuresIncomes.size() - 1; i >= 0; i--) {
+            FuturesIncomeRecord record = state.futuresIncomes.get(i);
+            if (key.equals(record.experienceKey)) state.futuresIncomes.remove(i);
+        }
     }
 
     private static void cleanupAllDoneAwards(AppState state) {
@@ -82,7 +109,7 @@ public final class RecordDeleteEngine {
         for (String key : state.awardedKeys) {
             if (key != null && key.startsWith("all_done_")) {
                 String date = key.substring("all_done_".length());
-                if (!StatsEngine.allFiveDone(state, date)) remove.add(key);
+                if (!StatsEngine.allFourDone(state, date)) remove.add(key);
             }
         }
         for (String key : remove) removeAwardAndLogs(state, key);

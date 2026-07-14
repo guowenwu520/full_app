@@ -12,12 +12,28 @@ import com.selfdiscipline.realm.util.ViewUtils;
 public class BaseFragmentHelper extends Fragment {
     protected void showReward(RewardEngine.RewardResult r) {
         if (getActivity() == null || r == null) return;
-        if (r.gainedXp > 0) ViewUtils.toast(getActivity(), getString(R.string.toast_xp_gained, r.gainedXp));
+        if (r.gainedXp > 0) {
+            ViewUtils.toast(getActivity(), getString(R.string.toast_xp_gained, r.gainedXp));
+        } else if (r.gainedXp < 0) {
+            ViewUtils.toast(getActivity(), "已收回 " + Math.abs(r.gainedXp) + " 经验");
+        }
+
         if (r.realmUp && r.newRealm != null) {
             RealmDialog.showInfo(
                     getActivity(),
                     getString(R.string.dialog_realm_up_title),
-                    getString(R.string.format_realm_up_message, getString(r.newRealm.nameRes), getString(r.newRealm.descRes))
+                    getString(
+                            R.string.format_realm_up_message,
+                            getString(r.newRealm.nameRes),
+                            getString(r.newRealm.descRes)
+                    )
+            );
+        } else if (r.realmDown && r.newRealm != null) {
+            RealmDialog.showInfo(
+                    getActivity(),
+                    "境界回落",
+                    "当前境界调整为：" + getString(r.newRealm.nameRes)
+                            + "\n" + getString(r.newRealm.descRes)
             );
         }
     }

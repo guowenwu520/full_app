@@ -29,6 +29,7 @@ import com.selfdiscipline.realm.model.ReadingHistory;
 import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.util.DateUtils;
 import com.selfdiscipline.realm.util.ViewUtils;
+import com.selfdiscipline.realm.util.NumberFormatUtils;
 
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -217,8 +218,8 @@ public class BookDetailActivity extends Activity {
                 ? 0.0
                 : Math.min(100.0, current * 100.0 / total);
 
-        bindStat(statCurrentPage, "当前页码", String.valueOf(current));
-        bindStat(statTotalPages, "全书页数", total > 0 ? String.valueOf(total) : "--");
+        bindStat(statCurrentPage, "当前页码", NumberFormatUtils.compact(current));
+        bindStat(statTotalPages, "全书页数", total > 0 ? NumberFormatUtils.compact(total) : "--");
         bindStat(
                 statReadingPercent,
                 "阅读进度",
@@ -320,7 +321,9 @@ public class BookDetailActivity extends Activity {
 
                     int oldPage = book.currentPage;
                     if (newPage != oldPage) {
+                        int addedPages = Math.max(0, newPage - book.rewardedPage);
                         book.currentPage = newPage;
+                        book.rewardedPage = Math.max(book.rewardedPage, newPage);
                         book.readingHistory.add(
                                 0,
                                 new ReadingHistory(
@@ -330,7 +333,10 @@ public class BookDetailActivity extends Activity {
                                         newPage
                                 )
                         );
-                        finishReadingAction();
+                        finishReadingAction(
+                                addedPages,
+                                "page_update_" + book.id + "_" + UUID.randomUUID()
+                        );
                     }
                     return true;
                 }
@@ -510,17 +516,28 @@ public class BookDetailActivity extends Activity {
     }
 
     private void finishReadingAction() {
+        finishReadingAction(0, "reading_action_" + UUID.randomUUID());
+    }
+
+    private void finishReadingAction(int addedPages, String actionId) {
         String today = DateUtils.today();
         state.addReadingDate(today);
-        RewardEngine.awardReading(this, state, today);
+        RewardEngine.awardReadingPages(
+                this,
+                state,
+                today,
+                Math.max(0, addedPages),
+                actionId
+        );
         repo.save(state);
         render();
     }
 
     private void shareBook() {
         String progressText = book.totalPages > 0
-                ? book.currentPage + " / " + book.totalPages + " 页"
-                : "当前第 " + book.currentPage + " 页";
+                ? NumberFormatUtils.compact(book.currentPage) + " / "
+                    + NumberFormatUtils.compact(book.totalPages) + " 页"
+                : "当前第 " + NumberFormatUtils.compact(book.currentPage) + " 页";
 
         String text = "《"
                 + safe(book.title)
@@ -556,6 +573,7 @@ public class BookDetailActivity extends Activity {
         if (target.pageNotes == null) target.pageNotes = new ArrayList<>();
         if (target.readingHistory == null) target.readingHistory = new ArrayList<>();
         if (target.currentPage < 0) target.currentPage = 0;
+        if (target.rewardedPage < 0) target.rewardedPage = 0;
         if (target.totalPages < 0) target.totalPages = 0;
     }
 

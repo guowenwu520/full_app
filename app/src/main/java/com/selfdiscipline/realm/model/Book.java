@@ -25,6 +25,8 @@ public class Book {
     public String author;
     public String coverUri;
     public int currentPage;
+    /** 已经发放过阅读经验的最高页码，防止页码回退后重复刷经验。 */
+    public int rewardedPage;
 
     public int totalPages;
     public String genre;
@@ -39,6 +41,7 @@ public class Book {
         author = "";
         coverUri = "";
         currentPage = 0;
+        rewardedPage = 0;
         totalPages = 0;
         genre = "";
         fullReview = "";
@@ -81,6 +84,7 @@ public class Book {
         this.author = safe(author);
         this.coverUri = safe(coverUri);
         this.currentPage = Math.max(0, currentPage);
+        this.rewardedPage = 0;
         this.totalPages = Math.max(0, totalPages);
         this.genre = safe(genre);
         this.fullReview = "";
@@ -119,6 +123,11 @@ public class Book {
                         "currentPage",
                         obj.optInt("page", 0)
                 )
+        );
+        // 旧备份没有 rewardedPage 时，以当前页作为已发放上限，避免升级后重复补发。
+        book.rewardedPage = Math.max(
+                0,
+                obj.optInt("rewardedPage", book.currentPage)
         );
 
         book.totalPages = Math.max(
@@ -187,6 +196,7 @@ public class Book {
             obj.put("author", safe(author));
             obj.put("coverUri", safe(coverUri));
             obj.put("currentPage", Math.max(0, currentPage));
+            obj.put("rewardedPage", Math.max(0, rewardedPage));
 
             obj.put("totalPages", Math.max(0, totalPages));
             obj.put("genre", safe(genre));

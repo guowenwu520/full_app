@@ -17,8 +17,11 @@
         <ImageView
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/ic_profile_meditation"
+            android:background="@drawable/bg_circle_image_clip"
+            android:clipToOutline="true"
             android:gravity="center_vertical"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_profile_meditation"
             android:text="@string/app_name"
             android:textColor="@color/color_text_main"
             android:textSize="20sp"
@@ -40,9 +43,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:textStyle="bold"
             android:text="@string/greeting_subtitle"
-            android:textColor="@color/color_text_people_sub"
+            android:textStyle="bold"
+            android:textColor="@color/color_text_sub"
             android:textSize="13sp" />
 
         <include
@@ -53,20 +56,20 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:layout_height="215dp"
             android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <include
                 layout="@layout/view_today_checkin_card"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1.7" />
 
             <include
                 layout="@layout/view_today_exp_card"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1" />
         </LinearLayout>

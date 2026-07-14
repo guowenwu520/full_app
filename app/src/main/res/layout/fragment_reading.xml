@@ -71,6 +71,9 @@
                 android:layout_height="28dp"
                 android:layout_marginStart="16dp"
                 android:contentDescription="@string/current_realm"
+                android:background="@drawable/bg_circle_image_clip"
+                android:clipToOutline="true"
+                android:scaleType="centerCrop"
                 android:src="@drawable/ic_profile_meditation" />
         </LinearLayout>
 

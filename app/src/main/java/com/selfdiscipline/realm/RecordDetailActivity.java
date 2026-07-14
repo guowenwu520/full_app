@@ -19,10 +19,12 @@ import com.selfdiscipline.realm.model.Badge;
 import com.selfdiscipline.realm.model.DiaryRecord;
 import com.selfdiscipline.realm.model.ExerciseRecord;
 import com.selfdiscipline.realm.model.ExperienceLog;
+import com.selfdiscipline.realm.model.FuturesIncomeRecord;
 import com.selfdiscipline.realm.model.SleepRecord;
 import com.selfdiscipline.realm.model.WeightRecord;
 import com.selfdiscipline.realm.model.WordEntry;
 import com.selfdiscipline.realm.util.ExerciseFormat;
+import com.selfdiscipline.realm.util.NumberFormatUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -33,6 +35,7 @@ public class RecordDetailActivity extends Activity {
     public static final String TYPE_BOOK = "book";
     public static final String TYPE_EXERCISE = "exercise";
     public static final String TYPE_WEIGHT = "weight";
+    public static final String TYPE_FUTURES_INCOME = "futures_income";
     public static final String TYPE_SLEEP = "sleep";
     public static final String TYPE_WORD = "word";
     public static final String TYPE_DIARY = "diary";
@@ -94,6 +97,10 @@ public class RecordDetailActivity extends Activity {
                 renderWeight(state.weights.get(index));
                 return;
             }
+            if (TYPE_FUTURES_INCOME.equals(type) && valid(index, state.futuresIncomes)) {
+                renderFuturesIncome(state.futuresIncomes.get(index));
+                return;
+            }
             if (TYPE_SLEEP.equals(type) && valid(index, state.sleeps)) {
                 renderSleep(state.sleeps.get(index));
                 return;
@@ -130,17 +137,17 @@ public class RecordDetailActivity extends Activity {
         int duration = ExerciseFormat.durationMinutes(record.content);
         double distance = ExerciseFormat.distanceKm(record.content);
         title.setText(name);
-        summary.setText(String.format(Locale.getDefault(), "%s · %d kcal", empty(record.date), record.calories));
+        summary.setText(empty(record.date) + " · " + NumberFormatUtils.compact(record.calories) + " kcal");
         pageSubtitle.setText("本次运动消耗与记录详情");
 
         addMetricGrid(
                 new String[]{"运动名称", "消耗热量"},
-                new String[]{name, record.calories + " kcal"}
+                new String[]{name, NumberFormatUtils.compact(record.calories) + " kcal"}
         );
         if (duration > 0 || distance > 0) {
             addMetricGrid(
                     new String[]{"运动时长", "运动距离"},
-                    new String[]{duration > 0 ? duration + " 分钟" : "--", distance > 0 ? String.format(Locale.getDefault(), "%.2f 公里", distance) : "--"}
+                    new String[]{duration > 0 ? NumberFormatUtils.compact(duration) + " 分钟" : "--", distance > 0 ? NumberFormatUtils.compact(distance, 2) + " 公里" : "--"}
             );
         }
         addSection("记录日期", empty(record.date));
@@ -158,6 +165,21 @@ public class RecordDetailActivity extends Activity {
         addSection("趋势说明", "体重曲线在运动作息页面集中查看，此处展示单次体重记录。 ");
     }
 
+
+    private void renderFuturesIncome(FuturesIncomeRecord record) {
+        String signed = NumberFormatUtils.compactSigned(record.amount);
+        String status = record.amount > 0 ? "盈利" : "亏损";
+        title.setText(signed + " 元");
+        summary.setText("期货" + status + " · " + empty(record.dateTime));
+        pageSubtitle.setText("期货收入与经验变化详情");
+
+        addMetricGrid(
+                new String[]{"本次收入", "经验变化", "记录时间"},
+                new String[]{signed + " 元", signed + " 经验", empty(record.dateTime)}
+        );
+        addSection("计算规则", "期货收入每 1 元对应 1 点经验；盈利增加经验，亏损扣除经验。");
+    }
+
     private void renderSleep(SleepRecord record) {
         String status = record.passed ? getString(R.string.text_sleep_pass) : getString(R.string.text_sleep_fail);
         title.setText(status);
@@ -168,7 +190,7 @@ public class RecordDetailActivity extends Activity {
                 new String[]{"入睡时间", "起床时间", "判定结果"},
                 new String[]{empty(record.sleepTime), empty(record.wakeTime), status}
         );
-        addSection("达标标准", "23:00 前入睡，并且 8:30 前起床。 ");
+        addSection("达标标准", "23:30 前入睡，并且 8:30 前起床。 ");
     }
 
     private void renderWord(WordEntry record) {
@@ -200,32 +222,56 @@ public class RecordDetailActivity extends Activity {
     }
 
     private void renderExp(ExperienceLog record) {
-        title.setText(String.format(Locale.getDefault(), "+%d 经验", record.points));
+        String signed = NumberFormatUtils.compactSigned(record.points);
+        title.setText(signed + " 经验");
         summary.setText(empty(record.source));
         pageSubtitle.setText("经验来源详情");
 
         addMetricGrid(
                 new String[]{"获得经验", "日期"},
-                new String[]{String.format(Locale.getDefault(), "+%d", record.points), empty(record.date)}
+                new String[]{signed, empty(record.date)}
         );
         addSection("来源", empty(record.source));
         addSection("唯一键", empty(record.key));
     }
 
     private void renderBadge(AppState state, Badge badge) {
-        boolean unlocked = state.isBadgeUnlocked(badge.id) || RewardEngine.meets(state, badge);
-        int count = StatsEngine.badgeEarnCount(state, badge);
+        boolean unlocked = state.isBadgeUnlocked(badge.id);
+        double metric = StatsEngine.badgeMetric(state, badge);
+        String unit = badgeUnit(badge);
+
         title.setText(badge.nameRes);
-        summary.setText(getString(badge.rankRes) + " · " + (unlocked ? getString(R.string.text_unlocked) : getString(R.string.text_locked)));
-        pageSubtitle.setText("勋章解锁与获得次数详情");
+        summary.setText(getString(badge.rankRes) + " · "
+                + (unlocked ? getString(R.string.text_unlocked) : getString(R.string.text_locked)));
+        pageSubtitle.setText("勋章当前进度与状态详情");
 
         addMetricGrid(
-                new String[]{"品级", "目标", "获得次数"},
-                new String[]{getString(badge.rankRes), String.valueOf(badge.target), String.valueOf(count)}
+                new String[]{"品级", "当前进度", "目标", "累计解锁"},
+                new String[]{
+                        getString(badge.rankRes),
+                        formatBadgeMetric(metric, badge) + unit,
+                        formatBadgeMetric(badge.target, badge) + unit,
+                        NumberFormatUtils.compact(RewardEngine.badgeUnlockCount(state, badge)) + " 次"
+                }
         );
         addSection("勋章状态", unlocked ? getString(R.string.text_unlocked) : getString(R.string.text_locked));
-        addSection("奖励经验", String.format(Locale.getDefault(), "+%d", badge.xpReward));
+        addSection("奖励经验", NumberFormatUtils.compactSigned(badge.xpReward));
         addSection("说明", getString(badge.descRes));
+    }
+
+    private String badgeUnit(Badge badge) {
+        if (Badge.TYPE_SELF.equals(badge.type) || Badge.TYPE_NOBREAK.equals(badge.type)) return "天";
+        if (Badge.TYPE_WEIGHT.equals(badge.type)) return "kg";
+        if (Badge.TYPE_CALORIE.equals(badge.type)) return "kcal";
+        if (Badge.TYPE_FUTURES.equals(badge.type)) return "元";
+        return "";
+    }
+
+    private String formatBadgeMetric(double value, Badge badge) {
+        if (Badge.TYPE_WEIGHT.equals(badge.type)) {
+            return NumberFormatUtils.compact(value, 1);
+        }
+        return NumberFormatUtils.compact(value);
     }
 
     private void addMetricGrid(String[] labels, String[] values) {
@@ -308,6 +354,7 @@ public class RecordDetailActivity extends Activity {
     private String titleFor(String type) {
         if (TYPE_EXERCISE.equals(type)) return getString(R.string.label_record_type_exercises);
         if (TYPE_WEIGHT.equals(type)) return getString(R.string.label_record_type_weights);
+        if (TYPE_FUTURES_INCOME.equals(type)) return getString(R.string.label_record_type_futures_income);
         if (TYPE_SLEEP.equals(type)) return getString(R.string.label_record_type_sleeps);
         if (TYPE_WORD.equals(type)) return getString(R.string.label_record_type_words);
         if (TYPE_DIARY.equals(type)) return getString(R.string.label_record_type_diaries);
@@ -319,6 +366,7 @@ public class RecordDetailActivity extends Activity {
     private int iconFor(String type, int index) {
         if (TYPE_EXERCISE.equals(type)) return R.drawable.ic_nav_sport;
         if (TYPE_WEIGHT.equals(type)) return R.drawable.ic_ew_weight;
+        if (TYPE_FUTURES_INCOME.equals(type)) return R.drawable.ic_xp;
         if (TYPE_SLEEP.equals(type)) return R.drawable.ic_exp_sleep;
         if (TYPE_WORD.equals(type)) return R.drawable.ic_nav_word;
         if (TYPE_DIARY.equals(type)) return R.drawable.ic_nav_diary;

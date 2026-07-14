@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 日记自律主页 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/diaryScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
@@ -14,7 +15,7 @@
         android:paddingStart="14dp"
         android:paddingTop="28dp"
         android:paddingEnd="14dp"
-        android:paddingBottom="24dp">
+        android:paddingBottom="120dp">
 
         <!-- 标题栏 -->
         <LinearLayout
@@ -60,6 +61,9 @@
                 android:layout_height="28dp"
                 android:layout_marginStart="14dp"
                 android:contentDescription="@null"
+                android:background="@drawable/bg_circle_image_clip"
+                android:clipToOutline="true"
+                android:scaleType="centerCrop"
                 android:src="@drawable/ic_profile_meditation" />
         </LinearLayout>
 
@@ -155,7 +159,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:text="今日是否："
+                    android:text="今日是否破戒："
                     android:textColor="@color/color_text_main"
                     android:textSize="12sp" />
 
@@ -197,7 +201,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="保持本心，记录今日修行感悟"
+                android:text="今日默认未破戒；发生破戒时点击“是”立即记录"
                 android:textColor="@color/color_text_sub"
                 android:textSize="10sp" />
         </LinearLayout>
@@ -233,7 +237,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="23:00 前入睡，8:30 前起床即为达标"
+                android:text="23:30 前入睡，8:30 前起床即为达标"
                 android:textColor="@color/color_text_sub"
                 android:textSize="10sp" />
 
@@ -336,7 +340,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 写日记 -->
+        <!-- 写日记：跳转到独立页面 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -362,43 +366,24 @@
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/inputDiaryTitle"
+            <TextView
+                android:id="@+id/tvDiaryWriteHint"
                 android:layout_width="match_parent"
-                android:layout_height="38dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_diary_input"
-                android:hint="标题：记录今日的心境"
-                android:paddingHorizontal="12dp"
-                android:singleLine="true"
-                android:textColor="@color/color_text_main"
-                android:textColorHint="@color/color_text_sub"
-                android:textSize="11sp" />
-
-            <EditText
-                android:id="@+id/inputDiaryBody"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginTop="7dp"
-                android:background="@drawable/bg_diary_input"
-                android:gravity="top|start"
-                android:hint="正文：写下今天发生的事情、感受与反思……"
-                android:inputType="textCapSentences|textMultiLine"
-                android:padding="12dp"
-                android:scrollbars="vertical"
-                android:textColor="@color/color_text_main"
-                android:textColorHint="@color/color_text_sub"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="点击进入独立页面记录今日心境"
+                android:textColor="@color/color_text_sub"
                 android:textSize="10sp" />
 
             <TextView
-                android:id="@+id/buttonSaveDiary"
-                android:layout_width="156dp"
-                android:layout_height="40dp"
+                android:id="@+id/buttonOpenDiaryEditor"
+                android:layout_width="180dp"
+                android:layout_height="42dp"
                 android:layout_gravity="end"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="10dp"
                 android:background="@drawable/bg_button_primary"
                 android:gravity="center"
-                android:text="保存今日日记"
+                android:text="写今日日记"
                 android:textColor="@color/color_text_on_primary"
                 android:textSize="12sp"
                 android:textStyle="bold" />

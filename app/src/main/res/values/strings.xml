@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">修炼尘世间</string>
     <string name="nav_reading">阅读</string>
-    <string name="nav_study">运动单词</string>
+    <string name="nav_study">运动</string>
     <string name="nav_diary">日记自律</string>
     <string name="nav_badges">勋章境界</string>
     <string name="current_realm">当前境界</string>
     <string name="realm_zhuji_middle">筑基中期</string>
-    <string name="realm_zhuji_middle_desc">体重、阅读、背词长期坚持，收获第一批白银勋章</string>
+    <string name="realm_zhuji_middle_desc">体重、阅读与收益记录长期坚持，收获第一批白银勋章</string>
     <string name="total_exp">总经验</string>
     <string name="today_available_exp">今日可获取经验</string>
     <string name="exp_rule_description">查看经验获取规则</string>
@@ -105,7 +105,7 @@
     <string name="exp_exercise">运动打卡</string>
     <string name="exp_sleep">作息达标</string>
     <string name="exp_word">单词学习</string>
-    <string name="exp_diary">日记与不破戒</string>
+    <string name="exp_diary">每日不破戒</string>
     <string name="exp_all_done">全模块完整打卡</string>
     <string name="exp_badge">勋章解锁</string>
 
@@ -135,11 +135,11 @@
     <string name="desc_qi_late">能稳定完成2-3项日常自律，自控力小幅提升</string>
     <string name="desc_qi_peak">极少破戒，作息、阅读基本稳定，初具恒心</string>
     <string name="desc_foundation_early">多数日子全模块打卡，连续自律天数稳步上涨</string>
-    <string name="desc_foundation_mid">体重、阅读、背词长期坚持，收获第一批白银勋章</string>
+    <string name="desc_foundation_mid">体重、阅读与收益记录长期坚持，收获第一批白银勋章</string>
     <string name="desc_foundation_late">极少中断自律，自控力显著提升，很少破戒</string>
     <string name="desc_foundation_peak">作息常年达标，运动阅读形成肌肉记忆</string>
     <string name="desc_core_early">解锁多类黄金勋章，长期保持多维度连续打卡</string>
-    <string name="desc_core_mid">体重稳步下降、阅读量大幅积累，单词储备丰厚</string>
+    <string name="desc_core_mid">体重稳步下降、阅读量持续积累，期货收益记录逐渐丰厚</string>
     <string name="desc_core_late">全年极少断签，自律成为日常本能</string>
     <string name="desc_core_peak">集齐大半品类勋章，意志力远超常人</string>
     <string name="desc_soul_early">解锁铂金勋章，长期无破戒记录，生活高度规律</string>
@@ -198,26 +198,34 @@
     <string name="badge_cal_tier_platinum">铂金燃脂者</string>
     <string name="badge_cal_tier_diamond">钻石燃脂者</string>
     <string name="badge_cal_tier_king">王者燃脂者</string>
-    <string name="badge_nobreak_tier_silver">白银守戒者</string>
-    <string name="badge_nobreak_tier_gold">黄金守戒者</string>
-    <string name="badge_nobreak_tier_platinum">铂金守戒者</string>
-    <string name="badge_nobreak_tier_diamond">钻石守戒者</string>
-    <string name="badge_nobreak_tier_king">王者守戒者</string>
+    <string name="badge_nobreak_tier_silver">三日清明</string>
+    <string name="badge_nobreak_tier_gold">七日守心</string>
+    <string name="badge_nobreak_tier_platinum">十五日自持</string>
+    <string name="badge_nobreak_tier_diamond">二十一日定心</string>
+    <string name="badge_nobreak_tier_king">三十日圆满</string>
     <string name="badge_word_tier_silver">白银词汇者</string>
     <string name="badge_word_tier_gold">黄金词汇者</string>
     <string name="badge_word_tier_platinum">铂金词汇者</string>
     <string name="badge_word_tier_diamond">钻石词汇者</string>
     <string name="badge_word_tier_king">王者词汇者</string>
 
+
+    <string name="badge_futures_tier_silver">白银交易者</string>
+    <string name="badge_futures_tier_gold">黄金交易者</string>
+    <string name="badge_futures_tier_platinum">铂金交易者</string>
+    <string name="badge_futures_tier_diamond">钻石交易者</string>
+    <string name="badge_futures_tier_king">王者交易者</string>
+
     <string name="badge_desc_self">连续完成全模块自律打卡达到目标天数</string>
     <string name="badge_desc_weight">体重相对历史最高记录下降达到目标</string>
     <string name="badge_desc_calorie">累计运动消耗卡路里达到目标</string>
-    <string name="badge_desc_nobreak">连续不破戒达到目标天数</string>
-    <string name="badge_desc_word">累计录入单词数量达到目标</string>
+    <string name="badge_desc_nobreak">当前连续不破戒达到目标天数；发生破戒后从零重新累计</string>
+    <string name="badge_desc_word">旧版单词勋章</string>
+    <string name="badge_desc_futures">期货累计净收入达到目标，亏损会降低当前进度</string>
 
     <string name="section_all_history">全部历史</string>
     <string name="button_view_all_books">查看全部书籍</string>
-    <string name="button_view_all_sport_sleep">查看全部运动作息</string>
+    <string name="button_view_all_sport_sleep">查看运动、体重、期货与作息</string>
     <string name="button_view_all_words">查看全部单词</string>
     <string name="button_view_all_diaries">查看全部日记</string>
     <string name="button_view_all_exp_logs">查看全部经验明细</string>
@@ -228,6 +236,7 @@
     <string name="label_record_type_books">书籍</string>
     <string name="label_record_type_exercises">运动</string>
     <string name="label_record_type_weights">体重</string>
+    <string name="label_record_type_futures_income">期货收入</string>
     <string name="label_record_type_sleeps">作息</string>
     <string name="label_record_type_words">单词</string>
     <string name="label_record_type_diaries">日记</string>

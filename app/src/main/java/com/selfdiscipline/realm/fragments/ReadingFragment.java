@@ -30,6 +30,7 @@ import com.selfdiscipline.realm.model.Book;
 import com.selfdiscipline.realm.model.PageNote;
 import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.util.DateUtils;
+import com.selfdiscipline.realm.util.NumberFormatUtils;
 import com.selfdiscipline.realm.util.ViewUtils;
 
 import java.io.InputStream;
@@ -279,7 +280,7 @@ public class ReadingFragment extends BaseFragmentHelper {
                 "本月阅读",
                 monthlyPages < 0
                         ? "--"
-                        : String.valueOf(monthlyPages),
+                        : NumberFormatUtils.compact(monthlyPages),
                 monthlyPages < 0 ? "" : "页"
         );
 
@@ -287,7 +288,7 @@ public class ReadingFragment extends BaseFragmentHelper {
                 statReadingBooks,
                 R.drawable.ic_exp_reading,
                 "在读",
-                String.valueOf(readingCount),
+                NumberFormatUtils.compact(readingCount),
                 "本"
         );
 
@@ -295,7 +296,7 @@ public class ReadingFragment extends BaseFragmentHelper {
                 statFinishedBooks,
                 R.drawable.ic_core_no_break,
                 "已读完",
-                String.valueOf(finishedCount),
+                NumberFormatUtils.compact(finishedCount),
                 "本"
         );
 
@@ -303,7 +304,7 @@ public class ReadingFragment extends BaseFragmentHelper {
                 statReadingStreak,
                 R.drawable.ic_core_streak,
                 "连续阅读",
-                String.valueOf(readingStreak),
+                NumberFormatUtils.compact(readingStreak),
                 "天"
         );
     }
@@ -380,12 +381,8 @@ public class ReadingFragment extends BaseFragmentHelper {
             double percent = currentPage * 100.0 / totalPages;
 
             currentReadingProgress.setText(
-                    String.format(
-                            Locale.getDefault(),
-                            "进度：%d / %d 页",
-                            currentPage,
-                            totalPages
-                    )
+                    "进度：" + NumberFormatUtils.compact(currentPage)
+                            + " / " + NumberFormatUtils.compact(totalPages) + " 页"
             );
             currentReadingPercent.setText(
                     String.format(
@@ -401,11 +398,7 @@ public class ReadingFragment extends BaseFragmentHelper {
             );
         } else {
             currentReadingProgress.setText(
-                    String.format(
-                            Locale.getDefault(),
-                            "进度：当前第 %d 页",
-                            currentBook.currentPage
-                    )
+                    "进度：当前第 " + NumberFormatUtils.compact(currentBook.currentPage) + " 页"
             );
             currentReadingPercent.setText("--");
             currentReadingPercent.setVisibility(View.VISIBLE);
@@ -673,12 +666,16 @@ public class ReadingFragment extends BaseFragmentHelper {
 
             String today = DateUtils.today();
             state.addReadingDate(today);
+            int addedPages = Math.max(0, currentPage - book.rewardedPage);
+            book.rewardedPage = Math.max(book.rewardedPage, currentPage);
 
             RewardEngine.RewardResult reward =
-                    RewardEngine.awardReading(
+                    RewardEngine.awardReadingPages(
                             getActivity(),
                             state,
-                            today
+                            today,
+                            addedPages,
+                            "book_add_" + book.id
                     );
 
             repo.save(state);
@@ -752,9 +749,14 @@ public class ReadingFragment extends BaseFragmentHelper {
                         return false;
                     }
 
+                    int addedPages = Math.max(0, page - book.rewardedPage);
                     book.currentPage = page;
+                    book.rewardedPage = Math.max(book.rewardedPage, page);
                     moveBookToFront(book);
-                    finishReadingAction();
+                    finishReadingAction(
+                            addedPages,
+                            "page_update_" + book.id + "_" + UUID.randomUUID()
+                    );
                     return true;
                 }
         );
@@ -880,15 +882,21 @@ public class ReadingFragment extends BaseFragmentHelper {
     }
 
     private void finishReadingAction() {
+        finishReadingAction(0, "reading_action_" + UUID.randomUUID());
+    }
+
+    private void finishReadingAction(int addedPages, String actionId) {
         try {
             String today = DateUtils.today();
             state.addReadingDate(today);
 
             RewardEngine.RewardResult reward =
-                    RewardEngine.awardReading(
+                    RewardEngine.awardReadingPages(
                             getActivity(),
                             state,
-                            today
+                            today,
+                            Math.max(0, addedPages),
+                            actionId
                     );
 
             repo.save(state);
@@ -1192,6 +1200,9 @@ public class ReadingFragment extends BaseFragmentHelper {
         if (book.currentPage < 0) {
             book.currentPage = 0;
         }
+        if (book.rewardedPage < 0) {
+            book.rewardedPage = 0;
+        }
     }
 
     private void showReadingError(Throwable throwable) {
@@ -1400,12 +1411,8 @@ public class ReadingFragment extends BaseFragmentHelper {
                         / totalPages;
 
                 holder.progressText.setText(
-                        String.format(
-                                Locale.getDefault(),
-                                "%d / %d 页",
-                                currentPage,
-                                totalPages
-                        )
+                        NumberFormatUtils.compact(currentPage)
+                                + " / " + NumberFormatUtils.compact(totalPages) + " 页"
                 );
                 holder.progress.setProgress(
                         (int) Math.round(percent)
@@ -1413,11 +1420,7 @@ public class ReadingFragment extends BaseFragmentHelper {
                 holder.progress.setVisibility(View.VISIBLE);
             } else {
                 holder.progressText.setText(
-                        String.format(
-                                Locale.getDefault(),
-                                "第 %d 页",
-                                book.currentPage
-                        )
+                        "第 " + NumberFormatUtils.compact(book.currentPage) + " 页"
                 );
                 holder.progress.setProgress(0);
                 holder.progress.setVisibility(View.VISIBLE);
@@ -1545,12 +1548,8 @@ public class ReadingFragment extends BaseFragmentHelper {
             NoteRow row = rows.get(position);
 
             holder.content.setText(
-                    String.format(
-                            Locale.getDefault(),
-                            "P%d：%s",
-                            row.note.page,
-                            safe(row.note.content)
-                    )
+                    "P" + NumberFormatUtils.compact(row.note.page) + "："
+                            + safe(row.note.content)
             );
             holder.date.setText(safe(row.note.date));
 

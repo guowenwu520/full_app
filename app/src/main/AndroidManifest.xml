@@ -6,6 +6,11 @@
         android:label="@string/app_name"
         android:icon="@drawable/ic_app_icon"
         android:roundIcon="@drawable/ic_app_icon">
+        <activity
+            android:name=".DiaryWriteActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
         <activity android:name=".RecordDetailActivity" android:exported="false" />
         <activity android:name=".RecordListActivity" android:exported="false" />
         <activity
@@ -13,7 +18,10 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-        <activity android:name=".MainActivity" android:exported="true">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

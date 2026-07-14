@@ -9,9 +9,10 @@ import com.selfdiscipline.realm.model.Book;
 import com.selfdiscipline.realm.model.DiaryRecord;
 import com.selfdiscipline.realm.model.ExerciseRecord;
 import com.selfdiscipline.realm.model.ExperienceLog;
+import com.selfdiscipline.realm.model.FuturesIncomeRecord;
 import com.selfdiscipline.realm.model.SleepRecord;
 import com.selfdiscipline.realm.model.WeightRecord;
-import com.selfdiscipline.realm.model.WordEntry;
+import com.selfdiscipline.realm.engine.RewardEngine;
 import com.selfdiscipline.realm.util.DateUtils;
 
 import org.json.JSONArray;
@@ -34,24 +35,52 @@ public class AppRepository {
     private static final String PREF_NAME = "self_discipline_realm_store";
     private static final String KEY_STATE = "app_state_v2";
     private static final String BACKUP_APP = "SelfDisciplineRealm";
-    private static final int ZIP_BACKUP_VERSION = 2;
+    private static final int ZIP_BACKUP_VERSION = 5;
     private final SharedPreferences prefs;
+    private final Context appContext;
     private AppState cachedState;
 
     public AppRepository(Context context) {
-        this.prefs = context.getApplicationContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        this.appContext = context.getApplicationContext();
+        this.prefs = appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
     public AppState load() {
-        if (cachedState == null) cachedState = AppState.fromJson(prefs.getString(KEY_STATE, ""));
+        if (cachedState == null) {
+            cachedState = AppState.fromJson(prefs.getString(KEY_STATE, ""));
+        }
+
+        boolean changed = RewardEngine.ensureDefaultNoBreak(
+                appContext,
+                cachedState,
+                DateUtils.today()
+        );
+        if (RewardEngine.reconcileBadges(
+                appContext,
+                cachedState,
+                DateUtils.today()
+        )) {
+            changed = true;
+        }
+
+        if (changed) {
+            persist(cachedState);
+        }
         return cachedState;
     }
 
     public void save(AppState state) {
+        if (state == null) return;
+        RewardEngine.reconcileBadges(appContext, state, DateUtils.today());
+        persist(state);
+    }
+
+    private void persist(AppState state) {
         try {
             cachedState = state;
             prefs.edit().putString(KEY_STATE, state.toJson().toString()).apply();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     /**
@@ -61,19 +90,21 @@ public class AppRepository {
     public void exportBackupZip(Context context, OutputStream outputStream) throws Exception {
         AppState state = load();
         JSONObject full = state.toJson();
+        full.remove("words");
+        full.remove("wordDates");
         JSONObject metadata = new JSONObject();
         metadata.put("readingDates", full.optJSONArray("readingDates"));
-        metadata.put("wordDates", full.optJSONArray("wordDates"));
         metadata.put("unlockedBadgeIds", full.optJSONArray("unlockedBadgeIds"));
         metadata.put("awardedKeys", full.optJSONArray("awardedKeys"));
+        metadata.put("badgeUnlockCounts", full.optJSONObject("badgeUnlockCounts"));
 
         JSONObject counts = new JSONObject();
         counts.put("books", state.books.size());
         counts.put("exercises", state.exercises.size());
         counts.put("weights", state.weights.size());
+        counts.put("futuresIncomes", state.futuresIncomes.size());
         counts.put("sleeps", state.sleeps.size());
         counts.put("diaries", state.diaries.size());
-        counts.put("words", state.words.size());
         counts.put("expLogs", state.expLogs.size());
 
         JSONObject coverMap = new JSONObject();
@@ -88,9 +119,9 @@ public class AppRepository {
         writeJsonEntry(zip, "books.json", full.optJSONArray("books"));
         writeJsonEntry(zip, "exercises.json", full.optJSONArray("exercises"));
         writeJsonEntry(zip, "weights.json", full.optJSONArray("weights"));
+        writeJsonEntry(zip, "futures_incomes.json", full.optJSONArray("futuresIncomes"));
         writeJsonEntry(zip, "sleeps.json", full.optJSONArray("sleeps"));
         writeJsonEntry(zip, "diaries.json", full.optJSONArray("diaries"));
-        writeJsonEntry(zip, "words.json", full.optJSONArray("words"));
         writeJsonEntry(zip, "exp_logs.json", full.optJSONArray("expLogs"));
         writeJsonEntry(zip, "metadata.json", metadata);
         writeJsonEntry(zip, "all_state.json", full); // compatibility fallback for future migrations
@@ -128,10 +159,12 @@ public class AppRepository {
         } else {
             imported = buildStateFromModules(entries);
         }
+        imported.words.clear();
+        imported.wordDates.clear();
         if (!looksLikeState(imported.toJson())) throw new IllegalArgumentException("Invalid backup state");
         restoreCoverFiles(context, imported, entries);
-        cachedState = imported;
-        prefs.edit().putString(KEY_STATE, imported.toJson().toString()).apply();
+        RewardEngine.reconcileBadges(appContext, imported, DateUtils.today());
+        persist(imported);
     }
 
     /** Backward-compatible JSON import kept for old v0.5 backup files. */
@@ -141,8 +174,10 @@ public class AppRepository {
         if (stateObj == null) stateObj = root;
         if (!looksLikeState(stateObj)) throw new IllegalArgumentException("Invalid backup file");
         AppState imported = AppState.fromJson(stateObj.toString());
-        cachedState = imported;
-        prefs.edit().putString(KEY_STATE, imported.toJson().toString()).apply();
+        imported.words.clear();
+        imported.wordDates.clear();
+        RewardEngine.reconcileBadges(appContext, imported, DateUtils.today());
+        persist(imported);
     }
 
     private void writeJsonEntry(ZipOutputStream zip, String name, Object json) throws Exception {
@@ -210,19 +245,26 @@ public class AppRepository {
         for (int i = 0; i < exercises.length(); i++) { JSONObject item = exercises.optJSONObject(i); if (item != null) state.exercises.add(ExerciseRecord.fromJson(item)); }
         JSONArray weights = array(entries, "weights.json");
         for (int i = 0; i < weights.length(); i++) { JSONObject item = weights.optJSONObject(i); if (item != null) state.weights.add(WeightRecord.fromJson(item)); }
+        JSONArray futures = array(entries, "futures_incomes.json");
+        for (int i = 0; i < futures.length(); i++) { JSONObject item = futures.optJSONObject(i); if (item != null) state.futuresIncomes.add(FuturesIncomeRecord.fromJson(item)); }
         JSONArray sleeps = array(entries, "sleeps.json");
         for (int i = 0; i < sleeps.length(); i++) { JSONObject item = sleeps.optJSONObject(i); if (item != null) state.sleeps.add(SleepRecord.fromJson(item)); }
         JSONArray diaries = array(entries, "diaries.json");
         for (int i = 0; i < diaries.length(); i++) { JSONObject item = diaries.optJSONObject(i); if (item != null) state.diaries.add(DiaryRecord.fromJson(item)); }
-        JSONArray words = array(entries, "words.json");
-        for (int i = 0; i < words.length(); i++) { JSONObject item = words.optJSONObject(i); if (item != null) state.words.add(WordEntry.fromJson(item)); }
         JSONArray logs = array(entries, "exp_logs.json");
         for (int i = 0; i < logs.length(); i++) { JSONObject item = logs.optJSONObject(i); if (item != null) state.expLogs.add(ExperienceLog.fromJson(item)); }
         JSONObject metadata = object(entries, "metadata.json");
         readStringArray(metadata, "readingDates", state.readingDates);
-        readStringArray(metadata, "wordDates", state.wordDates);
         readStringArray(metadata, "unlockedBadgeIds", state.unlockedBadgeIds);
         readStringArray(metadata, "awardedKeys", state.awardedKeys);
+        JSONObject badgeCounts = metadata.optJSONObject("badgeUnlockCounts");
+        if (badgeCounts != null) {
+            java.util.Iterator<String> keys = badgeCounts.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                state.setBadgeUnlockCount(key, badgeCounts.optInt(key, 0));
+            }
+        }
         return state;
     }
 
@@ -273,9 +315,9 @@ public class AppRepository {
     }
 
     private boolean looksLikeState(JSONObject obj) {
-        return obj.has("books") || obj.has("exercises") || obj.has("weights") || obj.has("sleeps")
-                || obj.has("diaries") || obj.has("words") || obj.has("expLogs")
-                || obj.has("readingDates") || obj.has("wordDates") || obj.has("unlockedBadgeIds")
-                || obj.has("awardedKeys");
+        return obj.has("books") || obj.has("exercises") || obj.has("weights") || obj.has("futuresIncomes") || obj.has("sleeps")
+                || obj.has("diaries") || obj.has("expLogs")
+                || obj.has("readingDates") || obj.has("unlockedBadgeIds")
+                || obj.has("awardedKeys") || obj.has("badgeUnlockCounts");
     }
 }

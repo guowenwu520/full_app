@@ -25,12 +25,14 @@ import com.selfdiscipline.realm.model.Book;
 import com.selfdiscipline.realm.model.DiaryRecord;
 import com.selfdiscipline.realm.model.ExerciseRecord;
 import com.selfdiscipline.realm.model.ExperienceLog;
+import com.selfdiscipline.realm.model.FuturesIncomeRecord;
 import com.selfdiscipline.realm.model.RealmLevel;
 import com.selfdiscipline.realm.model.SleepRecord;
 import com.selfdiscipline.realm.model.WeightRecord;
 import com.selfdiscipline.realm.model.WordEntry;
 import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.util.ExerciseFormat;
+import com.selfdiscipline.realm.util.NumberFormatUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -164,7 +166,7 @@ public class RecordListActivity extends Activity {
         int remaining = Math.max(0, realm.nextXp - xp);
         double percent = realm.nextXp <= 0
                 ? 100.0
-                : Math.min(100.0, xp * 100.0 / realm.nextXp);
+                : Math.max(0.0, Math.min(100.0, xp * 100.0 / realm.nextXp));
 
         realmRemainingExp.setText(formatInteger(remaining));
         realmPercent.setText(String.format(Locale.getDefault(), "%.2f%%", percent));
@@ -182,7 +184,7 @@ public class RecordListActivity extends Activity {
     }
 
     private String formatInteger(int value) {
-        return String.format(Locale.getDefault(), "%,d", value);
+        return NumberFormatUtils.compact(value);
     }
 
     private String titleFor(String type) {
@@ -256,7 +258,8 @@ public class RecordListActivity extends Activity {
             String title = safe(r.title).isEmpty() ? getString(R.string.label_record_type_books) : r.title;
             String author = safe(r.author);
             String review = safe(r.fullReview).isEmpty() ? getString(R.string.text_no) : getString(R.string.text_yes);
-            String content = String.format(Locale.getDefault(), "《%s》%s｜当前 %d 页｜读后感 %s", title, author.isEmpty() ? "" : " · " + author, r.currentPage, review);
+            String content = "《" + title + "》" + (author.isEmpty() ? "" : " · " + author)
+                    + "｜当前 " + NumberFormatUtils.compact(r.currentPage) + " 页｜读后感 " + review;
             out.add(new Entry("9999-99-99-book-" + (100000 - i), R.drawable.ic_nav_reading, "阅读：", content, "书籍", RecordDetailActivity.TYPE_BOOK, i));
         }
     }
@@ -266,9 +269,10 @@ public class RecordListActivity extends Activity {
             ExerciseRecord r = s.exercises.get(i);
             String name = ExerciseFormat.name(r.content);
             String metric = ExerciseFormat.metricText(r.content);
+            String calories = NumberFormatUtils.compact(r.calories) + " 千卡";
             String content = metric.equals("--")
-                    ? String.format(Locale.getDefault(), "%s｜%d 千卡", name, r.calories)
-                    : String.format(Locale.getDefault(), "%s｜%s｜%d 千卡", name, metric, r.calories);
+                    ? name + "｜" + calories
+                    : name + "｜" + metric + "｜" + calories;
             out.add(new Entry(r.date + "-exercise-" + i, R.drawable.ic_nav_sport, "运动：", content, safeDate(r.date), RecordDetailActivity.TYPE_EXERCISE, i));
         }
     }
@@ -280,6 +284,20 @@ public class RecordListActivity extends Activity {
             WeightRecord r = s.weights.get(i);
             String content = String.format(Locale.getDefault(), "体重 %.1f kg", r.weight);
             out.add(new Entry(r.date + "-weight-" + i, R.drawable.ic_ew_weight, "体重：", content, safeDate(r.date), RecordDetailActivity.TYPE_WEIGHT, i));
+        }
+        for (int i = 0; i < s.futuresIncomes.size(); i++) {
+            FuturesIncomeRecord r = s.futuresIncomes.get(i);
+            String signed = NumberFormatUtils.compactSigned(r.amount);
+            String content = "期货收入 " + signed + " 元｜经验 " + signed;
+            out.add(new Entry(
+                    safeDate(r.dateTime) + "-futures-" + i,
+                    R.drawable.ic_xp,
+                    "期货：",
+                    content,
+                    safeDate(r.dateTime),
+                    RecordDetailActivity.TYPE_FUTURES_INCOME,
+                    i
+            ));
         }
         for (int i = 0; i < s.sleeps.size(); i++) {
             SleepRecord r = s.sleeps.get(i);
@@ -309,7 +327,8 @@ public class RecordListActivity extends Activity {
     private void addExpLogs(AppState s, List<Entry> out) {
         for (int i = 0; i < s.expLogs.size(); i++) {
             ExperienceLog r = s.expLogs.get(i);
-            String content = String.format(Locale.getDefault(), "+%d 经验｜%s", r.points, safe(r.source));
+            String signed = NumberFormatUtils.compactSigned(r.points);
+            String content = String.format(Locale.getDefault(), "%s 经验｜%s", signed, safe(r.source));
             out.add(new Entry(r.date + "-exp-" + i, R.drawable.ic_xp, "经验：", content, safeDate(r.date), RecordDetailActivity.TYPE_EXP, i));
         }
     }
@@ -317,7 +336,6 @@ public class RecordListActivity extends Activity {
     private void addOverview(AppState s, List<Entry> out) {
         addBooks(s, out);
         addStudy(s, out);
-        addWords(s, out);
         addDiaries(s, out);
         addExpLogs(s, out);
     }

@@ -8,7 +8,6 @@
     <color name="color_text_main">#12304A</color>
     <color name="color_text_sub">#607892</color>
     <color name="color_text_on_primary">#FFFFFF</color>
-    <color name="color_text_people_sub">#ff1122</color>
     <color name="checkin_text_primary">#17394F</color>
     <color name="checkin_done">#0788A7</color>
     <color name="exp_text_secondary">#536E7E</color>
@@ -61,4 +60,5 @@
     <color name="icon_tabler_platinum">#65CDE5</color>
     <color name="icon_tabler_diamond">#8A92E8</color>
     <color name="icon_tabler_fill_soft">#EAF8FC</color>
+    <color name="color_danger">#C94B5A</color>
 </resources>
