@@ -25,7 +25,20 @@ public class WeightTrendView extends View {
         labels.clear();
         if (weights != null) values.addAll(weights);
         if (dates != null) labels.addAll(dates);
+        requestLayout();
         invalidate();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int viewportWidth = getResources().getDisplayMetrics().widthPixels - Math.round(dp(44));
+        int desiredWidth = Math.max(
+                viewportWidth,
+                Math.round(dp(64 + Math.max(1, values.size() - 1) * 72))
+        );
+        int measuredWidth = resolveSize(desiredWidth, widthMeasureSpec);
+        int measuredHeight = resolveSize(Math.round(dp(145)), heightMeasureSpec);
+        setMeasuredDimension(measuredWidth, measuredHeight);
     }
 
     @Override protected void onDraw(Canvas canvas) {

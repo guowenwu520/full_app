@@ -31,6 +31,8 @@ public class Book {
     public int totalPages;
     public String genre;
 
+    /** 全书读后感标题；旧数据没有该字段时保持为空。 */
+    public String fullReviewTitle;
     public String fullReview;
     public List<PageNote> pageNotes;
     public List<ReadingHistory> readingHistory;
@@ -44,6 +46,7 @@ public class Book {
         rewardedPage = 0;
         totalPages = 0;
         genre = "";
+        fullReviewTitle = "";
         fullReview = "";
         pageNotes = new ArrayList<>();
         readingHistory = new ArrayList<>();
@@ -87,6 +90,7 @@ public class Book {
         this.rewardedPage = 0;
         this.totalPages = Math.max(0, totalPages);
         this.genre = safe(genre);
+        this.fullReviewTitle = "";
         this.fullReview = "";
         this.pageNotes = new ArrayList<>();
         this.readingHistory = new ArrayList<>();
@@ -139,6 +143,7 @@ public class Book {
         );
 
         book.genre = obj.optString("genre", "");
+        book.fullReviewTitle = obj.optString("fullReviewTitle", "");
         book.fullReview = obj.optString("fullReview", "");
 
         book.pageNotes = new ArrayList<>();
@@ -200,6 +205,7 @@ public class Book {
 
             obj.put("totalPages", Math.max(0, totalPages));
             obj.put("genre", safe(genre));
+            obj.put("fullReviewTitle", safe(fullReviewTitle));
             obj.put("fullReview", safe(fullReview));
 
             JSONArray notesArray = new JSONArray();

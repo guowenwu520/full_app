@@ -25,7 +25,20 @@ public class IncomeTrendView extends View {
         labels.clear();
         if (cumulativeIncome != null) values.addAll(cumulativeIncome);
         if (dates != null) labels.addAll(dates);
+        requestLayout();
         invalidate();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int viewportWidth = getResources().getDisplayMetrics().widthPixels - Math.round(dp(44));
+        int desiredWidth = Math.max(
+                viewportWidth,
+                Math.round(dp(64 + Math.max(1, values.size() - 1) * 72))
+        );
+        int measuredWidth = resolveSize(desiredWidth, widthMeasureSpec);
+        int measuredHeight = resolveSize(Math.round(dp(145)), heightMeasureSpec);
+        setMeasuredDimension(measuredWidth, measuredHeight);
     }
 
     @Override
@@ -94,7 +107,8 @@ public class IncomeTrendView extends View {
         for (int i = 1; i < values.size(); i++) {
             float x = left + step * i;
             float y = mapY(values.get(i), min, max, top, bottom);
-            paint.setColor(values.get(i) >= values.get(i - 1) ? 0xFF1198B6 : 0xFFD45C5C);
+            // 横轴从左到右是新到旧；比较时用左侧新值减右侧旧值判断盈亏方向。
+            paint.setColor(values.get(i - 1) >= values.get(i) ? 0xFF1198B6 : 0xFFD45C5C);
             canvas.drawLine(oldX, oldY, x, y, paint);
             oldX = x;
             oldY = y;

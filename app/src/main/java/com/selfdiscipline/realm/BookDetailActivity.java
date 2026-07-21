@@ -183,7 +183,7 @@ public class BookDetailActivity extends Activity {
         View pageNoteButton = findViewById(R.id.buttonNewPageNote);
         if (pageNoteButton != null) pageNoteButton.setVisibility(View.GONE);
 
-        writeReviewButton.setOnClickListener(v -> dialogFullReview());
+        writeReviewButton.setOnClickListener(v -> BookReviewActivity.open(this, bookIndex));
 
         findViewById(R.id.buttonViewFullReview)
                 .setOnClickListener(v -> showFullReview());
@@ -238,7 +238,9 @@ public class BookDetailActivity extends Activity {
         lastUpdated.setText("最后更新：" + getLastUpdatedText());
 
         reviewHeading.setText(
-                "第一次读《" + safe(book.title) + "》的感受"
+                safe(book.fullReviewTitle).isEmpty()
+                        ? "《" + safe(book.title) + "》读后感"
+                        : safe(book.fullReviewTitle)
         );
         writeReviewButton.setEnabled(true);
         writeReviewButton.setAlpha(1.0f);
@@ -326,12 +328,13 @@ public class BookDetailActivity extends Activity {
                         book.rewardedPage = Math.max(book.rewardedPage, newPage);
                         book.readingHistory.add(
                                 0,
-                                new ReadingHistory(
-                                        UUID.randomUUID().toString(),
-                                        nowText(),
-                                        oldPage,
-                                        newPage
-                                )
+                            new ReadingHistory(
+                                    UUID.randomUUID().toString(),
+                                    nowText(),
+                                    oldPage,
+                                    newPage,
+                                    addedPages
+                            )
                         );
                         finishReadingAction(
                                 addedPages,
@@ -398,27 +401,6 @@ public class BookDetailActivity extends Activity {
                                     body
                             )
                     );
-                    finishReadingAction();
-                    return true;
-                }
-        );
-    }
-
-    private void dialogFullReview() {
-        EditText input = new EditText(this);
-        input.setMinLines(7);
-        input.setGravity(48);
-        input.setHint(R.string.hint_full_review);
-        input.setText(book.fullReview);
-
-        RealmDialog.showContent(
-                this,
-                R.string.button_full_review,
-                input,
-                R.string.dialog_ok,
-                R.string.dialog_cancel,
-                dialog -> {
-                    book.fullReview = input.getText().toString().trim();
                     finishReadingAction();
                     return true;
                 }
@@ -500,11 +482,7 @@ public class BookDetailActivity extends Activity {
     }
 
     private void showFullReview() {
-        RealmDialog.showInfo(
-                this,
-                reviewHeading.getText(),
-                book.fullReview.isEmpty() ? "暂无全书读后感" : book.fullReview
-        );
+        BookReviewActivity.open(this, bookIndex);
     }
 
     private void showNote(PageNote note) {
@@ -569,6 +547,7 @@ public class BookDetailActivity extends Activity {
         if (target.author == null) target.author = "";
         if (target.coverUri == null) target.coverUri = "";
         if (target.genre == null) target.genre = "";
+        if (target.fullReviewTitle == null) target.fullReviewTitle = "";
         if (target.fullReview == null) target.fullReview = "";
         if (target.pageNotes == null) target.pageNotes = new ArrayList<>();
         if (target.readingHistory == null) target.readingHistory = new ArrayList<>();

@@ -24,6 +24,8 @@ import java.util.ArrayList;
 public class DiaryWriteActivity extends Activity {
 
     private static final String BREAK_PLACEHOLDER_TITLE = "破戒记录";
+    private static final String EXTRA_EDITOR_MODE = "editor_mode";
+    private static final String MODE_FUTURES_INCOME = "futures_income";
 
     private AppRepository repo;
     private AppState state;
@@ -40,9 +42,23 @@ public class DiaryWriteActivity extends Activity {
         context.startActivity(new Intent(context, DiaryWriteActivity.class));
     }
 
+    /** 使用已经注册的长文本编辑页宿主打开期货盈亏页面，不需要修改清单配置。 */
+    public static void openFuturesIncome(Context context) {
+        if (context == null) return;
+        Intent intent = new Intent(context, DiaryWriteActivity.class);
+        intent.putExtra(EXTRA_EDITOR_MODE, MODE_FUTURES_INCOME);
+        context.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (MODE_FUTURES_INCOME.equals(
+                getIntent().getStringExtra(EXTRA_EDITOR_MODE)
+        )) {
+            new FuturesIncomeWriteController(this).create();
+            return;
+        }
         setContentView(R.layout.activity_diary_write);
 
         repo = new AppRepository(this);

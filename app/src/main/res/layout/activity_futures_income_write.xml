@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_book_detail_page"
+    android:clipToPadding="false"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="14dp"
+        android:paddingTop="30dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="28dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="46dp">
+
+            <ImageView
+                android:id="@+id/buttonFuturesIncomeWriteBack"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="start|center_vertical"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="返回"
+                android:padding="10dp"
+                android:src="@drawable/ic_book_detail_back" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:fontFamily="serif"
+                android:gravity="center"
+                android:text="记录期货盈亏"
+                android:textColor="@color/color_text_main"
+                android:textSize="21sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_realm_status_card"
+            android:clipToOutline="true"
+            android:elevation="3dp"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvFuturesIncomeWriteDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_text_sub"
+                android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="盈利填写正数，亏损填写负数；每 1 元对应 1 点经验"
+                android:textColor="@color/color_text_sub"
+                android:textSize="11sp" />
+
+            <EditText
+                android:id="@+id/inputFuturesIncomeAmount"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_diary_input"
+                android:hint="本次盈亏金额，例如：1200 或 -500"
+                android:imeOptions="actionNext"
+                android:inputType="numberSigned"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
+                android:singleLine="true"
+                android:textColor="@color/color_text_main"
+                android:textColorHint="@color/color_text_sub"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="心得体会"
+                android:textColor="@color/color_text_main"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/inputFuturesIncomeReflection"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_diary_input"
+                android:gravity="top|start"
+                android:hint="记录本次交易的判断、执行过程、得失与下一次改进……"
+                android:inputType="textCapSentences|textMultiLine"
+                android:padding="14dp"
+                android:scrollbars="vertical"
+                android:textColor="@color/color_text_main"
+                android:textColorHint="@color/color_text_sub"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/buttonSaveFuturesIncome"
+                android:layout_width="180dp"
+                android:layout_height="44dp"
+                android:layout_gravity="end"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_button_primary"
+                android:gravity="center"
+                android:text="保存本次记录"
+                android:textColor="@color/color_text_on_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

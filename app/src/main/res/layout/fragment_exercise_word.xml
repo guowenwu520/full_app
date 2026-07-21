@@ -61,18 +61,28 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="190dp" android:layout_marginTop="10dp" android:background="@drawable/bg_realm_status_card" android:clipToOutline="true" android:elevation="3dp" android:orientation="vertical" android:padding="12dp">
                 <FrameLayout android:layout_width="match_parent" android:layout_height="28dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_gravity="start" android:fontFamily="serif" android:gravity="center_vertical" android:text="体重变化" android:textColor="@color/color_text_main" android:textSize="15sp" android:textStyle="bold"/>
-                    <TextView android:id="@+id/buttonAddWeight" android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_gravity="end" android:gravity="center" android:text="+ 记录体重" android:textColor="@color/checkin_done" android:textSize="10sp"/>
+                    <LinearLayout android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_gravity="end" android:gravity="center_vertical" android:orientation="horizontal">
+                        <TextView android:id="@+id/buttonAllWeights" android:layout_width="wrap_content" android:layout_height="match_parent" android:gravity="center" android:paddingHorizontal="8dp" android:text="记录列表" android:textColor="@color/color_text_sub" android:textSize="10sp"/>
+                        <TextView android:id="@+id/buttonAddWeight" android:layout_width="wrap_content" android:layout_height="match_parent" android:gravity="center" android:text="+ 记录体重" android:textColor="@color/checkin_done" android:textSize="10sp"/>
+                    </LinearLayout>
                 </FrameLayout>
-                <com.selfdiscipline.realm.view.WeightTrendView android:id="@+id/weightTrendView" android:layout_width="match_parent" android:layout_height="145dp"/>
+                <HorizontalScrollView android:id="@+id/weightTrendScroll" android:layout_width="match_parent" android:layout_height="145dp" android:fillViewport="true" android:overScrollMode="ifContentScrolls" android:scrollbars="horizontal">
+                    <com.selfdiscipline.realm.view.WeightTrendView android:id="@+id/weightTrendView" android:layout_width="wrap_content" android:layout_height="145dp"/>
+                </HorizontalScrollView>
             </LinearLayout>
-            <!-- 期货收入变化 -->
+            <!-- 期货盈亏变化 -->
             <LinearLayout android:layout_width="match_parent" android:layout_height="226dp" android:layout_marginTop="10dp" android:background="@drawable/bg_realm_status_card" android:clipToOutline="true" android:elevation="3dp" android:orientation="vertical" android:padding="12dp">
                 <FrameLayout android:layout_width="match_parent" android:layout_height="28dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_gravity="start" android:fontFamily="serif" android:gravity="center_vertical" android:text="期货收入变化" android:textColor="@color/color_text_main" android:textSize="15sp" android:textStyle="bold"/>
-                    <TextView android:id="@+id/buttonAddFuturesIncome" android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_gravity="end" android:gravity="center" android:text="+ 记录收入" android:textColor="@color/checkin_done" android:textSize="10sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_gravity="start" android:fontFamily="serif" android:gravity="center_vertical" android:text="期货盈亏变化" android:textColor="@color/color_text_main" android:textSize="15sp" android:textStyle="bold"/>
+                    <LinearLayout android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_gravity="end" android:gravity="center_vertical" android:orientation="horizontal">
+                        <TextView android:id="@+id/buttonAllFuturesIncome" android:layout_width="wrap_content" android:layout_height="match_parent" android:gravity="center" android:paddingHorizontal="8dp" android:text="记录列表" android:textColor="@color/color_text_sub" android:textSize="10sp"/>
+                        <TextView android:id="@+id/buttonAddFuturesIncome" android:layout_width="wrap_content" android:layout_height="match_parent" android:gravity="center" android:text="+ 记录盈亏" android:textColor="@color/checkin_done" android:textSize="10sp"/>
+                    </LinearLayout>
                 </FrameLayout>
                 <TextView android:id="@+id/tvFuturesIncomeSummary" android:layout_width="match_parent" android:layout_height="24dp" android:gravity="center_vertical" android:text="累计 0 元 · 今日 0 元" android:textColor="@color/color_text_sub" android:textSize="10sp"/>
-                <com.selfdiscipline.realm.view.IncomeTrendView android:id="@+id/futuresIncomeTrendView" android:layout_width="match_parent" android:layout_height="145dp"/>
+                <HorizontalScrollView android:id="@+id/futuresIncomeTrendScroll" android:layout_width="match_parent" android:layout_height="145dp" android:fillViewport="true" android:overScrollMode="ifContentScrolls" android:scrollbars="horizontal">
+                    <com.selfdiscipline.realm.view.IncomeTrendView android:id="@+id/futuresIncomeTrendView" android:layout_width="wrap_content" android:layout_height="145dp"/>
+                </HorizontalScrollView>
             </LinearLayout>
         </LinearLayout>
         <!-- ==================== 单词页 ==================== -->

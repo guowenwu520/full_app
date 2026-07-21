@@ -25,9 +25,11 @@ import com.selfdiscipline.realm.BookDetailActivity;
 import com.selfdiscipline.realm.RecordListActivity;
 import com.selfdiscipline.realm.data.AppRepository;
 import com.selfdiscipline.realm.engine.RewardEngine;
+import com.selfdiscipline.realm.engine.StatsEngine;
 import com.selfdiscipline.realm.model.AppState;
 import com.selfdiscipline.realm.model.Book;
 import com.selfdiscipline.realm.model.PageNote;
+import com.selfdiscipline.realm.model.ReadingHistory;
 import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.util.DateUtils;
 import com.selfdiscipline.realm.util.NumberFormatUtils;
@@ -254,7 +256,10 @@ public class ReadingFragment extends BaseFragmentHelper {
      * 顶部四项统计。
      */
     private void renderSummary() {
-        int monthlyPages = calculateMonthlyReadingPages();
+        int monthlyPages = StatsEngine.monthlyReadingPages(
+                state,
+                DateUtils.today()
+        );
         int readingCount = 0;
         int finishedCount = 0;
 
@@ -661,13 +666,25 @@ public class ReadingFragment extends BaseFragmentHelper {
                     totalPages,
                     genre
             );
+            int addedPages = Math.max(0, currentPage - book.rewardedPage);
+            book.rewardedPage = Math.max(book.rewardedPage, currentPage);
+            if (currentPage > 0) {
+                book.readingHistory.add(
+                        0,
+                        new ReadingHistory(
+                                UUID.randomUUID().toString(),
+                                DateUtils.now(),
+                                0,
+                                currentPage,
+                                addedPages
+                        )
+                );
+            }
 
             state.books.add(0, book);
 
             String today = DateUtils.today();
             state.addReadingDate(today);
-            int addedPages = Math.max(0, currentPage - book.rewardedPage);
-            book.rewardedPage = Math.max(book.rewardedPage, currentPage);
 
             RewardEngine.RewardResult reward =
                     RewardEngine.awardReadingPages(
@@ -749,14 +766,27 @@ public class ReadingFragment extends BaseFragmentHelper {
                         return false;
                     }
 
-                    int addedPages = Math.max(0, page - book.rewardedPage);
-                    book.currentPage = page;
-                    book.rewardedPage = Math.max(book.rewardedPage, page);
-                    moveBookToFront(book);
-                    finishReadingAction(
-                            addedPages,
-                            "page_update_" + book.id + "_" + UUID.randomUUID()
-                    );
+                    int oldPage = book.currentPage;
+                    if (page != oldPage) {
+                        int addedPages = Math.max(0, page - book.rewardedPage);
+                        book.currentPage = page;
+                        book.rewardedPage = Math.max(book.rewardedPage, page);
+                        book.readingHistory.add(
+                                0,
+                                new ReadingHistory(
+                                        UUID.randomUUID().toString(),
+                                        DateUtils.now(),
+                                        oldPage,
+                                        page,
+                                        addedPages
+                                )
+                        );
+                        moveBookToFront(book);
+                        finishReadingAction(
+                                addedPages,
+                                "page_update_" + book.id + "_" + UUID.randomUUID()
+                        );
+                    }
                     return true;
                 }
         );
@@ -982,125 +1012,6 @@ public class ReadingFragment extends BaseFragmentHelper {
     }
 
     /**
-     * 旧 Book 模型只保存 currentPage，无法精确计算本月新增页数。
-     *
-     * 如果数据模型存在 readingLogs/readingHistory 等历史记录，
-     * 本方法会自动读取；否则返回 -1，界面显示“--”。
-     */
-    private int calculateMonthlyReadingPages() {
-        String today = DateUtils.today();
-
-        if (today == null || today.length() < 7) {
-            return -1;
-        }
-
-        String monthPrefix = today.substring(0, 7);
-        boolean historyFound = false;
-        int total = 0;
-
-        Collection<?> stateLogs = readCollection(
-                state,
-                "readingLogs",
-                "readingHistory",
-                "pageLogs",
-                "readingRecords"
-        );
-
-        if (stateLogs != null) {
-            historyFound = true;
-            total += sumReadingPages(
-                    stateLogs,
-                    monthPrefix
-            );
-        }
-
-        for (Book book : state.books) {
-            Collection<?> bookLogs = readCollection(
-                    book,
-                    "readingLogs",
-                    "readingHistory",
-                    "pageLogs",
-                    "progressLogs"
-            );
-
-            if (bookLogs != null) {
-                historyFound = true;
-                total += sumReadingPages(
-                        bookLogs,
-                        monthPrefix
-                );
-            }
-        }
-
-        return historyFound ? total : -1;
-    }
-
-    private int sumReadingPages(
-            Collection<?> records,
-            String monthPrefix
-    ) {
-        int total = 0;
-
-        for (Object record : records) {
-            String date = readText(
-                    record,
-                    "date",
-                    "day",
-                    "recordDate"
-            );
-
-            if (date == null
-                    || !date.startsWith(monthPrefix)) {
-                continue;
-            }
-
-            Number directPages = readNumber(
-                    record,
-                    "pages",
-                    "pageCount",
-                    "readPages",
-                    "pagesRead",
-                    "deltaPages",
-                    "addedPages"
-            );
-
-            if (directPages != null) {
-                total += Math.max(
-                        0,
-                        directPages.intValue()
-                );
-                continue;
-            }
-
-            Number oldPage = readNumber(
-                    record,
-                    "oldPage",
-                    "fromPage",
-                    "startPage",
-                    "previousPage"
-            );
-
-            Number newPage = readNumber(
-                    record,
-                    "newPage",
-                    "toPage",
-                    "endPage",
-                    "currentPage"
-            );
-
-            if (oldPage != null && newPage != null) {
-                total += Math.max(
-                        0,
-                        newPage.intValue()
-                                - oldPage.intValue()
-                );
-            }
-        }
-
-        return total;
-    }
-
-    /**
      * 安全加载封面。
      *
      * 不再使用 ImageView.setImageURI()：该方法可能延迟到 onMeasure()
@@ -1197,6 +1108,10 @@ public class ReadingFragment extends BaseFragmentHelper {
             book.pageNotes = new ArrayList<>();
         }
 
+        if (book.readingHistory == null) {
+            book.readingHistory = new ArrayList<>();
+        }
+
         if (book.currentPage < 0) {
             book.currentPage = 0;
         }
@@ -1234,14 +1149,6 @@ public class ReadingFragment extends BaseFragmentHelper {
         }
 
         return null;
-    }
-
-    private String readText(
-            Object target,
-            String... names
-    ) {
-        Object value = readMember(target, names);
-        return value == null ? null : String.valueOf(value);
     }
 
     private Number readNumber(

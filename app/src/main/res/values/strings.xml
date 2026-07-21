@@ -236,7 +236,9 @@
     <string name="label_record_type_books">书籍</string>
     <string name="label_record_type_exercises">运动</string>
     <string name="label_record_type_weights">体重</string>
-    <string name="label_record_type_futures_income">期货收入</string>
+    <string name="label_record_type_futures_income">期货盈亏</string>
+    <string name="title_all_weight_records">全部体重记录</string>
+    <string name="title_all_futures_records">全部期货盈亏记录</string>
     <string name="label_record_type_sleeps">作息</string>
     <string name="label_record_type_words">单词</string>
     <string name="label_record_type_diaries">日记</string>

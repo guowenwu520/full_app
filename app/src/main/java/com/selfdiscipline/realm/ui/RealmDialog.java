@@ -273,8 +273,25 @@ public final class RealmDialog {
 
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
+            boolean hasPreviousInput = false;
             for (int i = 0; i < group.getChildCount(); i++) {
-                applyDialogInputStyle(context, group.getChildAt(i));
+                View child = group.getChildAt(i);
+                applyDialogInputStyle(context, child);
+
+                // Java 动态创建的表单以前直接 addView，多个输入框会紧贴在一起。
+                // 在统一弹窗层补齐间距，所有页面都不必再重复设置 LayoutParams。
+                if (child instanceof EditText) {
+                    if (hasPreviousInput) {
+                        ViewGroup.LayoutParams raw = child.getLayoutParams();
+                        if (raw instanceof ViewGroup.MarginLayoutParams) {
+                            ViewGroup.MarginLayoutParams margins =
+                                    (ViewGroup.MarginLayoutParams) raw;
+                            margins.topMargin = Math.max(margins.topMargin, dp(context, 10));
+                            child.setLayoutParams(margins);
+                        }
+                    }
+                    hasPreviousInput = true;
+                }
             }
         }
     }

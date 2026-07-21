@@ -38,13 +38,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -554,7 +551,7 @@ public class OverviewFragment extends BaseFragmentHelper {
         String today = DateUtils.today();
 
         disciplineStreakValue.setText(
-                NumberFormatUtils.compact(StatsEngine.currentSelfDisciplineStreak(state))
+                NumberFormatUtils.compact(StatsEngine.maxSelfDisciplineStreak(state))
         );
 
         futuresIncomeValue.setText(
@@ -566,10 +563,10 @@ public class OverviewFragment extends BaseFragmentHelper {
         );
 
         todayCaloriesValue.setText(
-                NumberFormatUtils.compact(calculateTodayCalories(today))
+                NumberFormatUtils.compact(StatsEngine.caloriesOnDate(state, today))
         );
 
-        Double latestWeight = findLatestWeight();
+        Float latestWeight = StatsEngine.latestWeightKg(state);
         currentWeightValue.setText(
                 latestWeight == null
                         ? "--"
@@ -581,7 +578,7 @@ public class OverviewFragment extends BaseFragmentHelper {
         );
 
         monthlyReadingValue.setText(
-                NumberFormatUtils.compact(calculateMonthlyReadingPages(today))
+                NumberFormatUtils.compact(StatsEngine.monthlyReadingPages(state, today))
         );
     }
 
@@ -707,301 +704,6 @@ public class OverviewFragment extends BaseFragmentHelper {
 
     private String formatInteger(int value) {
         return NumberFormatUtils.compact(value);
-    }
-
-    /*
-     * ============================================================
-     * 以下三个统计方法使用反射读取模型字段。
-     *
-     * 原因：你这次只提供了 OverviewFragment，没有提供
-     * ExerciseRecord、WeightRecord、ReadingLog 的实际字段名。
-     *
-     * 该写法能够兼容 date/calories/weight/fromPage/toPage 等常见命名，
-     * 不需要修改当前模型即可编译。
-     *
-     * 等你确定模型字段后，建议把它们改成直接字段访问。
-     * ============================================================
-     */
-
-    private int calculateTodayCalories(String today) {
-        if (state.exercises == null) {
-            return 0;
-        }
-
-        int total = 0;
-
-        for (Object exercise : state.exercises) {
-            String date = readText(
-                    exercise,
-                    "date",
-                    "day",
-                    "recordDate",
-                    "createdDate"
-            );
-
-            if (!today.equals(date)) {
-                continue;
-            }
-
-            Number calories = readNumber(
-                    exercise,
-                    "calories",
-                    "calorie",
-                    "kcal",
-                    "burnedCalories",
-                    "calorieBurned"
-            );
-
-            if (calories != null) {
-                total += calories.intValue();
-            }
-        }
-
-        return total;
-    }
-
-    private Double findLatestWeight() {
-        if (state.weights == null || state.weights.isEmpty()) {
-            return null;
-        }
-
-        Object latestRecord = null;
-        String latestDate = "";
-
-        for (Object record : state.weights) {
-            String date = readText(
-                    record,
-                    "date",
-                    "day",
-                    "recordDate",
-                    "createdDate"
-            );
-
-            if (latestRecord == null
-                    || (date != null && date.compareTo(latestDate) >= 0)) {
-                latestRecord = record;
-                latestDate = date == null ? "" : date;
-            }
-        }
-
-        Number weight = readNumber(
-                latestRecord,
-                "weight",
-                "value",
-                "kg",
-                "weightKg"
-        );
-
-        return weight == null ? null : weight.doubleValue();
-    }
-
-    private int calculateMonthlyReadingPages(String today) {
-        if (today == null || today.length() < 7) {
-            return 0;
-        }
-
-        String monthPrefix = today.substring(0, 7);
-
-        Collection<?> topLevelLogs = readCollection(
-                state,
-                "readingLogs",
-                "readingRecords",
-                "pageLogs",
-                "readingHistory",
-                "bookProgressLogs"
-        );
-
-        int total = sumReadingPages(topLevelLogs, monthPrefix);
-
-        // 如果 AppState 没有独立阅读记录，则尝试读取每本书内部的历史。
-        if (total == 0 && state.books != null) {
-            for (Object book : state.books) {
-                Collection<?> bookLogs = readCollection(
-                        book,
-                        "readingLogs",
-                        "readingRecords",
-                        "pageLogs",
-                        "history",
-                        "progressLogs"
-                );
-
-                total += sumReadingPages(bookLogs, monthPrefix);
-            }
-        }
-
-        return total;
-    }
-
-    private int sumReadingPages(
-            Collection<?> records,
-            String monthPrefix
-    ) {
-        if (records == null) {
-            return 0;
-        }
-
-        int total = 0;
-
-        for (Object record : records) {
-            String date = readText(
-                    record,
-                    "date",
-                    "day",
-                    "recordDate",
-                    "createdDate"
-            );
-
-            if (date == null || !date.startsWith(monthPrefix)) {
-                continue;
-            }
-
-            Number directPages = readNumber(
-                    record,
-                    "pages",
-                    "pageCount",
-                    "readPages",
-                    "pagesRead",
-                    "deltaPages",
-                    "addedPages"
-            );
-
-            if (directPages != null) {
-                total += Math.max(0, directPages.intValue());
-                continue;
-            }
-
-            Number oldPage = readNumber(
-                    record,
-                    "oldPage",
-                    "fromPage",
-                    "startPage",
-                    "previousPage"
-            );
-
-            Number newPage = readNumber(
-                    record,
-                    "newPage",
-                    "toPage",
-                    "endPage",
-                    "currentPage"
-            );
-
-            if (oldPage != null && newPage != null) {
-                total += Math.max(
-                        0,
-                        newPage.intValue() - oldPage.intValue()
-                );
-            }
-        }
-
-        return total;
-    }
-
-    private Collection<?> readCollection(
-            Object target,
-            String... names
-    ) {
-        Object value = readMember(target, names);
-
-        if (value instanceof Collection<?>) {
-            return (Collection<?>) value;
-        }
-
-        return null;
-    }
-
-    private String readText(
-            Object target,
-            String... names
-    ) {
-        Object value = readMember(target, names);
-        return value == null ? null : String.valueOf(value);
-    }
-
-    private Number readNumber(
-            Object target,
-            String... names
-    ) {
-        Object value = readMember(target, names);
-
-        if (value instanceof Number) {
-            return (Number) value;
-        }
-
-        if (value != null) {
-            try {
-                return Double.parseDouble(String.valueOf(value));
-            } catch (NumberFormatException ignored) {
-                // 不是数值，继续返回 null。
-            }
-        }
-
-        return null;
-    }
-
-    private Object readMember(
-            Object target,
-            String... names
-    ) {
-        if (target == null) {
-            return null;
-        }
-
-        for (String name : names) {
-            Object fieldValue = readField(target, name);
-            if (fieldValue != null) {
-                return fieldValue;
-            }
-
-            Object getterValue = invokeGetter(target, name);
-            if (getterValue != null) {
-                return getterValue;
-            }
-        }
-
-        return null;
-    }
-
-    private Object readField(Object target, String fieldName) {
-        Class<?> type = target.getClass();
-
-        while (type != null) {
-            try {
-                Field field = type.getDeclaredField(fieldName);
-                field.setAccessible(true);
-                return field.get(target);
-            } catch (Exception ignored) {
-                type = type.getSuperclass();
-            }
-        }
-
-        return null;
-    }
-
-    private Object invokeGetter(Object target, String name) {
-        if (name == null || name.isEmpty()) {
-            return null;
-        }
-
-        String suffix = Character.toUpperCase(name.charAt(0))
-                + name.substring(1);
-
-        String[] methodNames = {
-                "get" + suffix,
-                "is" + suffix
-        };
-
-        for (String methodName : methodNames) {
-            try {
-                Method method = target.getClass().getMethod(methodName);
-                method.setAccessible(true);
-                return method.invoke(target);
-            } catch (Exception ignored) {
-                // 继续尝试下一个 getter。
-            }
-        }
-
-        return null;
     }
 
     private void exportData() {

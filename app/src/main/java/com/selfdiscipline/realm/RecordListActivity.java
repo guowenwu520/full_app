@@ -80,6 +80,8 @@ public class RecordListActivity extends Activity {
     public static final String TYPE_BOOKS = "books";
     public static final String TYPE_STUDY = "study";
     public static final String TYPE_EXERCISES = "exercises";
+    public static final String TYPE_WEIGHTS = "weights";
+    public static final String TYPE_FUTURES_INCOMES = "futures_incomes";
     public static final String TYPE_WORDS = "words";
     public static final String TYPE_DIARIES = "diaries";
     public static final String TYPE_EXP_LOGS = "exp_logs";
@@ -129,6 +131,16 @@ public class RecordListActivity extends Activity {
         TextView title = findViewById(R.id.text_list_title);
         title.setText(titleFor(currentType));
 
+        renderRealmCard();
+        renderList(state, currentType);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (repository == null) return;
+        state = repository.load();
+        if (state == null) state = new AppState();
         renderRealmCard();
         renderList(state, currentType);
     }
@@ -191,6 +203,8 @@ public class RecordListActivity extends Activity {
         if (TYPE_BOOKS.equals(type)) return getString(R.string.button_view_all_books);
         if (TYPE_STUDY.equals(type)) return getString(R.string.button_view_all_sport_sleep);
         if (TYPE_EXERCISES.equals(type)) return getString(R.string.label_record_type_exercises);
+        if (TYPE_WEIGHTS.equals(type)) return getString(R.string.title_all_weight_records);
+        if (TYPE_FUTURES_INCOMES.equals(type)) return getString(R.string.title_all_futures_records);
         if (TYPE_WORDS.equals(type)) return getString(R.string.button_view_all_words);
         if (TYPE_DIARIES.equals(type)) return getString(R.string.button_view_all_diaries);
         if (TYPE_EXP_LOGS.equals(type)) return getString(R.string.button_view_all_exp_logs);
@@ -202,6 +216,8 @@ public class RecordListActivity extends Activity {
         if (TYPE_BOOKS.equals(type)) addBooks(state, entries);
         else if (TYPE_STUDY.equals(type)) addStudy(state, entries);
         else if (TYPE_EXERCISES.equals(type)) addExercises(state, entries);
+        else if (TYPE_WEIGHTS.equals(type)) addWeights(state, entries);
+        else if (TYPE_FUTURES_INCOMES.equals(type)) addFuturesIncomes(state, entries);
         else if (TYPE_WORDS.equals(type)) addWords(state, entries);
         else if (TYPE_DIARIES.equals(type)) addDiaries(state, entries);
         else if (TYPE_EXP_LOGS.equals(type)) addExpLogs(state, entries);
@@ -230,6 +246,7 @@ public class RecordListActivity extends Activity {
         if (RecordDetailActivity.TYPE_BOOK.equals(type)) return getString(R.string.label_record_type_books);
         if (RecordDetailActivity.TYPE_EXERCISE.equals(type)) return getString(R.string.label_record_type_exercises);
         if (RecordDetailActivity.TYPE_WEIGHT.equals(type)) return getString(R.string.label_record_type_weights);
+        if (RecordDetailActivity.TYPE_FUTURES_INCOME.equals(type)) return getString(R.string.label_record_type_futures_income);
         if (RecordDetailActivity.TYPE_SLEEP.equals(type)) return getString(R.string.label_record_type_sleeps);
         if (RecordDetailActivity.TYPE_WORD.equals(type)) return getString(R.string.label_record_type_words);
         if (RecordDetailActivity.TYPE_DIARY.equals(type)) return getString(R.string.label_record_type_diaries);
@@ -280,15 +297,33 @@ public class RecordListActivity extends Activity {
     private void addStudy(AppState s, List<Entry> out) {
         addExercises(s, out);
 
+        addWeights(s, out);
+        addFuturesIncomes(s, out);
+        for (int i = 0; i < s.sleeps.size(); i++) {
+            SleepRecord r = s.sleeps.get(i);
+            String status = r.passed ? getString(R.string.text_sleep_pass) : getString(R.string.text_sleep_fail);
+            String content = String.format(Locale.getDefault(), "%s - %s｜%s", safe(r.sleepTime), safe(r.wakeTime), status);
+            out.add(new Entry(r.date + "-sleep-" + i, R.drawable.ic_exp_sleep, "作息：", content, safeDate(r.date), RecordDetailActivity.TYPE_SLEEP, i));
+        }
+    }
+
+    private void addWeights(AppState s, List<Entry> out) {
         for (int i = 0; i < s.weights.size(); i++) {
             WeightRecord r = s.weights.get(i);
             String content = String.format(Locale.getDefault(), "体重 %.1f kg", r.weight);
             out.add(new Entry(r.date + "-weight-" + i, R.drawable.ic_ew_weight, "体重：", content, safeDate(r.date), RecordDetailActivity.TYPE_WEIGHT, i));
         }
+    }
+
+    private void addFuturesIncomes(AppState s, List<Entry> out) {
         for (int i = 0; i < s.futuresIncomes.size(); i++) {
             FuturesIncomeRecord r = s.futuresIncomes.get(i);
             String signed = NumberFormatUtils.compactSigned(r.amount);
             String content = "期货收入 " + signed + " 元｜经验 " + signed;
+            String reflection = safe(r.reflection).replace('\n', ' ').trim();
+            if (!reflection.isEmpty()) {
+                content += "｜心得 " + preview(reflection, 28);
+            }
             out.add(new Entry(
                     safeDate(r.dateTime) + "-futures-" + i,
                     R.drawable.ic_xp,
@@ -298,12 +333,6 @@ public class RecordListActivity extends Activity {
                     RecordDetailActivity.TYPE_FUTURES_INCOME,
                     i
             ));
-        }
-        for (int i = 0; i < s.sleeps.size(); i++) {
-            SleepRecord r = s.sleeps.get(i);
-            String status = r.passed ? getString(R.string.text_sleep_pass) : getString(R.string.text_sleep_fail);
-            String content = String.format(Locale.getDefault(), "%s - %s｜%s", safe(r.sleepTime), safe(r.wakeTime), status);
-            out.add(new Entry(r.date + "-sleep-" + i, R.drawable.ic_exp_sleep, "作息：", content, safeDate(r.date), RecordDetailActivity.TYPE_SLEEP, i));
         }
     }
 
@@ -347,6 +376,14 @@ public class RecordListActivity extends Activity {
     private String safeDate(String value) {
         String date = safe(value);
         return date.isEmpty() ? "-" : date;
+    }
+
+    private String preview(String value, int maxLength) {
+        String text = safe(value);
+        if (text.length() <= maxLength) {
+            return text;
+        }
+        return text.substring(0, Math.max(0, maxLength)) + "…";
     }
 
 

@@ -7,14 +7,17 @@ import com.selfdiscipline.realm.model.DiaryRecord;
 import com.selfdiscipline.realm.model.ExerciseRecord;
 import com.selfdiscipline.realm.model.ExperienceLog;
 import com.selfdiscipline.realm.model.FuturesIncomeRecord;
+import com.selfdiscipline.realm.model.ReadingHistory;
 import com.selfdiscipline.realm.model.SleepRecord;
 import com.selfdiscipline.realm.model.WeightRecord;
 import com.selfdiscipline.realm.model.WordEntry;
 import com.selfdiscipline.realm.util.DateUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class StatsEngine {
@@ -36,6 +39,27 @@ public class StatsEngine {
         return sum;
     }
 
+    public static int caloriesOnDate(AppState s, String date) {
+        int sum = 0;
+        if (s == null || s.exercises == null || date == null) return 0;
+        for (ExerciseRecord record : s.exercises) {
+            if (record != null && date.equals(record.date)) sum += record.calories;
+        }
+        return sum;
+    }
+
+    public static Float latestWeightKg(AppState s) {
+        if (s == null || s.weights == null) return null;
+        WeightRecord latest = null;
+        for (WeightRecord record : s.weights) {
+            if (record == null) continue;
+            if (latest == null || safeDate(record.date).compareTo(safeDate(latest.date)) >= 0) {
+                latest = record;
+            }
+        }
+        return latest == null ? null : latest.weight;
+    }
+
     public static int totalFuturesIncome(AppState s) {
         int sum = 0;
         if (s == null || s.futuresIncomes == null) return 0;
@@ -52,6 +76,36 @@ public class StatsEngine {
             if (book != null && book.fullReview != null && !book.fullReview.trim().isEmpty()) sum++;
         }
         return sum;
+    }
+
+    /**
+     * 先汇总指定月份每天的阅读页数，再得到整个月的阅读总量。
+     * 阅读量按每条记录的 newPage - oldPage 计算，只累计正数；
+     * 它与“本次实际发放多少阅读经验”是两个独立概念。
+     */
+    public static int monthlyReadingPages(AppState s, String dateInMonth) {
+        if (s == null || s.books == null || dateInMonth == null || dateInMonth.length() < 7) {
+            return 0;
+        }
+        String monthPrefix = dateInMonth.substring(0, 7);
+        Map<String, Integer> dailyPages = new HashMap<>();
+        for (Book book : s.books) {
+            if (book == null || book.readingHistory == null) continue;
+            for (ReadingHistory history : book.readingHistory) {
+                if (history == null || history.dateTime == null) continue;
+                if (history.dateTime.startsWith(monthPrefix)) {
+                    String day = history.dateTime.length() >= 10
+                            ? history.dateTime.substring(0, 10)
+                            : history.dateTime;
+                    int pages = history.recordedPages();
+                    dailyPages.put(day, dailyPages.getOrDefault(day, 0) + pages);
+                }
+            }
+        }
+
+        int total = 0;
+        for (int pages : dailyPages.values()) total += pages;
+        return total;
     }
 
     public static boolean hasExercise(AppState s, String date) {

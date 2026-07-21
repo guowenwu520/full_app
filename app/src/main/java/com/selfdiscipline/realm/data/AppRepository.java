@@ -12,6 +12,7 @@ import com.selfdiscipline.realm.model.ExperienceLog;
 import com.selfdiscipline.realm.model.FuturesIncomeRecord;
 import com.selfdiscipline.realm.model.SleepRecord;
 import com.selfdiscipline.realm.model.WeightRecord;
+import com.selfdiscipline.realm.engine.ReadingProgressEngine;
 import com.selfdiscipline.realm.engine.RewardEngine;
 import com.selfdiscipline.realm.util.DateUtils;
 
@@ -35,7 +36,7 @@ public class AppRepository {
     private static final String PREF_NAME = "self_discipline_realm_store";
     private static final String KEY_STATE = "app_state_v2";
     private static final String BACKUP_APP = "SelfDisciplineRealm";
-    private static final int ZIP_BACKUP_VERSION = 5;
+    private static final int ZIP_BACKUP_VERSION = 6;
     private final SharedPreferences prefs;
     private final Context appContext;
     private AppState cachedState;
@@ -46,15 +47,21 @@ public class AppRepository {
     }
 
     public AppState load() {
-        if (cachedState == null) {
-            cachedState = AppState.fromJson(prefs.getString(KEY_STATE, ""));
-        }
+        // 每次从 SharedPreferences 重新读取，确保独立编辑页或详情页保存后，
+        // 返回原页面能够立即拿到最新数据，而不是命中当前 Repository 的旧缓存。
+        cachedState = AppState.fromJson(prefs.getString(KEY_STATE, ""));
 
-        boolean changed = RewardEngine.ensureDefaultNoBreak(
+        boolean changed = ReadingProgressEngine.backfillMissingHistory(
+                cachedState,
+                DateUtils.now()
+        );
+        if (RewardEngine.ensureDefaultNoBreak(
                 appContext,
                 cachedState,
                 DateUtils.today()
-        );
+        )) {
+            changed = true;
+        }
         if (RewardEngine.reconcileBadges(
                 appContext,
                 cachedState,

@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.selfdiscipline.realm.data.AppRepository;
 import com.selfdiscipline.realm.data.BadgeCatalog;
+import com.selfdiscipline.realm.engine.RecordDeleteEngine;
 import com.selfdiscipline.realm.engine.RewardEngine;
 import com.selfdiscipline.realm.engine.StatsEngine;
 import com.selfdiscipline.realm.model.AppState;
@@ -25,6 +26,7 @@ import com.selfdiscipline.realm.model.WeightRecord;
 import com.selfdiscipline.realm.model.WordEntry;
 import com.selfdiscipline.realm.util.ExerciseFormat;
 import com.selfdiscipline.realm.util.NumberFormatUtils;
+import com.selfdiscipline.realm.ui.RealmDialog;
 
 import java.util.List;
 import java.util.Locale;
@@ -48,6 +50,11 @@ public class RecordDetailActivity extends Activity {
     private TextView summary;
     private ImageView icon;
     private LinearLayout contentContainer;
+    private TextView deleteButton;
+    private AppRepository repository;
+    private AppState state;
+    private String recordType;
+    private int recordIndex;
 
     public static void open(Context c, String type, int index) {
         Intent i = new Intent(c, RecordDetailActivity.class);
@@ -66,12 +73,14 @@ public class RecordDetailActivity extends Activity {
 
         bindViews();
 
-        String type = getIntent().getStringExtra(EXTRA_TYPE);
-        int index = getIntent().getIntExtra(EXTRA_INDEX, -1);
-        AppState state = new AppRepository(this).load();
+        recordType = getIntent().getStringExtra(EXTRA_TYPE);
+        recordIndex = getIntent().getIntExtra(EXTRA_INDEX, -1);
+        repository = new AppRepository(this);
+        state = repository.load();
         if (state == null) state = new AppState();
 
-        render(state, type, index);
+        setupDeleteAction();
+        render(state, recordType, recordIndex);
     }
 
     private void bindViews() {
@@ -81,6 +90,31 @@ public class RecordDetailActivity extends Activity {
         summary = findViewById(R.id.text_detail_summary);
         icon = findViewById(R.id.image_detail_icon);
         contentContainer = findViewById(R.id.detail_content_container);
+        deleteButton = findViewById(R.id.button_delete_record);
+    }
+
+    private void setupDeleteAction() {
+        boolean deletable = !TYPE_BADGE.equals(recordType) && !TYPE_BOOK.equals(recordType);
+        deleteButton.setVisibility(deletable ? View.VISIBLE : View.GONE);
+        if (!deletable) return;
+        deleteButton.setOnClickListener(v -> RealmDialog.showConfirm(
+                this,
+                R.string.dialog_delete_record_title,
+                getString(R.string.dialog_delete_record_message, titleFor(recordType)),
+                R.string.dialog_delete,
+                R.string.dialog_cancel,
+                this::deleteCurrentRecord
+        ));
+    }
+
+    private void deleteCurrentRecord() {
+        if (RecordDeleteEngine.delete(state, recordType, recordIndex)) {
+            repository.save(state);
+            android.widget.Toast.makeText(this, R.string.toast_deleted, android.widget.Toast.LENGTH_SHORT).show();
+            finish();
+        } else {
+            android.widget.Toast.makeText(this, R.string.toast_delete_failed, android.widget.Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void render(AppState state, String type, int index) {
@@ -176,6 +210,12 @@ public class RecordDetailActivity extends Activity {
         addMetricGrid(
                 new String[]{"本次收入", "经验变化", "记录时间"},
                 new String[]{signed + " 元", signed + " 经验", empty(record.dateTime)}
+        );
+        addSection(
+                "心得体会",
+                record.reflection == null || record.reflection.trim().isEmpty()
+                        ? "暂无心得体会"
+                        : record.reflection.trim()
         );
         addSection("计算规则", "期货收入每 1 元对应 1 点经验；盈利增加经验，亏损扣除经验。");
     }

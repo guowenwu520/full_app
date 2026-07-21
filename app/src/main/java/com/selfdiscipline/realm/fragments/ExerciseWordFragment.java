@@ -15,13 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.selfdiscipline.realm.R;
+import com.selfdiscipline.realm.DiaryWriteActivity;
 import com.selfdiscipline.realm.RecordListActivity;
 import com.selfdiscipline.realm.data.AppRepository;
 import com.selfdiscipline.realm.engine.RewardEngine;
+import com.selfdiscipline.realm.engine.TrendDataBuilder;
 import com.selfdiscipline.realm.model.AppState;
 import com.selfdiscipline.realm.model.ExerciseRecord;
-import com.selfdiscipline.realm.model.ExperienceLog;
-import com.selfdiscipline.realm.model.FuturesIncomeRecord;
 import com.selfdiscipline.realm.model.WeightRecord;
 import com.selfdiscipline.realm.ui.RealmDialog;
 import com.selfdiscipline.realm.util.DateUtils;
@@ -34,12 +34,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * 运动、体重与期货收入页面。
@@ -117,9 +115,14 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
     private void setupClicks(View root) {
         root.findViewById(R.id.buttonAddExercise).setOnClickListener(v -> dialogAddExercise());
         root.findViewById(R.id.buttonAddWeight).setOnClickListener(v -> dialogAddWeight());
-        root.findViewById(R.id.buttonAddFuturesIncome).setOnClickListener(v -> dialogAddFuturesIncome());
+        root.findViewById(R.id.buttonAddFuturesIncome).setOnClickListener(v ->
+                DiaryWriteActivity.openFuturesIncome(getActivity()));
         root.findViewById(R.id.buttonAllExercises).setOnClickListener(v ->
                 RecordListActivity.open(getActivity(), RecordListActivity.TYPE_EXERCISES));
+        root.findViewById(R.id.buttonAllWeights).setOnClickListener(v ->
+                RecordListActivity.open(getActivity(), RecordListActivity.TYPE_WEIGHTS));
+        root.findViewById(R.id.buttonAllFuturesIncome).setOnClickListener(v ->
+                RecordListActivity.open(getActivity(), RecordListActivity.TYPE_FUTURES_INCOMES));
     }
 
     private void render() {
@@ -186,43 +189,18 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
     }
 
     private void renderWeightTrend() {
-        List<WeightRecord> rows = new ArrayList<>(state.weights);
-        Collections.sort(rows, Comparator.comparing(record -> safe(record.date)));
-        if (rows.size() > 7) rows = new ArrayList<>(rows.subList(rows.size() - 7, rows.size()));
-
-        List<Float> values = new ArrayList<>();
-        List<String> dates = new ArrayList<>();
-        for (WeightRecord record : rows) {
-            if (record == null || record.weight <= 0) continue;
-            values.add(record.weight);
-            dates.add(shortDate(record.date));
-        }
-        weightTrendView.setData(values, dates);
+        TrendDataBuilder.WeightTrendData trend =
+                TrendDataBuilder.weightsNewestFirst(state.weights);
+        weightTrendView.setData(trend.values, trend.labels);
     }
 
     private void renderFuturesTrend(String today) {
-        List<FuturesIncomeRecord> rows = new ArrayList<>(state.futuresIncomes);
-        Collections.sort(rows, Comparator.comparing(record -> safe(record.dateTime)));
-
-        int cumulative = 0;
-        int todayIncome = 0;
-        List<Integer> cumulativeValues = new ArrayList<>();
-        List<String> dates = new ArrayList<>();
-        for (FuturesIncomeRecord record : rows) {
-            if (record == null) continue;
-            cumulative += record.amount;
-            if (safe(record.dateTime).startsWith(today)) todayIncome += record.amount;
-            cumulativeValues.add(cumulative);
-            dates.add(shortDate(record.dateTime));
-        }
-
-        int from = Math.max(0, cumulativeValues.size() - 7);
-        futuresIncomeTrendView.setData(
-                new ArrayList<>(cumulativeValues.subList(from, cumulativeValues.size())),
-                new ArrayList<>(dates.subList(from, dates.size()))
-        );
+        TrendDataBuilder.IncomeTrendData trend =
+                TrendDataBuilder.incomesNewestFirst(state.futuresIncomes, today);
+        futuresIncomeTrendView.setData(trend.cumulativeValues, trend.labels);
         futuresIncomeSummary.setText(
-                "累计 " + signedNumber(cumulative) + " 元 · 今日 " + signedNumber(todayIncome) + " 元"
+                "累计 " + signedNumber(trend.totalIncome)
+                        + " 元 · 今日 " + signedNumber(trend.todayIncome) + " 元"
         );
     }
 
@@ -308,45 +286,6 @@ public class ExerciseWordFragment extends BaseFragmentHelper {
                         toast("体重记录保存失败：" + exception.getMessage());
                         return false;
                     }
-                }
-        );
-    }
-
-    private void dialogAddFuturesIncome() {
-        EditText input = edit(
-                "本次期货收入：盈利填正数，亏损填负数",
-                InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED
-        );
-        RealmDialog.showContent(
-                getActivity(),
-                "记录期货收入",
-                input,
-                "保存",
-                "取消",
-                dialog -> {
-                    int amount = parseInt(input, 0);
-                    if (amount == 0) {
-                        toast("请输入非 0 的收入金额；亏损请填写负数");
-                        return false;
-                    }
-
-                    String id = UUID.randomUUID().toString();
-                    String key = "futures_income_" + id;
-                    state.futuresIncomes.add(0, new FuturesIncomeRecord(id, DateUtils.now(), amount, key));
-                    String source = amount > 0
-                            ? "期货盈利 " + amount + " 元"
-                            : "期货亏损 " + Math.abs(amount) + " 元";
-                    state.expLogs.add(0, new ExperienceLog(DateUtils.today(), key, source, amount));
-
-                    RewardEngine.RewardResult reward = RewardEngine.afterAction(
-                            getActivity(), state, DateUtils.today());
-                    repo.save(state);
-                    showReward(reward);
-                    render();
-                    toast(amount > 0
-                            ? "已增加 " + amount + " 经验"
-                            : "已扣除 " + Math.abs(amount) + " 经验");
-                    return true;
                 }
         );
     }
